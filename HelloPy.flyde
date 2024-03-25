@@ -1,0 +1,36 @@
+imports:
+  "@flyde/stdlib": []
+  mylib.components:
+    - Print
+node:
+  instances:
+    - pos:
+        x: -155.756337890625
+        y: -87.86838989257814
+      id: Print-v20397a
+      inputConfig: {}
+      nodeId: Print
+  connections:
+    - from:
+        insId: __this
+        pinId: In
+      to:
+        insId: Print-v20397a
+        pinId: msg
+  id: Example
+  inputs:
+    In:
+      mode: required
+  outputs: {}
+  inputsPosition:
+    In:
+      x: -124.6319580078125
+      y: -224.17413330078125
+  outputsPosition:
+    result:
+      x: -23.264428942324532
+      y: 237.25953921502617
+    Out:
+      x: -121.0498046875
+      y: 52.40669067382812
+  completionOutputs: []

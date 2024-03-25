@@ -1,0 +1,14 @@
+{
+  "name": "pyflyde",
+  "version": "0.0.1",
+  "description": "Python runtime for Flyde",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Vladimir Sibirov",
+  "license": "MIT",
+  "devDependencies": {
+    "@flyde/core": "^0.2.57"
+  }
+}
