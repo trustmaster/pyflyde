@@ -1,7 +1,8 @@
 imports:
   "@flyde/stdlib": []
-  mylib.components:
+  mylib/Print.flyde.ts:
     - Print
+  mylib/Concat.flyde.ts: []
 node:
   instances:
     - pos:
