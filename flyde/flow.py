@@ -14,6 +14,8 @@ class FlydeFlow:
         # Look up the class in the imports
         for module, classes in self.imports.items():
             if class_name in classes:
+                # Translate typescript file path to python module
+                module = module.replace('/', '.').replace('.flyde.ts', '')
                 print(f'Importing {module} for class {class_name}')
                 mod = importlib.import_module(module)
                 return getattr(mod, class_name)(**args)

@@ -1,14 +1,13 @@
 imports:
   "@flyde/stdlib": []
-  mylib/Print.flyde.ts:
+  mylib/components.flyde.ts:
     - Print
-  mylib/Concat.flyde.ts: []
 node:
   instances:
     - pos:
-        x: -155.756337890625
-        y: -87.86838989257814
-      id: Print-v20397a
+        x: -155.62672119140626
+        y: -119.7533740234375
+      id: Print-g7039qo
       inputConfig: {}
       nodeId: Print
   connections:
@@ -16,7 +15,7 @@ node:
         insId: __this
         pinId: In
       to:
-        insId: Print-v20397a
+        insId: Print-g7039qo
         pinId: msg
   id: Example
   inputs:

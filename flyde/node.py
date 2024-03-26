@@ -58,7 +58,7 @@ class Node:
         }
 
 
-RunNodeFunction = Callable[[Node, dict[str, Any], dict[str, Any]], None]
+RunNodeFunction = Callable[[Any, dict[str, str], dict[str, str]], None]
 
 
 class CodeNode(Node):
