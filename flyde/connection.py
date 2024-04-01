@@ -8,16 +8,16 @@ class ConnectionNode:
 
 
 class Connection:
-    from_node: ConnectionNode
-    to_node: ConnectionNode
-    delayed: bool
-    hidden: bool
+    """Connection is a connection between two nodes."""
 
     def __init__(self, from_node: ConnectionNode, to_node: ConnectionNode, delayed: bool = False, hidden: bool = False):
         self.from_node = from_node
         self.to_node = to_node
         self.delayed = delayed
         self.hidden = hidden
+
+    def set_queue(self, queue):
+        self.queue = queue
 
     @classmethod
     def from_yaml(cls, yml: dict):

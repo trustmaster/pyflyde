@@ -1,9 +1,12 @@
 #!/usr/bin/env python3
+import logging
 import pprint
 import sys
 import yaml
 
 from flyde.flow import FlydeFlow
+
+logging.basicConfig(level=logging.INFO)
 
 def load_yaml_file(yaml_file: str) -> dict:
     with open(yaml_file, 'r') as f:
@@ -19,6 +22,11 @@ yml = load_yaml_file(yaml_file)
 if isinstance(yml, dict):
     flow = FlydeFlow.from_yaml(yml)
 
-    pprint.pprint(flow.to_dict())
+    if logging.getLevelName(logging.root.level) == 'DEBUG':
+        print('Loaded flow:')
+        pprint.pprint(flow.to_dict())
+
+    flow.node.run()
+    flow.node.stopped.wait()
 else:
     raise ValueError('Invalid YAML file')

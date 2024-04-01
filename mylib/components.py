@@ -1,7 +1,8 @@
-from flyde.node import CodeNode, Metadata
-from flyde.pins import InputPin, OutputPin
+from flyde.node import Component, Metadata
+from flyde.io import Input, Output, InputMode
 
-class Print(CodeNode):
+
+class Print(Component):
     meta: Metadata = Metadata(
         name='Print',
         display_name='Print',
@@ -9,15 +10,20 @@ class Print(CodeNode):
         search_keywords=['print', 'console', 'output'],
         namespace='Print'
     )
-    inputs: dict[str, InputPin] = {
-        'msg': InputPin(description='The message to print'),
-    }
 
-    def run(self, ins: dict[str, str], outs: dict[str, str]):
-        print(ins['msg'])
+    def __init__(self, **kwargs):
+        super().__init__(
+            inputs={
+                'msg': Input(description='The message to print', type=str),
+            },
+            **kwargs
+        )
+
+    def process(self, msg: str):
+        print(msg)
 
 
-class Concat(CodeNode):
+class Concat(Component):
     meta: Metadata = Metadata(
         name='Concat',
         display_name='Concat',
@@ -25,13 +31,19 @@ class Concat(CodeNode):
         search_keywords=['concat', 'string', 'combine'],
         namespace='String'
     )
-    inputs: dict[str, InputPin] = {
-        'a': InputPin(description='The first string'),
-        'b': InputPin(description='The second string'),
-    }
-    outputs: dict[str, OutputPin] = {
-        'out': OutputPin(description='The concatenated string'),
-    }
 
-    def run(self, ins: dict[str, str], outs: dict[str, str]):
-        outs['out'] = ins['a'] + ins['b']
+    def __init__(self, **kwargs):
+        super().__init__(
+            inputs={
+                'a': Input(description='The first string', type=str),
+                'b': Input(description='The second string', type=str),
+            },
+            outputs={
+                'out': Output(description='The concatenated string', type=str),
+            },
+            **kwargs
+        )
+
+    def process(self, a: str, b: str):
+        out = a + b
+        self.outputs['out'].send(out)

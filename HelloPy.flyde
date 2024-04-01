@@ -1,26 +1,36 @@
 imports:
-  "@flyde/stdlib": []
+  "@flyde/stdlib":
+    - InlineValue
   mylib/components.flyde.ts:
     - Print
 node:
   instances:
     - pos:
-        x: -155.62672119140626
-        y: -119.7533740234375
+        x: -157.29365234375
+        y: -130.58668701171877
       id: Print-g7039qo
       inputConfig: {}
       nodeId: Print
+    - pos:
+        x: -198.96331298828125
+        y: -295.8833435058594
+      id: vzy5s9fyaacybwutaijgttv1
+      inputConfig: {}
+      nodeId: InlineValue__vzy5s9fyaacybwutaijgttv1
+      macroId: InlineValue
+      macroData:
+        type: string
+        value: Hello Flyde!
+        label: '"Hello Flyde!"'
   connections:
     - from:
-        insId: __this
-        pinId: In
+        insId: vzy5s9fyaacybwutaijgttv1
+        pinId: value
       to:
         insId: Print-g7039qo
         pinId: msg
   id: Example
-  inputs:
-    In:
-      mode: required
+  inputs: {}
   outputs: {}
   inputsPosition:
     In:
