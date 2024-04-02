@@ -138,6 +138,21 @@ class Component(Node):
         """Stop the component execution."""
         logger.debug(f'Stopping {self.id}')
         self._stop.set()
+
+    def to_ts(self) -> str:
+        """Convert the node to a TypeScript definition."""
+
+        inputs_str = ',\n'.join([f'    {k}: {{"description": "{v.description}"}}' for k, v in self.inputs.items()])
+        outputs_str = ',\n'.join([f'    {k}: {{"description": "{v.description}"}}' for k, v in self.outputs.items()])
+        return (
+            f'export const {self.node_type}: CodeNode {{\n'
+            f'  id: "{self.node_type}",\n'
+            f'  description: "{self.__doc__}",\n'
+            f'  inputs: {{\n{inputs_str}\n  }},\n'
+            f'  outputs: {{\n{outputs_str}\n  }},\n'
+            f'  run: () {{ return;  }},\n'
+            f'}};\n'
+        )
         
 
 class Graph(Node):
