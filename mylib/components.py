@@ -24,6 +24,6 @@ class Concat(Component):
         'out': Output(description='The concatenated string', type=str),
     }
 
-    def process(self, a: str, b: str):
+    def process(self, a: str, b: str) -> dict[str, str]:
         out = a + b
-        self.outputs['out'].send(out)
+        return {'out': out}

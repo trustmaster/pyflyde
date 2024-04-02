@@ -121,7 +121,13 @@ class Component(Node):
                     self.stop()
                     break
                 logger.debug(f'Processing {self.id} with inputs: {inputs}')
-                self.process(**inputs)
+                res = self.process(**inputs)
+                if type(res) == dict or (isinstance(res, tuple) and hasattr(res, '_fields')):
+                    # Send values to the outputs named as keys
+                    for k, v in res.items():
+                        if k not in self.outputs:
+                            raise ValueError(f'{self.node_type}.process(): sending to non-existing output "{k}" from return value')
+                        self.outputs[k].send(v)
             self.finish()
         
         logger.debug(f'Starting {self.id} thread')
