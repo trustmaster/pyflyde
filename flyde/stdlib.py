@@ -1,24 +1,17 @@
 from typing import Any
 
-from flyde.node import Component, Metadata
+from flyde.node import Component
 from flyde.io import Input, Output, InputMode
 
 class InlineValue(Component):
-    meta: Metadata = Metadata(
-        name='InlineValue',
-        display_name='Inline Value',
-        description='Outputs a constant value',
-        search_keywords=['constant', 'value', 'inline'],
-        namespace='stdlib'
-    )
+    """InlineValue sends a constant value to output."""
+
+    outputs = {
+        'value': Output(description='The constant value')
+    }
 
     def __init__(self, value: Any, **kwargs):
-        super().__init__(
-            outputs={
-                'value': Output(description='The constant value'),
-            },
-            **kwargs
-        )
+        super().__init__(**kwargs)
         self.value = value
 
     def process(self):

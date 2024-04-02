@@ -1,23 +1,14 @@
 import logging
+from copy import deepcopy
 from dataclasses import dataclass
+from queue import Queue
 from threading import Event, Lock, Thread
 from typing import Any, Callable
-from queue import Queue
 from uuid import uuid4
 
 from flyde.connection import Connection
 from flyde.io import InputMode, Input, Output, EOF
 logger = logging.getLogger(__name__)
-
-
-@dataclass
-class Metadata:
-    """Contains meta information about a node type."""
-    name: str
-    display_name: str
-    description: str
-    search_keywords: list[str]
-    namespace: str
 
 
 # InstanceFactory is a function that creates a new instance of a node.
@@ -27,19 +18,15 @@ InstanceFactory = Callable[[str, dict], Any]
 
 class Node:
     """Node is the main building block of an application.
-
-    Class attributes:
-        meta: Metadata about the node type.
     
     Attributes:
-        id: A unique identifier for the node.
-        node_type: The node type identifier.
-        input_config: A dictionary of input pin configurations.
-        display_name: A human-readable name for the node.
-        inputs: Node inputs as key => value.
-        outputs: Node outputs dict as key => value.
+        id (str): A unique identifier for the node.
+        node_type (str): The node type identifier.
+        input_config (dict): A dictionary of input pin configurations.
+        display_name (str): A human-readable name for the node.
+        inputs (dict[str, Input]): Node input map.
+        outputs (dict[str, Output]): Node output map.
     """
-    meta: Metadata
 
     def __init__(self, /,
         id: str,
@@ -51,13 +38,27 @@ class Node:
         stopped: Event = Event()
     ):
         node_type = node_type if node_type else self.__class__.__name__
-        id = id if id else create_instance_id(node_type)
         self.node_type = node_type
-        self.id = id
+        self.id = id if id else create_instance_id(node_type)
         self.input_config = input_config
-        self.display_name = display_name
-        self.inputs = inputs
-        self.outputs = outputs
+        self.display_name = display_name if display_name else node_type
+
+        if len(inputs) > 0:
+            self.inputs = inputs
+        elif hasattr(self.__class__, 'inputs') and len(self.inputs) > 0:
+            # Copy from class definition, but instance will have own connections
+            self.inputs = deepcopy(self.inputs)
+        else:
+            self.inputs = {}
+        
+        if len(outputs) > 0:
+            self.outputs = outputs
+        elif hasattr(self.__class__, 'outputs') and len(self.outputs) > 0:
+            # Copy from class definition, but instance will have own connections
+            self.outputs = deepcopy(self.outputs)
+        else:
+            self.outputs = {}
+
         self._stopped = stopped
 
     def finish(self):
@@ -82,11 +83,10 @@ class Node:
             args['value'] = yml['macroData']['value']
         return create(node_class_name, args)
 
-
     def to_dict(self) -> dict:
         return {
             'id': self.id,
-            'nodeId': self.meta.name,
+            'nodeId': self.node_type,
             'inputConfig': self.input_config
         }
 
