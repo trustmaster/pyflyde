@@ -38,10 +38,10 @@ class Node:
         stopped: Event = Event()
     ):
         node_type = node_type if node_type else self.__class__.__name__
-        self.node_type = node_type
-        self.id = id if id else create_instance_id(node_type)
-        self.input_config = input_config
-        self.display_name = display_name if display_name else node_type
+        self._node_type = node_type
+        self._id = id if id else create_instance_id(node_type)
+        self._input_config = input_config
+        self._display_name = display_name if display_name else node_type
 
         if len(inputs) > 0:
             self.inputs = inputs
@@ -67,6 +67,18 @@ class Node:
                 output.queue.put(EOF)
         self._stopped.set()
 
+    def send(self, output_id: str, value: Any):
+        """Send a value to an output."""
+        if output_id not in self.outputs:
+            raise ValueError(f'Output {output_id} not found in node {self._id}')
+        self.outputs[output_id].send(value)
+
+    def receive(self, input_id: str) -> Any:
+        """Receive a value from an input."""
+        if input_id not in self.inputs:
+            raise ValueError(f'Input {input_id} not found in node {self._id}')
+        return self.inputs[input_id].get()
+
     @classmethod
     def from_yaml(cls, create: InstanceFactory, yml: dict):
         node_class_name = yml.get('nodeId', 'VisualNode')
@@ -85,13 +97,10 @@ class Node:
 
     def to_dict(self) -> dict:
         return {
-            'id': self.id,
-            'nodeId': self.node_type,
-            'inputConfig': self.input_config
+            'id': self._id,
+            'nodeId': self._node_type,
+            'inputConfig': self._input_config
         }
-
-
-RunFunction = Callable[[Any, dict[str, str], dict[str, str]], None]
 
 
 class Component(Node):
@@ -111,49 +120,55 @@ class Component(Node):
             raise NotImplementedError('Component does not have neither run() nor process() method. No code to run.')
 
         def worker():
-            logger.debug(f'Running {self.id} worker')
+            logger.debug(f'Running {self._id} worker')
             while not self._stop.is_set():
-                logger.debug(f'Waiting for inputs on {self.id}')
+                logger.debug(f'Waiting for inputs on {self._id}')
                 inputs = {k: v.queue.get() for k, v in self.inputs.items()}
                 # If all of the input values are EOF, stop the component
                 if len(inputs) > 0 and all(v == EOF for v in inputs.values()):
-                    logger.debug(f'All inputs are EOF, stopping {self.id}')
+                    logger.debug(f'All inputs are EOF, stopping {self._id}')
                     self.stop()
                     break
-                logger.debug(f'Processing {self.id} with inputs: {inputs}')
+                logger.debug(f'Processing {self._id} with inputs: {inputs}')
                 res = self.process(**inputs)
                 if type(res) == dict or (isinstance(res, tuple) and hasattr(res, '_fields')):
                     # Send values to the outputs named as keys
                     for k, v in res.items():
                         if k not in self.outputs:
-                            raise ValueError(f'{self.node_type}.process(): sending to non-existing output "{k}" from return value')
+                            raise ValueError(f'{self._node_type}.process(): sending to non-existing output "{k}" from return value')
                         self.outputs[k].send(v)
             self.finish()
         
-        logger.debug(f'Starting {self.id} thread')
+        logger.debug(f'Starting {self._id} thread')
         thread = Thread(target=worker, daemon=True)
         thread.start()
 
     def stop(self):
         """Stop the component execution."""
-        logger.debug(f'Stopping {self.id}')
+        logger.debug(f'Stopping {self._id}')
         self._stop.set()
 
-    def to_ts(self) -> str:
+    @classmethod
+    def to_ts(self, name: str = '') -> str:
         """Convert the node to a TypeScript definition."""
 
-        inputs_str = ',\n'.join([f'    {k}: {{"description": "{v.description}"}}' for k, v in self.inputs.items()])
-        outputs_str = ',\n'.join([f'    {k}: {{"description": "{v.description}"}}' for k, v in self.outputs.items()])
+        name = self.__class__.__name__ if name == '' else name
+        inputs_str = ''
+        if hasattr(self, 'inputs') and len(self.inputs) > 0:
+            inputs_str = '\n' + ',\n'.join([f'    {k}: {{"description": "{v.description}"}}' for k, v in self.inputs.items()]) + '\n'
+        outputs_str = ''
+        if hasattr(self, 'outputs') and len(self.outputs) > 0:
+            outputs_str = '\n' + ',\n'.join([f'    {k}: {{"description": "{v.description}"}}' for k, v in self.outputs.items()]) + '\n'
         return (
-            f'export const {self.node_type}: CodeNode {{\n'
-            f'  id: "{self.node_type}",\n'
+            f'export const {name}: CodeNode = {{\n'
+            f'  id: "{name}",\n'
             f'  description: "{self.__doc__}",\n'
-            f'  inputs: {{\n{inputs_str}\n  }},\n'
-            f'  outputs: {{\n{outputs_str}\n  }},\n'
-            f'  run: () {{ return;  }},\n'
-            f'}};\n'
+            f'  inputs: {{ {inputs_str} }},\n'
+            f'  outputs: {{ {outputs_str} }},\n'
+            f'  run: () => {{ return; }},\n'
+            f'}};\n\n'
         )
-        
+
 
 class Graph(Node):
     """A visual graph node that contains other nodes."""
@@ -180,12 +195,12 @@ class Graph(Node):
             stopped=stopped
         )
 
-        self.connections = connections
-        self.instances = instances
-        self.instances_stopped = instances_stopped
+        self._connections = connections
+        self._instances = instances
+        self._instances_stopped = instances_stopped
     
         # Wire all connections
-        for conn in self.connections:
+        for conn in self._connections:
             queue: Queue = Queue(maxsize=0)
             conn.set_queue(queue)
 
@@ -197,37 +212,37 @@ class Graph(Node):
             if from_id == '__this':
                 # Own ports are reversed: we read from inputs and write to outputs
                 if from_pin not in self.inputs:
-                    raise ValueError(f'Input {from_pin} not found in node {self.id}')
+                    raise ValueError(f'Input {from_pin} not found in node {self._id}')
                 self.inputs[from_pin].queue = queue
             else:
-                if from_id not in self.instances:
+                if from_id not in self._instances:
                     raise ValueError(f'Instance {from_id} not found')
-                if from_pin not in self.instances[from_id].outputs:
+                if from_pin not in self._instances[from_id].outputs:
                     raise ValueError(f'Output {from_pin} not found in instance {from_id}')
-                self.instances[from_id].outputs[conn.from_node.pin_id].queue = queue
+                self._instances[from_id].outputs[conn.from_node.pin_id].queue = queue
             if to_id == '__this':
                 if to_pin not in self.outputs:
-                    raise ValueError(f'Output {to_pin} not found in node {self.id}')
+                    raise ValueError(f'Output {to_pin} not found in node {self._id}')
                 self.outputs[to_pin].queue = queue
             else:
-                if to_id not in self.instances:
+                if to_id not in self._instances:
                     raise ValueError(f'Instance {to_id} not found')
-                if to_pin not in self.instances[to_id].inputs:
+                if to_pin not in self._instances[to_id].inputs:
                     raise ValueError(f'Input {to_pin} not found in instance {to_id}')
-                self.instances[to_id].inputs[conn.to_node.pin_id].queue = queue
+                self._instances[to_id].inputs[conn.to_node.pin_id].queue = queue
 
     def run(self):
-        for instance in self.instances.values():
-            logger.debug(f'Running instance {instance.id} of type {instance.node_type}')
+        for instance in self._instances.values():
+            logger.debug(f'Running instance {instance._id} of type {instance._node_type}')
             instance.run()
     
         # Wait for all instances to finish
-        for v in self.instances_stopped.values():
+        for v in self._instances_stopped.values():
             logger.debug(f'Waiting for instance to stop')
             v.wait()
         
         self.finish()
-        logger.debug(f'Graph {self.id} finished')
+        logger.debug(f'Graph {self._id} finished')
 
     def stop(self):
         # Close all inputs and wait for all instances to stop
@@ -236,7 +251,7 @@ class Graph(Node):
 
     def terminate(self):
         """Terminate all instances immediately."""
-        for instance in self.instances.values():
+        for instance in self._instances.values():
             instance.stop()
         self.stop()
         self.finish()
@@ -293,14 +308,14 @@ class Graph(Node):
 
     def to_dict(self) -> dict:
         return {
-            'id': self.id,
-            'nodeId': self.node_type,
-            'inputConfig': self.input_config,
-            'displayName': self.display_name,
+            'id': self._id,
+            'nodeId': self._node_type,
+            'inputConfig': self._input_config,
+            'displayName': self._display_name,
             'inputs': self.inputs,
             'outputs': self.outputs,
-            'instances': [v.to_dict() for k, v in self.instances.items()],
-            'connections': [conn.to_dict() for conn in self.connections]
+            'instances': [v.to_dict() for k, v in self._instances.items()],
+            'connections': [conn.to_dict() for conn in self._connections]
         }
 
 

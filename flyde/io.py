@@ -92,7 +92,7 @@ class Output:
     Args:
         id (str): The ID of the output
         description (str): The description of the output
-        typ (type): The type of the output
+        type (type): The type of the output
         delayed (bool): If the output is delayed
     """
     def __init__(self, /,

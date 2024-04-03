@@ -15,6 +15,6 @@ class InlineValue(Component):
         self.value = value
 
     def process(self):
-        self.outputs['value'].send(self.value)
+        self.send('value', self.value)
         # Inline value only runs once
         self.stop()
