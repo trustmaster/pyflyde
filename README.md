@@ -21,3 +21,17 @@ Then you can run the Hello World example:
 ```bash
 ./flyde.py HelloPy.flyde
 ```
+
+### Using the visual editor
+
+To make your flows show in Flyde visual editor, you currently have to install Flyde TypeScript dependencies:
+
+```bash
+npm install
+```
+
+Whenever you change your component library classes or their interfaces, use flyde.py gen command to generate .flyde.ts definitions, e.g.:
+
+```bash
+./flyde.py gen mylib.components
+```
