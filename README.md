@@ -19,7 +19,7 @@ pip install .
 Then you can run the Hello World example:
 
 ```bash
-./flyde.py HelloPy.flyde
+./flyde.py examples/HelloPy.flyde
 ```
 
 ### Using the visual editor
@@ -33,5 +33,5 @@ npm install
 Whenever you change your component library classes or their interfaces, use flyde.py gen command to generate .flyde.ts definitions, e.g.:
 
 ```bash
-./flyde.py gen mylib.components
+./flyde.py gen examples/mylib/components.py
 ```
