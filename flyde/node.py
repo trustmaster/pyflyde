@@ -123,12 +123,40 @@ class Component(Node):
             logger.debug(f'Running {self._id} worker')
             while not self._stop.is_set():
                 logger.debug(f'Waiting for inputs on {self._id}')
-                inputs = {k: v.queue.get() for k, v in self.inputs.items()}
+                inputs = {}
+                non_static_count = 0
+                non_static_closed_count = 0
+                for key, inp in self.inputs.items():
+                    non_static = True
+                    if inp.mode == InputMode.STICKY:
+                        if not inp.queue.empty():
+                            # Update the sticky value with the next value from the queue
+                            value = inp.queue.get()
+                            inp.set_value(value)
+                        value = inp.value
+                    elif inp.mode == InputMode.STATIC:
+                        # Static input values don't change at all
+                        non_static = False
+                        value = inp.value
+                    else:
+                        # InputMode.QUEUE is the default mode
+                        value = inp.queue.get()
+
+                    inputs[key] = value
+
+                    # Count EOFs received on non-static inputs
+                    if non_static:
+                        non_static_count += 1
+                    if value == EOF:
+                        if non_static:
+                            non_static_closed_count += 1
+        
                 # If all of the input values are EOF, stop the component
-                if len(inputs) > 0 and all(v == EOF for v in inputs.values()):
+                if non_static_count > 0 and non_static_count == non_static_closed_count:
                     logger.debug(f'All inputs are EOF, stopping {self._id}')
                     self.stop()
                     break
+
                 logger.debug(f'Processing {self._id} with inputs: {inputs}')
                 res = self.process(**inputs)
                 if type(res) == dict or (isinstance(res, tuple) and hasattr(res, '_fields')):
@@ -137,6 +165,7 @@ class Component(Node):
                         if k not in self.outputs:
                             raise ValueError(f'{self._node_type}.process(): sending to non-existing output "{k}" from return value')
                         self.outputs[k].send(v)
+                        
             self.finish()
         
         logger.debug(f'Starting {self._id} thread')
