@@ -1,0 +1,212 @@
+imports:
+  "@flyde/stdlib":
+    - InlineValue
+    - GetAttribute
+  mylib/dataframe.flyde.ts:
+    - LoadDataset
+    - Scale
+    - SplitRef3
+    - SplitRef2
+  mylib/kmeans.flyde.ts:
+    - KMeansNClusters
+    - KMeansCluster
+    - PCA2
+    - Visualize
+node:
+  instances:
+    - pos:
+        x: -44.66999999999999
+        y: -77.04670715332031
+      id: LoadDataset-1a039uk
+      inputConfig: {}
+      nodeId: LoadDataset
+    - pos:
+        x: -81.66337402343748
+        y: -174.31002807617188
+      id: mc4t4fqqezd1gns4fb7ckxmc
+      inputConfig: {}
+      nodeId: InlineValue__mc4t4fqqezd1gns4fb7ckxmc
+      macroId: InlineValue
+      macroData:
+        type: string
+        value: examples/datasets/wine-clustering.csv
+        label: wine-clustering.csv
+    - pos:
+        x: -21.19016845703129
+        y: 18.14411163330078
+      id: Scale-dz139az
+      inputConfig: {}
+      nodeId: Scale
+    - pos:
+        x: 198.02504928588866
+        y: 271.5199851989746
+      id: KMeansNClusters-5m2390u
+      inputConfig: {}
+      nodeId: KMeansNClusters
+    - pos:
+        x: -24.453948974609375
+        y: 384.64927673339844
+      id: KMeansCluster-ql339i4
+      inputConfig: {}
+      nodeId: KMeansCluster
+    - pos:
+        x: 315.7918101119995
+        y: 139.13578152656555
+      id: yquy5xqil6xp9tmb42ktmosp
+      inputConfig: {}
+      nodeId: InlineValue__yquy5xqil6xp9tmb42ktmosp
+      macroId: InlineValue
+      macroData:
+        value: 20
+        type: number
+        label: "20"
+    - pos:
+        x: -367.4641552734375
+        y: 351.37111480712895
+      id: PCA2-mz439jk
+      inputConfig: {}
+      nodeId: PCA2
+    - pos:
+        x: -154.71726806640623
+        y: 998.1520443725586
+      id: Visualize-yz539m4
+      inputConfig: {}
+      nodeId: Visualize
+    - pos:
+        x: -46.604047851562484
+        y: 848.7439442443848
+      id: PCA2-e5639ct
+      inputConfig: {}
+      nodeId: PCA2
+    - pos:
+        x: -91.5520684814453
+        y: 120.58904156801339
+      id: SplitRef3-iu039nw
+      inputConfig: {}
+      nodeId: SplitRef3
+    - pos:
+        x: -7.844333496093668
+        y: 509.7350116595453
+      id: SplitRef2-210390v
+      inputConfig: {}
+      nodeId: SplitRef2
+    - pos:
+        x: -142.73368286132813
+        y: 723.4239659719841
+      id: nmt2k6i80qpwu9fyuckbqefw
+      inputConfig: {}
+      nodeId: GetAttribute__nmt2k6i80qpwu9fyuckbqefw
+      macroId: GetAttribute
+      macroData:
+        key:
+          mode: dynamic
+    - pos:
+        x: -64.69646728515636
+        y: 615.0982726126091
+      id: xb5xo767x6u0ubdvvegi0e53
+      inputConfig: {}
+      nodeId: InlineValue__xb5xo767x6u0ubdvvegi0e53
+      macroId: InlineValue
+      macroData:
+        type: string
+        value: centroids
+        label: '"centroids"'
+  connections:
+    - from:
+        insId: mc4t4fqqezd1gns4fb7ckxmc
+        pinId: value
+      to:
+        insId: LoadDataset-1a039uk
+        pinId: file_path
+    - from:
+        insId: LoadDataset-1a039uk
+        pinId: dataframe
+      to:
+        insId: Scale-dz139az
+        pinId: dataframe
+    - from:
+        insId: KMeansNClusters-5m2390u
+        pinId: n_clusters
+      to:
+        insId: KMeansCluster-ql339i4
+        pinId: n_clusters
+    - from:
+        insId: yquy5xqil6xp9tmb42ktmosp
+        pinId: value
+      to:
+        insId: KMeansNClusters-5m2390u
+        pinId: max_clusters
+    - from:
+        insId: PCA2-mz439jk
+        pinId: pca_components
+      to:
+        insId: Visualize-yz539m4
+        pinId: pca_components
+    - from:
+        insId: Scale-dz139az
+        pinId: scaled_dataframe
+      to:
+        insId: SplitRef3-iu039nw
+        pinId: dataframe
+    - from:
+        insId: SplitRef3-iu039nw
+        pinId: dataframe1
+      to:
+        insId: PCA2-mz439jk
+        pinId: scaled_dataframe
+    - from:
+        insId: SplitRef3-iu039nw
+        pinId: dataframe2
+      to:
+        insId: KMeansCluster-ql339i4
+        pinId: scaled_dataframe
+    - from:
+        insId: SplitRef3-iu039nw
+        pinId: dataframe3
+      to:
+        insId: KMeansNClusters-5m2390u
+        pinId: scaled_dataframe
+    - from:
+        insId: PCA2-e5639ct
+        pinId: pca_components
+      to:
+        insId: Visualize-yz539m4
+        pinId: pca_centroids
+    - from:
+        insId: KMeansCluster-ql339i4
+        pinId: kmeans_result
+      to:
+        insId: SplitRef2-210390v
+        pinId: dataframe
+    - from:
+        insId: SplitRef2-210390v
+        pinId: dataframe2
+      to:
+        insId: Visualize-yz539m4
+        pinId: kmeans_result
+    - from:
+        insId: SplitRef2-210390v
+        pinId: dataframe1
+      to:
+        insId: nmt2k6i80qpwu9fyuckbqefw
+        pinId: object
+    - from:
+        insId: nmt2k6i80qpwu9fyuckbqefw
+        pinId: value
+      to:
+        insId: PCA2-e5639ct
+        pinId: scaled_dataframe
+    - from:
+        insId: xb5xo767x6u0ubdvvegi0e53
+        pinId: value
+      to:
+        insId: nmt2k6i80qpwu9fyuckbqefw
+        pinId: attribute
+  id: Example
+  inputs: {}
+  outputs: {}
+  inputsPosition: {}
+  outputsPosition:
+    result:
+      x: -23.264428942324532
+      y: 237.25953921502617

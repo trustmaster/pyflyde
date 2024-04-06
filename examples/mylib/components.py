@@ -1,3 +1,4 @@
+"""Generic components."""
 from flyde.node import Component
 from flyde.io import Input, Output, InputMode
 

@@ -7,7 +7,7 @@ from typing import Any, Callable
 from uuid import uuid4
 
 from flyde.connection import Connection
-from flyde.io import InputMode, Input, Output, EOF
+from flyde.io import InputMode, Input, Output, EOF, isEOF
 logger = logging.getLogger(__name__)
 
 
@@ -50,6 +50,9 @@ class Node:
             self.inputs = deepcopy(self.inputs)
         else:
             self.inputs = {}
+
+        for k, v in self.inputs.items():
+            v.id = f'{self._id}.{k}'
         
         if len(outputs) > 0:
             self.outputs = outputs
@@ -58,6 +61,9 @@ class Node:
             self.outputs = deepcopy(self.outputs)
         else:
             self.outputs = {}
+
+        for k, vv in self.outputs.items():
+            vv.id = f'{self._id}.{k}'
 
         self._stopped = stopped
 
@@ -90,9 +96,12 @@ class Node:
             'display_name': yml.get('displayName', ''),
             'stopped': yml['stopped'],
         }
-        # If yml['macroData']['value'] is set, pass it in the args as value
-        if 'macroData' in yml and 'value' in yml['macroData']:
-            args['value'] = yml['macroData']['value']
+        # If macro parameters are present, pass them to the constructor
+        if 'macroData' in yml:
+            if 'value' in yml['macroData']:
+                args['value'] = yml['macroData']['value']
+            if 'key' in yml['macroData']:
+                args['key'] = yml['macroData']['key']
         return create(node_class_name, args)
 
     def to_dict(self) -> dict:
@@ -130,10 +139,16 @@ class Component(Node):
                     non_static = True
                     if inp.mode == InputMode.STICKY:
                         if not inp.queue.empty():
-                            # Update the sticky value with the next value from the queue
+                            # Update the sticky value with the new value from the queue
                             value = inp.queue.get()
                             inp.set_value(value)
-                        value = inp.value
+                        elif hasattr(inp, 'value') and inp.value != None:
+                            # Use the sticky value if the queue is empty
+                            value = inp.value
+                        else:
+                            # If no value is set, wait for the next value
+                            value = inp.queue.get()
+                            inp.set_value(value)
                     elif inp.mode == InputMode.STATIC:
                         # Static input values don't change at all
                         non_static = False
@@ -147,7 +162,7 @@ class Component(Node):
                     # Count EOFs received on non-static inputs
                     if non_static:
                         non_static_count += 1
-                    if value == EOF:
+                    if isEOF(value):
                         if non_static:
                             non_static_closed_count += 1
         
@@ -182,16 +197,22 @@ class Component(Node):
         """Convert the node to a TypeScript definition."""
 
         name = self.__class__.__name__ if name == '' else name
+
         inputs_str = ''
         if hasattr(self, 'inputs') and len(self.inputs) > 0:
             inputs_str = '\n' + ',\n'.join([f'    {k}: {{"description": "{v.description}"}}' for k, v in self.inputs.items()]) + '\n'
         outputs_str = ''
         if hasattr(self, 'outputs') and len(self.outputs) > 0:
             outputs_str = '\n' + ',\n'.join([f'    {k}: {{"description": "{v.description}"}}' for k, v in self.outputs.items()]) + '\n'
+
+        safe_doc = ''
+        if hasattr(self, '__doc__') and self.__doc__:
+            safe_doc = self.__doc__.replace('\n', '\\n').replace('\r', '\\r').replace('\"', '\\\"')
+            
         return (
             f'export const {name}: CodeNode = {{\n'
             f'  id: "{name}",\n'
-            f'  description: "{self.__doc__}",\n'
+            f'  description: "{safe_doc}",\n'
             f'  inputs: {{ {inputs_str} }},\n'
             f'  outputs: {{ {outputs_str} }},\n'
             f'  run: () => {{ return; }},\n'
@@ -308,9 +329,9 @@ class Graph(Node):
             ins_id = ins['id']
             if 'macroId' in ins:
                 # Only InlineValue macros are supported for now
-                if ins['macroId'] != 'InlineValue':
+                if ins['macroId'] not in ['InlineValue', 'GetAttribute']:
                     raise ValueError(f'Unsupported macro: {ins["macroId"]}')
-                ins['nodeId'] = 'InlineValue'
+                ins['nodeId'] = ins['macroId']
             stopped = Event()
             ins['stopped'] = stopped
             instances[ins_id] = Node.from_yaml(create, ins)

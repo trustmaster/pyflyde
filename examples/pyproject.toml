@@ -1,0 +1,13 @@
+[project]
+name = "pyflyde-examples"
+version = "0.0.1"
+requires-python = ">= 3.9"
+
+dependencies = [
+    "matplotlib",
+    "pandas",
+    "scikit-learn",
+]
+
+[tool.setuptools.packages.find]
+where = ["../flyde", "mylib"]

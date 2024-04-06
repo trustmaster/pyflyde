@@ -5,6 +5,10 @@ from queue import Queue
 
 EOF = Exception('__EOF__')
 
+def isEOF(value: Any) -> bool:
+    """Checks if a value is an EOF signal."""
+    return isinstance(value, Exception) and value.args[0] == '__EOF__'
+
 class InputMode(Enum):
     QUEUE = "queue"
     STICKY = "sticky"
@@ -45,7 +49,7 @@ class Input:
 
     def set_value(self, value: Any):
         """Set the value of the input."""
-        if self.type != None and not isinstance(value, self.type): # type: ignore
+        if self.type != None and not isEOF(value) and not isinstance(value, self.type): # type: ignore
             raise ValueError(f'Value {value} is not of type {self.type}')
         self.value = value
 
@@ -53,7 +57,7 @@ class Input:
         """Get the value of the input."""
         if self.mode == InputMode.QUEUE:
             value = self.queue.get()
-            if value == EOF:
+            if isEOF(value):
                 raise EOF
             return value
 
@@ -112,6 +116,6 @@ class Output:
 
     def send(self, value: Any):
         """Put a value in the output queue."""
-        if self.type != None and not isinstance(value, self.type): # type: ignore
-            raise ValueError(f'Value {value} is not of type {self.type}')
+        if self.type != None and not isEOF(value) and not isinstance(value, self.type): # type: ignore
+            raise ValueError(f'Error in output "{self.id}": value {value} is not of type {self.type}')
         self.queue.put(value)
