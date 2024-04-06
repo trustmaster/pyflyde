@@ -105,16 +105,32 @@ class Visualize(Component):
     }
     
     def process(self, pca_components: pd.DataFrame, pca_centroids: pd.DataFrame, kmeans_result: KMeansResult):
+        pd.set_option('display.max_rows', 200)
+        print('Clustered data:')
+        print(kmeans_result.clustered_dataframe)
+
+        print('Cluster centroids:')
+        print(kmeans_result.centroids.head(10))
+
+        print('Data in 2d PCA space:')
+        print(pca_components.head(10))
+
+        print('Centroids in 2d PCA space:')
+        print(pca_centroids.head(10))
+
         plot = pca_components.plot.scatter(x='PC1', y='PC2', c=kmeans_result.clustered_dataframe['cluster'], cmap='viridis')
-        x = pca_components[:, 0]
-        y = pca_components[:, 1]
+        x = pca_components.iloc[:, 0].values
+        y = pca_components.iloc[:, 1].values
 
         plt.scatter(x, y, c=kmeans_result.cluster_labels, alpha=0.5, s=200)  # plot different colors per cluster
         plt.title('Wine clusters')
         plt.xlabel('PCA 1')
         plt.ylabel('PCA 2')
 
-        plt.scatter(pca_centroids[:, 0], pca_centroids[:, 1], marker='X', s=200, linewidths=1.5,
-                    color='red', edgecolors="black", lw=1.5)
+        x = pca_centroids.iloc[:, 0].values
+        y = pca_centroids.iloc[:, 1].values
+
+        plt.scatter(x, y, marker='X', s=200, linewidths=1.5,
+                    color='red', edgecolors="black", label='Centroids')
 
         plt.show()
