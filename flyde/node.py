@@ -18,7 +18,7 @@ InstanceFactory = Callable[[str, dict], Any]
 
 class Node:
     """Node is the main building block of an application.
-    
+
     Attributes:
         id (str): A unique identifier for the node.
         node_type (str): The node type identifier.
@@ -53,7 +53,7 @@ class Node:
 
         for k, v in self.inputs.items():
             v.id = f'{self._id}.{k}'
-        
+
         if len(outputs) > 0:
             self.outputs = outputs
         elif hasattr(self.__class__, 'outputs') and len(self.outputs) > 0:
@@ -121,7 +121,7 @@ class Component(Node):
         self._mutex = Lock()
 
     """Run the main component function.
-    
+
     Defaut implementation looks for a reactive method called `process()` and calls it passing the input values.
     """
     def run(self):
@@ -165,7 +165,7 @@ class Component(Node):
                     if isEOF(value):
                         if non_static:
                             non_static_closed_count += 1
-        
+
                 # If all of the input values are EOF, stop the component
                 if non_static_count > 0 and non_static_count == non_static_closed_count:
                     logger.debug(f'All inputs are EOF, stopping {self._id}')
@@ -180,9 +180,9 @@ class Component(Node):
                         if k not in self.outputs:
                             raise ValueError(f'{self._node_type}.process(): sending to non-existing output "{k}" from return value')
                         self.outputs[k].send(v)
-                        
+
             self.finish()
-        
+
         logger.debug(f'Starting {self._id} thread')
         thread = Thread(target=worker, daemon=True)
         thread.start()
@@ -208,7 +208,7 @@ class Component(Node):
         safe_doc = ''
         if hasattr(self, '__doc__') and self.__doc__:
             safe_doc = self.__doc__.replace('\n', '\\n').replace('\r', '\\r').replace('\"', '\\\"')
-            
+
         return (
             f'export const {name}: CodeNode = {{\n'
             f'  id: "{name}",\n'
@@ -248,7 +248,7 @@ class Graph(Node):
         self._connections = connections
         self._instances = instances
         self._instances_stopped = instances_stopped
-    
+
         # Wire all connections
         for conn in self._connections:
             queue: Queue = Queue(maxsize=0)
@@ -285,12 +285,15 @@ class Graph(Node):
         for instance in self._instances.values():
             logger.debug(f'Running instance {instance._id} of type {instance._node_type}')
             instance.run()
-    
+
         # Wait for all instances to finish
-        for v in self._instances_stopped.values():
+        for k, v in self._instances_stopped.items():
             logger.debug(f'Waiting for instance to stop')
             v.wait()
-        
+            # If the instance has a `shutdown()` handler method, call it at this point
+            if hasattr(self._instances[k], 'shutdown'):
+                self._instances[k].shutdown()
+
         self.finish()
         logger.debug(f'Graph {self._id} finished')
 
@@ -309,7 +312,7 @@ class Graph(Node):
     @property
     def stopped(self) -> Event:
         return self._stopped
-    
+
     @stopped.setter
     def stopped(self, value: Event):
         self._stopped = value
@@ -337,7 +340,7 @@ class Graph(Node):
             instances[ins_id] = Node.from_yaml(create, ins)
             instances_stopped[ins_id] = stopped
             logger.debug(f'Loaded instance {ins_id}')
-    
+
         # Load connections and graph inputs/outputs
         connections = [Connection.from_yaml(conn) for conn in yml.get('connections', [])]
         inputs = {k: Input(**v) for k, v in yml.get('inputs', {}).items()}

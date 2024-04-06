@@ -12,14 +12,14 @@ from flyde.io import Input, Output, InputMode
 
 class PCA2(Component):
     """Performs PCA on a dataframe and returns the first two principal components."""
-    
+
     inputs = {
         'scaled_dataframe': Input(description='The scaled dataframe to reduce', type=pd.DataFrame),
     }
     outputs = {
         'pca_components': Output(description='The first two principal components', type=pd.DataFrame),
     }
-    
+
     def process(self, scaled_dataframe: pd.DataFrame) -> dict[str, pd.DataFrame]:
         pca = PCA(n_components=2)
         pca_components = pd.DataFrame(pca.fit_transform(scaled_dataframe), columns=['PC1', 'PC2'])
@@ -56,7 +56,7 @@ class KMeansNClusters(Component):
 @dataclass
 class KMeansResult:
     """K-means clustering result.
-    
+
     Attributes:
         clustered_dataframe (pd.DataFrame): The dataframe with cluster labels.
         cluster_labels: The cluster labels.
@@ -103,21 +103,11 @@ class Visualize(Component):
         'pca_centroids': Input(description='The centroids in PCA space', type=pd.DataFrame),
         'kmeans_result': Input(description='K-means clustering result', type=KMeansResult),
     }
-    
-    def process(self, pca_components: pd.DataFrame, pca_centroids: pd.DataFrame, kmeans_result: KMeansResult):
-        pd.set_option('display.max_rows', 200)
-        print('Clustered data:')
-        print(kmeans_result.clustered_dataframe)
 
-        print('Cluster centroids:')
-        print(kmeans_result.centroids.head(10))
-
-        print('Data in 2d PCA space:')
-        print(pca_components.head(10))
-
-        print('Centroids in 2d PCA space:')
-        print(pca_centroids.head(10))
-
+    def plot(self):
+        pca_components = self.pca_components
+        pca_centroids = self.pca_centroids
+        kmeans_result = self.kmeans_result
         plot = pca_components.plot.scatter(x='PC1', y='PC2', c=kmeans_result.clustered_dataframe['cluster'], cmap='viridis')
         x = pca_components.iloc[:, 0].values
         y = pca_components.iloc[:, 1].values
@@ -134,3 +124,26 @@ class Visualize(Component):
                     color='red', edgecolors="black", label='Centroids')
 
         plt.show()
+
+    def process(self, pca_components: pd.DataFrame, pca_centroids: pd.DataFrame, kmeans_result: KMeansResult):
+        pd.set_option('display.max_rows', 200)
+        print('Clustered data:')
+        print(kmeans_result.clustered_dataframe)
+
+        print('Cluster centroids:')
+        print(kmeans_result.centroids.head(10))
+
+        print('Data in 2d PCA space:')
+        print(pca_components.head(10))
+
+        print('Centroids in 2d PCA space:')
+        print(pca_centroids.head(10))
+
+        # Here is the trick: we save the data to the instance so that it can be accessed in the plot method.
+        # Then we call the plot method from the main thread on component shutdown.
+        self.pca_components = pca_components
+        self.pca_centroids = pca_centroids
+        self.kmeans_result = kmeans_result
+
+    def shutdown(self):
+        self.plot()
