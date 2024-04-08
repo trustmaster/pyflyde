@@ -10,7 +10,7 @@ class Print(Component):
         'msg': Input(description='The message to print', type=str),
     }
 
-    def process(self, msg: str):
+    async def process(self, msg: str):
         print(msg)
 
 
@@ -25,6 +25,6 @@ class Concat(Component):
         'out': Output(description='The concatenated string', type=str),
     }
 
-    def process(self, a: str, b: str) -> dict[str, str]:
+    async def process(self, a: str, b: str) -> dict[str, str]:
         out = a + b
         return {'out': out}

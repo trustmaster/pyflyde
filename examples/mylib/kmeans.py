@@ -20,7 +20,7 @@ class PCA2(Component):
         'pca_components': Output(description='The first two principal components', type=pd.DataFrame),
     }
     
-    def process(self, scaled_dataframe: pd.DataFrame) -> dict[str, pd.DataFrame]:
+    async def process(self, scaled_dataframe: pd.DataFrame) -> dict[str, pd.DataFrame]:
         pca = PCA(n_components=2)
         pca_components = pd.DataFrame(pca.fit_transform(scaled_dataframe), columns=['PC1', 'PC2'])
         return {
@@ -38,7 +38,7 @@ class KMeansNClusters(Component):
         'n_clusters': Output(description='The optimal number of clusters', type=int),
     }
 
-    def process(self, scaled_dataframe: pd.DataFrame, max_clusters: int) -> dict[str, int]:
+    async def process(self, scaled_dataframe: pd.DataFrame, max_clusters: int) -> dict[str, int]:
         best_score = -1
         best_n_clusters = 0
 
@@ -77,7 +77,7 @@ class KMeansCluster(Component):
         'kmeans_result': Output(description='K-means clustering result', type=KMeansResult),
     }
 
-    def process(self, scaled_dataframe: pd.DataFrame, n_clusters: int) -> dict[str, KMeansResult]:
+    async def process(self, scaled_dataframe: pd.DataFrame, n_clusters: int) -> dict[str, KMeansResult]:
         kmeans = KMeans(n_clusters=n_clusters)
         labels = kmeans.fit_predict(scaled_dataframe)
         centroids = pd.DataFrame(kmeans.cluster_centers_, columns=scaled_dataframe.columns)
@@ -104,7 +104,7 @@ class Visualize(Component):
         'kmeans_result': Input(description='K-means clustering result', type=KMeansResult),
     }
     
-    def process(self, pca_components: pd.DataFrame, pca_centroids: pd.DataFrame, kmeans_result: KMeansResult):
+    async def process(self, pca_components: pd.DataFrame, pca_centroids: pd.DataFrame, kmeans_result: KMeansResult):
         pd.set_option('display.max_rows', 200)
         print('Clustered data:')
         print(kmeans_result.clustered_dataframe)

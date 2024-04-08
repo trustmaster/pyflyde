@@ -1,6 +1,6 @@
 import importlib
 import logging
-from threading import Event
+from asyncio import Event
 
 from flyde.node import Graph
 
@@ -26,9 +26,10 @@ class FlydeFlow:
 
         raise ValueError(f'Unknown class name: {class_name}')
 
-    def run(self):
+    async def run(self):
         """Start the flow running."""
-        self._node.run()
+        await self._node.run()
+        await self._node.stopped.wait()
 
     @property
     def stopped(self) -> Event:

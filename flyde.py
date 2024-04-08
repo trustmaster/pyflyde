@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import argparse
+import asyncio
 import importlib
 import logging
 import os
@@ -69,8 +70,8 @@ if __name__ == '__main__':
                 print('Loaded flow:')
                 pprint.pprint(flow.to_dict())
 
-            flow.run()
-            flow.stopped.wait()
+            loop = asyncio.get_event_loop()
+            loop.run_until_complete(flow.run())
         else:
             raise ValueError('Invalid YAML file')
     elif args.command == 'gen':

@@ -1,7 +1,6 @@
 from enum import Enum
 from typing import Any, Optional, Union, get_args
-from asyncio import Queue as AsyncQueue
-from queue import Queue
+from asyncio import Queue
 
 EOF = Exception('__EOF__')
 
@@ -53,10 +52,10 @@ class Input:
             raise ValueError(f'Value {value} is not of type {self.type}')
         self.value = value
 
-    def get(self) -> Any:
+    async def get(self) -> Any:
         """Get the value of the input."""
         if self.mode == InputMode.QUEUE:
-            value = self.queue.get()
+            value = await self.queue.get()
             if isEOF(value):
                 raise EOF
             return value
@@ -74,18 +73,6 @@ class Input:
         if self.mode == InputMode.QUEUE:
             return self.queue.qsize()
         return 1
-
-
-# class AsyncInput(Input):
-#     """AsyncInput is an interface for getting input/output data for a component."""
-
-#     def connect(self, queue: AsyncQueue):
-#         """Connect the input to a queue."""
-#         self.queue = queue
-
-#     def get(self):
-#         """Get the value of the input."""
-#         return self.queue.get()
 
 
 class Output:
@@ -114,8 +101,8 @@ class Output:
         """Connect the output to a queue."""
         self.queue = queue
 
-    def send(self, value: Any):
+    async def send(self, value: Any):
         """Put a value in the output queue."""
         if self.type != None and not isEOF(value) and not isinstance(value, self.type): # type: ignore
             raise ValueError(f'Error in output "{self.id}": value {value} is not of type {self.type}')
-        self.queue.put(value)
+        await self.queue.put(value)

@@ -14,8 +14,8 @@ class InlineValue(Component):
         super().__init__(**kwargs)
         self.value = value
 
-    def process(self):
-        self.send('value', self.value)
+    async def process(self):
+        await self.send('value', self.value)
         # Inline value only runs once
         self.stop()
 
@@ -44,6 +44,6 @@ class GetAttribute(Component):
                 if self.value is not None:
                     self.inputs['attribute'].set_value(self.value)
 
-    def process(self, object: Any, attribute: str):
+    async def process(self, object: Any, attribute: str):
         value = getattr(object, attribute)
-        self.send('value', value)
+        await self.send('value', value)

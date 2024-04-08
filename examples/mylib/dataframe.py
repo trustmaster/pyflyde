@@ -17,7 +17,7 @@ class LoadDataset(Component):
         'dataframe': Output(description='The loaded dataframe', type=pd.DataFrame),
     }
     
-    def process(self, file_path: str) -> dict[str, pd.DataFrame]:
+    async def process(self, file_path: str) -> dict[str, pd.DataFrame]:
         dataframe = pd.read_csv(file_path)
         return {'dataframe': dataframe}
 
@@ -31,7 +31,7 @@ class Scale(Component):
         'scaled_dataframe': Output(description='The scaled dataframe', type=pd.DataFrame),
     }
     
-    def process(self, dataframe: pd.DataFrame) -> dict[str, pd.DataFrame]:
+    async def process(self, dataframe: pd.DataFrame) -> dict[str, pd.DataFrame]:
         scaler = StandardScaler()
         scaled_dataframe = pd.DataFrame(scaler.fit_transform(dataframe), columns=dataframe.columns)
         return {'scaled_dataframe': scaled_dataframe}
@@ -50,7 +50,7 @@ class SplitRef2(Component):
         'dataframe2': Output(description='The second copy of the dataframe'),
     }
     
-    def process(self, dataframe: pd.DataFrame) -> dict[str, pd.DataFrame]:
+    async def process(self, dataframe: pd.DataFrame) -> dict[str, pd.DataFrame]:
         return {
             'dataframe1': dataframe,
             'dataframe2': dataframe,
@@ -71,7 +71,7 @@ class SplitRef3(Component):
         'dataframe3': Output(description='The third copy of the dataframe'),
     }
     
-    def process(self, dataframe: pd.DataFrame) -> dict[str, pd.DataFrame]:
+    async def process(self, dataframe: pd.DataFrame) -> dict[str, pd.DataFrame]:
         return {
             'dataframe1': dataframe,
             'dataframe2': dataframe,
@@ -93,7 +93,7 @@ class SplitCopy3(Component):
         'dataframe3': Output(description='The third copy of the dataframe'),
     }
     
-    def process(self, dataframe: pd.DataFrame) -> dict[str, pd.DataFrame]:
+    async def process(self, dataframe: pd.DataFrame) -> dict[str, pd.DataFrame]:
         return {
             'dataframe1': dataframe.copy(),
             'dataframe2': dataframe.copy(),

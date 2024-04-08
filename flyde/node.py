@@ -1,8 +1,8 @@
+import asyncio
 import logging
 from copy import deepcopy
 from dataclasses import dataclass
-from queue import Queue
-from threading import Event, Lock, Thread
+from asyncio import Event, Lock, Queue
 from typing import Any, Callable
 from uuid import uuid4
 
@@ -67,23 +67,23 @@ class Node:
 
         self._stopped = stopped
 
-    def finish(self):
+    async def finish(self):
         """Finish the component execution gracefully by closing all its outputs and notifying others."""
         for output in self.outputs.values():
-                output.queue.put(EOF)
+            await output.queue.put(EOF)
         self._stopped.set()
 
-    def send(self, output_id: str, value: Any):
+    async def send(self, output_id: str, value: Any):
         """Send a value to an output."""
         if output_id not in self.outputs:
             raise ValueError(f'Output {output_id} not found in node {self._id}')
-        self.outputs[output_id].send(value)
+        await self.outputs[output_id].send(value)
 
-    def receive(self, input_id: str) -> Any:
+    async def receive(self, input_id: str) -> Any:
         """Receive a value from an input."""
         if input_id not in self.inputs:
             raise ValueError(f'Input {input_id} not found in node {self._id}')
-        return self.inputs[input_id].get()
+        return await self.inputs[input_id].get()
 
     @classmethod
     def from_yaml(cls, create: InstanceFactory, yml: dict):
@@ -124,11 +124,11 @@ class Component(Node):
     
     Defaut implementation looks for a reactive method called `process()` and calls it passing the input values.
     """
-    def run(self):
+    async def run(self):
         if not hasattr(self, 'process'):
             raise NotImplementedError('Component does not have neither run() nor process() method. No code to run.')
 
-        def worker():
+        async def worker():
             logger.debug(f'Running {self._id} worker')
             while not self._stop.is_set():
                 logger.debug(f'Waiting for inputs on {self._id}')
@@ -140,14 +140,14 @@ class Component(Node):
                     if inp.mode == InputMode.STICKY:
                         if not inp.queue.empty():
                             # Update the sticky value with the new value from the queue
-                            value = inp.queue.get()
+                            value = await inp.queue.get()
                             inp.set_value(value)
                         elif hasattr(inp, 'value') and inp.value != None:
                             # Use the sticky value if the queue is empty
                             value = inp.value
                         else:
                             # If no value is set, wait for the next value
-                            value = inp.queue.get()
+                            value = await inp.queue.get()
                             inp.set_value(value)
                     elif inp.mode == InputMode.STATIC:
                         # Static input values don't change at all
@@ -155,7 +155,7 @@ class Component(Node):
                         value = inp.value
                     else:
                         # InputMode.QUEUE is the default mode
-                        value = inp.queue.get()
+                        value = await inp.queue.get()
 
                     inputs[key] = value
 
@@ -173,19 +173,18 @@ class Component(Node):
                     break
 
                 logger.debug(f'Processing {self._id} with inputs: {inputs}')
-                res = self.process(**inputs)
+                res = await self.process(**inputs)
                 if type(res) == dict or (isinstance(res, tuple) and hasattr(res, '_fields')):
                     # Send values to the outputs named as keys
                     for k, v in res.items():
                         if k not in self.outputs:
                             raise ValueError(f'{self._node_type}.process(): sending to non-existing output "{k}" from return value')
-                        self.outputs[k].send(v)
+                        await self.outputs[k].send(v)
                         
-            self.finish()
+            await self.finish()
         
         logger.debug(f'Starting {self._id} thread')
-        thread = Thread(target=worker, daemon=True)
-        thread.start()
+        asyncio.create_task(worker())
 
     def stop(self):
         """Stop the component execution."""
@@ -281,30 +280,30 @@ class Graph(Node):
                     raise ValueError(f'Input {to_pin} not found in instance {to_id}')
                 self._instances[to_id].inputs[conn.to_node.pin_id].queue = queue
 
-    def run(self):
+    async def run(self):
         for instance in self._instances.values():
             logger.debug(f'Running instance {instance._id} of type {instance._node_type}')
-            instance.run()
+            await instance.run()
     
         # Wait for all instances to finish
         for v in self._instances_stopped.values():
             logger.debug(f'Waiting for instance to stop')
-            v.wait()
+            await v.wait()
         
-        self.finish()
+        await self.finish()
         logger.debug(f'Graph {self._id} finished')
 
-    def stop(self):
+    async def stop(self):
         # Close all inputs and wait for all instances to stop
         for v in self.inputs.values():
-            v.queue.put(EOF)
+            await v.queue.put(EOF)
 
-    def terminate(self):
+    async def terminate(self):
         """Terminate all instances immediately."""
         for instance in self._instances.values():
             instance.stop()
-        self.stop()
-        self.finish()
+        await self.stop()
+        await self.finish()
 
     @property
     def stopped(self) -> Event:
