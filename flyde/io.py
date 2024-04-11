@@ -10,9 +10,9 @@ def isEOF(value: Any) -> bool:
     return isinstance(value, Exception) and value.args[0] == '__EOF__'
 
 class InputMode(Enum):
-    QUEUE = "queue"
-    STICKY = "sticky"
-    STATIC = "static"
+    QUEUE = 'queue'
+    STICKY = 'sticky'
+    STATIC = 'static'
 
 
 class Input:
@@ -38,6 +38,8 @@ class Input:
         self.description = description
         self.type = type
         self.mode = mode
+        self.queue = None
+        self.value = None
         if value != None:
             if self.type != None and not isinstance(value, type): # type: ignore
                 raise ValueError(f'Value {value} is not of type {self.type}')
@@ -49,6 +51,7 @@ class Input:
 
     def set_value(self, value: Any):
         """Set the value of the input."""
+        # Can be set to EOF to indicate end of data
         if self.type != None and not isEOF(value) and not isinstance(value, self.type): # type: ignore
             raise ValueError(f'Value {value} is not of type {self.type}')
         self.value = value
@@ -74,18 +77,6 @@ class Input:
         if self.mode == InputMode.QUEUE:
             return self.queue.qsize()
         return 1
-
-
-# class AsyncInput(Input):
-#     """AsyncInput is an interface for getting input/output data for a component."""
-
-#     def connect(self, queue: AsyncQueue):
-#         """Connect the input to a queue."""
-#         self.queue = queue
-
-#     def get(self):
-#         """Get the value of the input."""
-#         return self.queue.get()
 
 
 class Output:
