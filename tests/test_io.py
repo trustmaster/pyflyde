@@ -1,6 +1,6 @@
 import unittest
 from queue import Queue
-from flyde.io import Input, InputMode, EOF
+from flyde.io import Input, InputMode, Output, EOF
 
 class TestInput(unittest.TestCase):
     def setUp(self):
@@ -16,8 +16,6 @@ class TestInput(unittest.TestCase):
         for test_case in test_cases:
             with self.subTest(case=test_case['name']):
                 args = {}
-                if 'mode' in test_case:
-                    args['mode'] = test_case['mode']
                 if 'type' in test_case:
                     args['type'] = test_case['type']
                 if 'value' in test_case:
@@ -113,5 +111,43 @@ class TestInput(unittest.TestCase):
                     self.input.set_value(test_case['value'])
                 self.assertEqual(self.input.count(), test_case['expected'])
 
-if __name__ == '__main__':
-    unittest.main()
+class TestOutput(unittest.TestCase):
+    def setUp(self):
+        self.output = Output()
+
+    def test_init(self):
+        test_cases = [
+            {'name': 'default output', 'expected': None},
+            {'name': 'output with type', 'type': int, 'expected': int},
+        ]
+        for test_case in test_cases:
+            with self.subTest(case=test_case['name']):
+                args = {}
+                if 'type' in test_case:
+                    args['type'] = test_case['type']
+                self.output = Output(**args)
+                self.assertEqual(self.output.type, test_case['expected'])
+
+    def test_connect(self):
+        queue = Queue()
+        self.output.connect(queue)
+        self.assertEqual(self.output.queue, queue)
+
+    def test_send(self):
+        test_cases = [
+            {'name': 'put valid integer', 'type': int, 'value': 10, 'expected': 10, 'raises': None},
+            {'name': 'put invalid string', 'type': int, 'value': 'string', 'expected': None, 'raises': ValueError},
+            {'name': 'put EOF as a valid case', 'type': int, 'value': EOF, 'expected': EOF, 'raises': None},
+        ]
+        for test_case in test_cases:
+            with self.subTest(case=test_case['name']):
+                self.output = Output(type=test_case['type'])
+                queue = Queue()
+                self.output.connect(queue)
+                if test_case['raises']:
+                    with self.assertRaises(test_case['raises']):
+                        self.output.send(test_case['value'])
+                else:
+                    self.output.send(test_case['value'])
+                    value = queue.get()
+                    self.assertEqual(value, test_case['expected'])

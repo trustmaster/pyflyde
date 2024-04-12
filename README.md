@@ -55,3 +55,25 @@ After going back to the main folder you can run it with:
 ```bash
 ./flyde.py examples/Clustering.flyde
 ```
+
+## Contributing
+
+### Install dev dependencies
+
+```bash
+pip install .[dev]
+```
+
+### Run tests and coverage reports
+
+To run tests only:
+
+```bash
+make test
+```
+
+TO run tests with coverage and see report:
+
+```bash
+make cover report
+```

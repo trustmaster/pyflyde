@@ -38,7 +38,6 @@ class Input:
         self.description = description
         self.type = type
         self.mode = mode
-        self.queue = None
         self.value = None
         if value != None:
             if self.type != None and not isinstance(value, type): # type: ignore
@@ -93,13 +92,11 @@ class Output:
     def __init__(self, /,
         id: str = '',
         description: str = '',
-        type: Optional[type] = None,
-        delayed: bool = False
+        type: Optional[type] = None
     ):
         self.id = id
         self.description = description
         self.type = type
-        self.delayed = delayed
 
     def connect(self, queue: Queue):
         """Connect the output to a queue."""

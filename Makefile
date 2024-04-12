@@ -19,3 +19,10 @@ ts:
 test:
 	@echo "Running tests..."
 	@$(PYTHON) -m unittest discover -s $(TEST_DIR) -p "test_*.py";
+
+cover:
+	@echo "Running tests with coverage..."
+	@coverage run -m unittest discover -s $(TEST_DIR) -p "test_*.py";
+
+report:
+	@coverage report -m --skip-empty;

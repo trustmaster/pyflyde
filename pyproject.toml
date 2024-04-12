@@ -9,3 +9,8 @@ dependencies = [
 
 [tool.setuptools.packages.find]
 where = ["flyde", "examples/mylib"]
+
+[project.optional-dependencies]
+dev = [
+    "coverage",
+]
