@@ -12,5 +12,7 @@ where = ["flyde", "examples/mylib"]
 
 [project.optional-dependencies]
 dev = [
+    "black",
     "coverage",
+    "flake8",
 ]

@@ -1,6 +1,7 @@
 import unittest
 from queue import Queue
-from flyde.io import Input, InputMode, Output, EOF
+from flyde.io import Input, InputMode, Output, EOF, Connection, ConnectionNode
+
 
 class TestInput(unittest.TestCase):
     def setUp(self):
@@ -8,24 +9,41 @@ class TestInput(unittest.TestCase):
 
     def test_init(self):
         test_cases = [
-            {'name': 'default input', 'expected': (InputMode.QUEUE, None, None)},
-            {'name': 'input with type', 'type': int, 'expected': (InputMode.QUEUE, int, None)},
-            {'name': 'input with value', 'value': 10, 'expected': (InputMode.QUEUE, None, 10)},
-            {'name': 'input with type and invalid value', 'type': int, 'value': 'string', 'expected': (InputMode.QUEUE, int, None), 'raises': ValueError},
+            {"name": "default input", "expected": (InputMode.QUEUE, None, None)},
+            {
+                "name": "input with type",
+                "type": int,
+                "expected": (InputMode.QUEUE, int, None),
+            },
+            {
+                "name": "input with value",
+                "value": 10,
+                "expected": (InputMode.QUEUE, None, 10),
+            },
+            {
+                "name": "input with type and invalid value",
+                "type": int,
+                "value": "string",
+                "expected": (InputMode.QUEUE, int, None),
+                "raises": ValueError,
+            },
         ]
         for test_case in test_cases:
-            with self.subTest(case=test_case['name']):
+            with self.subTest(case=test_case["name"]):
                 args = {}
-                if 'type' in test_case:
-                    args['type'] = test_case['type']
-                if 'value' in test_case:
-                    args['value'] = test_case['value']
-                if 'raises' in test_case:
-                    with self.assertRaises(test_case['raises']):
+                if "type" in test_case:
+                    args["type"] = test_case["type"]
+                if "value" in test_case:
+                    args["value"] = test_case["value"]
+                if "raises" in test_case:
+                    with self.assertRaises(test_case["raises"]):
                         self.input = Input(**args)
                 else:
                     self.input = Input(**args)
-                    self.assertEqual((self.input.mode, self.input.type, self.input.value), test_case['expected'])
+                    self.assertEqual(
+                        (self.input.mode, self.input.type, self.input.value),
+                        test_case["expected"],
+                    )
 
     def test_connect(self):
         queue = Queue()
@@ -34,82 +52,175 @@ class TestInput(unittest.TestCase):
 
     def test_set_value(self):
         test_cases = [
-            {'name': 'valid integer', 'type': int, 'value': 10, 'expected': 10, 'raises': None},
-            {'name': 'invalid string', 'type': int, 'value': 'string', 'expected': None, 'raises': ValueError},
-            {'name': 'EOF as a valid case', 'type': int, 'value': EOF, 'expected': EOF, 'raises': None},
+            {
+                "name": "valid integer",
+                "type": int,
+                "value": 10,
+                "expected": 10,
+                "raises": None,
+            },
+            {
+                "name": "invalid string",
+                "type": int,
+                "value": "string",
+                "expected": None,
+                "raises": ValueError,
+            },
+            {
+                "name": "EOF as a valid case",
+                "type": int,
+                "value": EOF,
+                "expected": EOF,
+                "raises": None,
+            },
         ]
         for test_case in test_cases:
-            with self.subTest(case=test_case['name']):
-                self.input = Input(type=test_case['type'])
-                if test_case['raises']:
-                    with self.assertRaises(test_case['raises']):
-                        self.input.set_value(test_case['value'])
+            with self.subTest(case=test_case["name"]):
+                self.input = Input(type=test_case["type"])
+                if test_case["raises"]:
+                    with self.assertRaises(test_case["raises"]):
+                        self.input.set_value(test_case["value"])
                 else:
-                    self.input.set_value(test_case['value'])
-                    self.assertEqual(self.input.value, test_case['expected'])
+                    self.input.set_value(test_case["value"])
+                    self.assertEqual(self.input.value, test_case["expected"])
 
     def test_get(self):
         test_cases = [
-            {'name': 'get valid value in queue mode', 'mode': InputMode.QUEUE, 'queue_values': [10], 'expected': 10, 'raises': None},
-            {'name': 'get EOF in queue mode', 'mode': InputMode.QUEUE, 'queue_values': [EOF], 'expected': None, 'raises': Exception},
-            {'name': 'get value in static mode', 'mode': InputMode.STATIC, 'value': 10, 'expected': 10, 'raises': None},
-            {'name': 'get value in sticky mode', 'mode': InputMode.STICKY, 'value': 10, 'expected': 10, 'raises': None},
+            {
+                "name": "get valid value in queue mode",
+                "mode": InputMode.QUEUE,
+                "queue_values": [10],
+                "expected": 10,
+                "raises": None,
+            },
+            {
+                "name": "get EOF in queue mode",
+                "mode": InputMode.QUEUE,
+                "queue_values": [EOF],
+                "expected": None,
+                "raises": Exception,
+            },
+            {
+                "name": "get value in static mode",
+                "mode": InputMode.STATIC,
+                "value": 10,
+                "expected": 10,
+                "raises": None,
+            },
+            {
+                "name": "get value in sticky mode",
+                "mode": InputMode.STICKY,
+                "value": 10,
+                "expected": 10,
+                "raises": None,
+            },
         ]
         for test_case in test_cases:
-            with self.subTest(case=test_case['name']):
-                self.input = Input(mode=test_case['mode'])
-                if 'queue_values' in test_case:
+            with self.subTest(case=test_case["name"]):
+                self.input = Input(mode=test_case["mode"])
+                if "queue_values" in test_case:
                     queue = Queue()
                     self.input.connect(queue)
-                    for value in test_case['queue_values']:
+                    for value in test_case["queue_values"]:
                         queue.put(value)
-                if 'value' in test_case:
-                    self.input.set_value(test_case['value'])
-                if test_case['raises']:
-                    with self.assertRaises(test_case['raises']):
+                if "value" in test_case:
+                    self.input.set_value(test_case["value"])
+                if test_case["raises"]:
+                    with self.assertRaises(test_case["raises"]):
                         self.input.get()
                 else:
-                    self.assertEqual(self.input.get(), test_case['expected'])
+                    self.assertEqual(self.input.get(), test_case["expected"])
 
     def test_empty(self):
         test_cases = [
-            {'name': 'empty input in queue mode', 'mode': InputMode.QUEUE, 'queue_values': [], 'expected': True},
-            {'name': 'non-empty input in queue mode', 'mode': InputMode.QUEUE, 'queue_values': [10], 'expected': False},
-            {'name': 'empty input in static mode', 'mode': InputMode.STATIC, 'value': None, 'expected': True},
-            {'name': 'non-empty input in static mode', 'mode': InputMode.STATIC, 'value': 10, 'expected': False},
-            {'name': 'empty input in sticky mode', 'mode': InputMode.STICKY, 'value': None, 'expected': True},
-            {'name': 'non-empty input in sticky mode', 'mode': InputMode.STICKY, 'value': 10, 'expected': False},
+            {
+                "name": "empty input in queue mode",
+                "mode": InputMode.QUEUE,
+                "queue_values": [],
+                "expected": True,
+            },
+            {
+                "name": "non-empty input in queue mode",
+                "mode": InputMode.QUEUE,
+                "queue_values": [10],
+                "expected": False,
+            },
+            {
+                "name": "empty input in static mode",
+                "mode": InputMode.STATIC,
+                "value": None,
+                "expected": True,
+            },
+            {
+                "name": "non-empty input in static mode",
+                "mode": InputMode.STATIC,
+                "value": 10,
+                "expected": False,
+            },
+            {
+                "name": "empty input in sticky mode",
+                "mode": InputMode.STICKY,
+                "value": None,
+                "expected": True,
+            },
+            {
+                "name": "non-empty input in sticky mode",
+                "mode": InputMode.STICKY,
+                "value": 10,
+                "expected": False,
+            },
         ]
         for test_case in test_cases:
-            with self.subTest(case=test_case['name']):
-                self.input = Input(mode=test_case['mode'])
-                if 'queue_values' in test_case:
+            with self.subTest(case=test_case["name"]):
+                self.input = Input(mode=test_case["mode"])
+                if "queue_values" in test_case:
                     queue = Queue()
                     self.input.connect(queue)
-                    for value in test_case['queue_values']:
+                    for value in test_case["queue_values"]:
                         queue.put(value)
-                if 'value' in test_case:
-                    self.input.set_value(test_case['value'])
-                self.assertEqual(self.input.empty(), test_case['expected'])
+                if "value" in test_case:
+                    self.input.set_value(test_case["value"])
+                self.assertEqual(self.input.empty(), test_case["expected"])
 
     def test_count(self):
         test_cases = [
-            {'name': 'count with one item in queue mode', 'mode': InputMode.QUEUE, 'queue_values': [10], 'expected': 1},
-            {'name': 'count with no item in queue mode', 'mode': InputMode.QUEUE, 'queue_values': [], 'expected': 0},
-            {'name': 'count in static mode', 'mode': InputMode.STATIC, 'value': 10, 'expected': 1},
-            {'name': 'count in sticky mode', 'mode': InputMode.STICKY, 'value': 10, 'expected': 1},
+            {
+                "name": "count with one item in queue mode",
+                "mode": InputMode.QUEUE,
+                "queue_values": [10],
+                "expected": 1,
+            },
+            {
+                "name": "count with no item in queue mode",
+                "mode": InputMode.QUEUE,
+                "queue_values": [],
+                "expected": 0,
+            },
+            {
+                "name": "count in static mode",
+                "mode": InputMode.STATIC,
+                "value": 10,
+                "expected": 1,
+            },
+            {
+                "name": "count in sticky mode",
+                "mode": InputMode.STICKY,
+                "value": 10,
+                "expected": 1,
+            },
         ]
         for test_case in test_cases:
-            with self.subTest(case=test_case['name']):
-                self.input = Input(mode=test_case['mode'])
-                if 'queue_values' in test_case:
+            with self.subTest(case=test_case["name"]):
+                self.input = Input(mode=test_case["mode"])
+                if "queue_values" in test_case:
                     queue = Queue()
                     self.input.connect(queue)
-                    for value in test_case['queue_values']:
+                    for value in test_case["queue_values"]:
                         queue.put(value)
-                if 'value' in test_case:
-                    self.input.set_value(test_case['value'])
-                self.assertEqual(self.input.count(), test_case['expected'])
+                if "value" in test_case:
+                    self.input.set_value(test_case["value"])
+                self.assertEqual(self.input.count(), test_case["expected"])
+
 
 class TestOutput(unittest.TestCase):
     def setUp(self):
@@ -117,16 +228,16 @@ class TestOutput(unittest.TestCase):
 
     def test_init(self):
         test_cases = [
-            {'name': 'default output', 'expected': None},
-            {'name': 'output with type', 'type': int, 'expected': int},
+            {"name": "default output", "expected": None},
+            {"name": "output with type", "type": int, "expected": int},
         ]
         for test_case in test_cases:
-            with self.subTest(case=test_case['name']):
+            with self.subTest(case=test_case["name"]):
                 args = {}
-                if 'type' in test_case:
-                    args['type'] = test_case['type']
+                if "type" in test_case:
+                    args["type"] = test_case["type"]
                 self.output = Output(**args)
-                self.assertEqual(self.output.type, test_case['expected'])
+                self.assertEqual(self.output.type, test_case["expected"])
 
     def test_connect(self):
         queue = Queue()
@@ -135,19 +246,81 @@ class TestOutput(unittest.TestCase):
 
     def test_send(self):
         test_cases = [
-            {'name': 'put valid integer', 'type': int, 'value': 10, 'expected': 10, 'raises': None},
-            {'name': 'put invalid string', 'type': int, 'value': 'string', 'expected': None, 'raises': ValueError},
-            {'name': 'put EOF as a valid case', 'type': int, 'value': EOF, 'expected': EOF, 'raises': None},
+            {
+                "name": "put valid integer",
+                "type": int,
+                "value": 10,
+                "expected": 10,
+                "raises": None,
+            },
+            {
+                "name": "put invalid string",
+                "type": int,
+                "value": "string",
+                "expected": None,
+                "raises": ValueError,
+            },
+            {
+                "name": "put EOF as a valid case",
+                "type": int,
+                "value": EOF,
+                "expected": EOF,
+                "raises": None,
+            },
         ]
         for test_case in test_cases:
-            with self.subTest(case=test_case['name']):
-                self.output = Output(type=test_case['type'])
+            with self.subTest(case=test_case["name"]):
+                self.output = Output(type=test_case["type"])
                 queue = Queue()
                 self.output.connect(queue)
-                if test_case['raises']:
-                    with self.assertRaises(test_case['raises']):
-                        self.output.send(test_case['value'])
+                if test_case["raises"]:
+                    with self.assertRaises(test_case["raises"]):
+                        self.output.send(test_case["value"])
                 else:
-                    self.output.send(test_case['value'])
+                    self.output.send(test_case["value"])
                     value = queue.get()
-                    self.assertEqual(value, test_case['expected'])
+                    self.assertEqual(value, test_case["expected"])
+
+
+class TestConnection(unittest.TestCase):
+    def setUp(self):
+        self.from_node = ConnectionNode("from_id", "from_pin")
+        self.to_node = ConnectionNode("to_id", "to_pin")
+        self.connection = Connection(self.from_node, self.to_node)
+
+    def test_init(self):
+        self.assertEqual(self.connection.from_node, self.from_node)
+        self.assertEqual(self.connection.to_node, self.to_node)
+        self.assertFalse(self.connection.delayed)
+        self.assertFalse(self.connection.hidden)
+
+    def test_set_queue(self):
+        queue = "queue"
+        self.connection.set_queue(queue)
+        self.assertEqual(self.connection.queue, queue)
+
+    def test_from_yaml(self):
+        yml = {
+            "from": {"insId": "from_id", "pinId": "from_pin"},
+            "to": {"insId": "to_id", "pinId": "to_pin"},
+            "delayed": True,
+            "hidden": True,
+        }
+        connection = Connection.from_yaml(yml)
+        self.assertEqual(connection.from_node.ins_id, "from_id")
+        self.assertEqual(connection.from_node.pin_id, "from_pin")
+        self.assertEqual(connection.to_node.ins_id, "to_id")
+        self.assertEqual(connection.to_node.pin_id, "to_pin")
+        self.assertTrue(connection.delayed)
+        self.assertTrue(connection.hidden)
+
+    def test_to_dict(self):
+        self.connection.delayed = True
+        self.connection.hidden = True
+        expected_dict = {
+            "from": {"insId": "from_id", "pinId": "from_pin"},
+            "to": {"insId": "to_id", "pinId": "to_pin"},
+            "delayed": True,
+            "hidden": True,
+        }
+        self.assertEqual(self.connection.to_dict(), expected_dict)

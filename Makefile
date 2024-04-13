@@ -15,6 +15,10 @@ ts:
 		./flyde.py gen $$file; \
 	done
 
+lint:
+	@echo "Running linters..."
+	@flake8 $(LIB_DIR) $(TEST_DIR);
+	@black $(LIB_DIR) $(TEST_DIR);
 
 test:
 	@echo "Running tests..."

@@ -61,7 +61,7 @@ After going back to the main folder you can run it with:
 ### Install dev dependencies
 
 ```bash
-pip install .[dev]
+pip install .\[dev\]
 ```
 
 ### Run tests and coverage reports
