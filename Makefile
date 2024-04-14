@@ -6,7 +6,7 @@ LIB_DIR = examples/mylib
 TEST_DIR = tests
 
 # Targets
-.PHONY: ts test
+.PHONY: ts test cover
 
 ts:
 	@echo "Building the project..."
@@ -22,7 +22,7 @@ lint:
 
 test:
 	@echo "Running tests..."
-	@$(PYTHON) -m unittest discover -s $(TEST_DIR) -p "test_*.py";
+	@$(PYTHON) -m unittest discover -s $(TEST_DIR) -p "test_$(if $(mod),$(mod),*).py";
 
 cover:
 	@echo "Running tests with coverage..."

@@ -1,4 +1,5 @@
 import logging
+from abc import ABC, abstractmethod
 from copy import deepcopy
 from queue import Queue
 from threading import Event, Lock, Thread
@@ -15,7 +16,7 @@ logger = logging.getLogger(__name__)
 InstanceFactory = Callable[[str, dict], Any]
 
 
-class Node:
+class Node(ABC):
     """Node is the main building block of an application.
 
     Attributes:
@@ -71,10 +72,12 @@ class Node:
 
         self._stopped = stopped
 
+    @abstractmethod
     def run(self):
         """Run the node. This method should be overridden by subclasses."""
         pass
 
+    @abstractmethod
     def stop(self):
         """Stop the node. This method should be overridden by subclasses."""
         pass
@@ -85,8 +88,12 @@ class Node:
             output.queue.put(EOF)
         self._stopped.set()
 
+    @property
+    def stopped(self) -> Event:
+        return self._stopped
+
     def shutdown(self):
-        """Shutdown the component. This method should be overridden by subclasses."""
+        """Shutdown the component. This method is optional and can be overridden by subclasses."""
         pass
 
     def send(self, output_id: str, value: Any):
