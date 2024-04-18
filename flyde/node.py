@@ -84,9 +84,12 @@ class Node(ABC):
 
     def finish(self):
         """Finish the component execution gracefully by closing all its outputs and notifying others."""
+        logger.debug(f"Sending EOF to all outputs of {self._id}")
         for output in self.outputs.values():
             output.queue.put(EOF)
+        logger.debug(f"Node {self._id} finished, sending stopped event")
         self._stopped.set()
+        logger.debug("Stop event set")
 
     @property
     def stopped(self) -> Event:
@@ -160,10 +163,10 @@ class Component(Node):
             while not self._stop.is_set():
                 logger.debug(f"Waiting for inputs on {self._id}")
                 inputs = {}
-                non_static_count = 0
-                non_static_closed_count = 0
+                queue_count = 0
+                queue_closed_count = 0
                 for key, inp in self.inputs.items():
-                    non_static = True
+                    is_queue = False
                     if inp.mode == InputMode.STICKY:
                         if not inp.queue.empty():
                             # Update the sticky value with the new value from the queue
@@ -182,20 +185,20 @@ class Component(Node):
                         value = inp.value
                     else:
                         # InputMode.QUEUE is the default mode
+                        is_queue = True
                         value = inp.queue.get()
 
                     inputs[key] = value
 
                     # Count EOFs received on non-static inputs
-                    if non_static:
-                        non_static_count += 1
-                    if isEOF(value):
-                        if non_static:
-                            non_static_closed_count += 1
+                    if is_queue:
+                        queue_count += 1
+                        if isEOF(value):
+                            queue_closed_count += 1
 
-                # If all of the input values are EOF, stop the component
-                if non_static_count > 0 and non_static_count == non_static_closed_count:
-                    logger.debug(f"All inputs are EOF, stopping {self._id}")
+                # If all of the queue input values are EOF, stop the component
+                if queue_count > 0 and queue_count == queue_closed_count:
+                    logger.debug(f"All queue inputs are EOF, stopping {self._id}")
                     self.stop()
                     break
 
