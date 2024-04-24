@@ -1,5 +1,8 @@
 import importlib
 import logging
+import os
+import sys
+import yaml  # type: ignore
 from threading import Event
 
 from flyde.node import Graph
@@ -51,5 +54,29 @@ class FlydeFlow:
         ins._node.stopped = Event()
         return ins
 
+    @classmethod
+    def from_file(cls, path: str):
+        yml = load_yaml_file(path)
+        if not isinstance(yml, dict):
+            raise ValueError("Invalid YAML file")
+
+        # Get the absolute path from the yaml_file path and add it to the sys.path for discoverability
+        add_folder_to_path(path)
+
+        return cls.from_yaml(yml)
+
     def to_dict(self) -> dict:
         return {"imports": self._imports, "node": self._node.to_dict()}
+
+
+def add_folder_to_path(path: str):
+    # Get the absolute path from the relative file path provided
+    folder = os.path.abspath(os.path.dirname(path))
+    if folder not in sys.path:
+        sys.path.append(folder)
+
+
+def load_yaml_file(yaml_file: str) -> dict:
+    with open(yaml_file, "r") as f:
+        data = yaml.safe_load(f)
+    return data

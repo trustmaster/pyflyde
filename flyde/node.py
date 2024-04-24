@@ -89,7 +89,7 @@ class Node(ABC):
             output.queue.put(EOF)
         logger.debug(f"Node {self._id} finished, sending stopped event")
         self._stopped.set()
-        logger.debug("Stop event set")
+        logger.debug(f"Stop event set for node {self._id}")
 
     @property
     def stopped(self) -> Event:
@@ -121,6 +121,7 @@ class Node(ABC):
             "id": yml["id"],
             "input_config": yml.get("inputConfig", {}),
             "display_name": yml.get("displayName", ""),
+            "stopped": yml.get("stopped", None),  # It's a hacky way to pass the stopped event to the constructor
         }
         # If macro parameters are present, pass them to the constructor
         if "macroData" in yml:
@@ -354,11 +355,12 @@ class Graph(Node):
 
         # Wait for all instances to finish
         for k, v in self._instances_stopped.items():
-            logger.debug("Waiting for instance to stop")
+            logger.debug(f"Waiting for instance {k} to stop")
             v.wait()
             # If the instance has a `shutdown()` handler method, call it at this point
             if hasattr(self._instances[k], "shutdown"):
                 self._instances[k].shutdown()
+            logger.debug(f"Instance {k} stopped")
 
         self.finish()
         logger.debug(f"Graph {self._id} finished")

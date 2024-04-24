@@ -77,23 +77,14 @@ Examples:
         # Get the yaml file path from the command line argument
         yaml_file = args.path
 
-        # Load the yaml file
-        yml = load_yaml_file(yaml_file)
+        flow = FlydeFlow.from_file(yaml_file)
 
-        # Get the absolute path from the yaml_file path and add it to the sys.path
-        add_folder_to_path(yaml_file)
+        if logging.getLevelName(logging.root.level) == "DEBUG":
+            print("Loaded flow:")
+            pprint.pprint(flow.to_dict())
 
-        if isinstance(yml, dict):
-            flow = FlydeFlow.from_yaml(yml)
-
-            if logging.getLevelName(logging.root.level) == "DEBUG":
-                print("Loaded flow:")
-                pprint.pprint(flow.to_dict())
-
-            flow.run()
-            flow.stopped.wait()
-        else:
-            raise ValueError("Invalid YAML file")
+        flow.run()
+        flow.stopped.wait()
     elif args.command == "gen":
         add_folder_to_path(args.path)
         gen(args.path)
