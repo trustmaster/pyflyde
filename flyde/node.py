@@ -86,7 +86,8 @@ class Node(ABC):
         """Finish the component execution gracefully by closing all its outputs and notifying others."""
         logger.debug(f"Sending EOF to all outputs of {self._id}")
         for output in self.outputs.values():
-            output.queue.put(EOF)
+            if hasattr(output, "queue") and output.queue is not None:
+                output.queue.put(EOF)
         logger.debug(f"Node {self._id} finished, sending stopped event")
         self._stopped.set()
         logger.debug(f"Stop event set for node {self._id}")
@@ -218,7 +219,14 @@ class Component(Node):
                             self.stop()
                             self.finish()
                             raise e
-                        self.outputs[k].send(v)
+                        # Check if the output is connected to a queue
+                        if hasattr(self.outputs[k], "queue") and self.outputs[k].queue is not None:
+                            self.outputs[k].send(v)
+                        else:
+                            # TODO: raise?
+                            logger.warning(
+                                f"Output {k} of {self._id} is not connected to a queue"
+                            )
 
             self.finish()
 

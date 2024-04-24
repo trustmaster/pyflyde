@@ -26,10 +26,10 @@ test:
 
 cover:
 	@echo "Running tests with coverage..."
-	@coverage run -m unittest discover -s $(TEST_DIR) -p "test_*.py";
+	@coverage run -m unittest discover -s $(TEST_DIR) -p "test_*.py" ;
 
 report:
-	@coverage report -m --skip-empty;
+	@coverage report -m --skip-empty --omit="tests/*";
 
 venv-activate:
 	@echo "Activating virtual environment..."
