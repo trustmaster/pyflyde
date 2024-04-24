@@ -121,7 +121,6 @@ class Node(ABC):
             "id": yml["id"],
             "input_config": yml.get("inputConfig", {}),
             "display_name": yml.get("displayName", ""),
-            "stopped": yml["stopped"],
         }
         # If macro parameters are present, pass them to the constructor
         if "macroData" in yml:
@@ -136,6 +135,7 @@ class Node(ABC):
             "id": self._id,
             "nodeId": self._node_type,
             "inputConfig": self._input_config,
+            "displayName": self._display_name,
         }
 
 
@@ -181,7 +181,6 @@ class Component(Node):
                             inp.set_value(value)
                     elif inp.mode == InputMode.STATIC:
                         # Static input values don't change at all
-                        non_static = False
                         value = inp.value
                     else:
                         # InputMode.QUEUE is the default mode
@@ -210,9 +209,14 @@ class Component(Node):
                     # Send values to the outputs named as keys
                     for k, v in res.items():  # type: ignore
                         if k not in self.outputs:
-                            raise ValueError(
+                            # Return Exception instead of raising because we are in a thread
+                            e = ValueError(
                                 f'{self._node_type}.process(): sending to non-existing output "{k}" from return value'
                             )
+                            # logger.error(e)
+                            self.stop()
+                            self.finish()
+                            raise e
                         self.outputs[k].send(v)
 
             self.finish()
@@ -230,7 +234,7 @@ class Component(Node):
     def to_ts(cls, name: str = "") -> str:
         """Convert the node to a TypeScript definition."""
 
-        name = cls.__class__.__name__ if name == "" else name  # type: ignore
+        name = cls.__name__ if name == "" else name  # type: ignore
 
         inputs_str = ""
         if hasattr(cls, "inputs") and len(cls.inputs) > 0:
@@ -238,7 +242,7 @@ class Component(Node):
                 "\n"
                 + ",\n".join(
                     [
-                        f'    {k}: {{"description": "{v.description}"}}'
+                        f'    {k}: {{ description: "{v.description}" }}'
                         for k, v in cls.inputs.items()
                     ]
                 )
@@ -250,7 +254,7 @@ class Component(Node):
                 "\n"
                 + ",\n".join(
                     [
-                        f'    {k}: {{"description": "{v.description}"}}'
+                        f'    {k}: {{ description: "{v.description}" }}'
                         for k, v in cls.outputs.items()
                     ]
                 )
@@ -269,8 +273,8 @@ class Component(Node):
             f"export const {name}: CodeNode = {{\n"
             f'  id: "{name}",\n'
             f'  description: "{safe_doc}",\n'
-            f"  inputs: {{ {inputs_str} }},\n"
-            f"  outputs: {{ {outputs_str} }},\n"
+            f"  inputs: {{{inputs_str}  }},\n"
+            f"  outputs: {{{outputs_str}  }},\n"
             f"  run: () => {{ return; }},\n"
             f"}};\n\n"
         )

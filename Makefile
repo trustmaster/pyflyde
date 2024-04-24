@@ -17,8 +17,8 @@ ts:
 
 lint:
 	@echo "Running linters..."
-	@flake8 $(LIB_DIR) $(TEST_DIR);
 	@black $(LIB_DIR) $(TEST_DIR);
+	@flake8 $(LIB_DIR) $(TEST_DIR);
 
 test:
 	@echo "Running tests..."
@@ -30,3 +30,7 @@ cover:
 
 report:
 	@coverage report -m --skip-empty;
+
+venv-activate:
+	@echo "Activating virtual environment..."
+	@source .venv/bin/activate;
