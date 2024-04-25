@@ -26,11 +26,7 @@ Then you can run the Hello World example:
 
 ### Using the visual editor
 
-To make your flows show in Flyde visual editor, you currently have to install Flyde TypeScript dependencies:
-
-```bash
-npm install
-```
+Install Flyde VSCode extension from the [marketplace](https://marketplace.visualstudio.com/items?itemName=flyde.flyde-vscode).
 
 Whenever you change your component library classes or their interfaces, use flyde.py gen command to generate .flyde.ts definitions, e.g.:
 
