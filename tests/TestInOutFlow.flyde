@@ -1,0 +1,43 @@
+imports:
+  "@flyde/stdlib": []
+  components.flyde.ts:
+    - Echo
+node:
+  instances:
+    - pos:
+        x: -79.91999999999999
+        y: 47.5
+      id: Echo-h3049mb
+      inputConfig: {}
+      nodeId: Echo
+  connections:
+    - from:
+        insId: __this
+        pinId: inMsg
+      to:
+        insId: Echo-h3049mb
+        pinId: inp
+    - from:
+        insId: Echo-h3049mb
+        pinId: out
+      to:
+        insId: __this
+        pinId: outMsg
+  id: Example
+  inputs:
+    inMsg:
+      mode: required
+  outputs:
+    outMsg:
+      delayed: false
+  inputsPosition:
+    inMsg:
+      x: -65.24972534179688
+      y: -113.34333984375
+  outputsPosition:
+    result:
+      x: -23.264428942324532
+      y: 237.25953921502617
+    outMsg:
+      x: -70.891923828125
+      y: 220.63164794921875

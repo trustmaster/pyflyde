@@ -6,7 +6,7 @@ from threading import Event, Lock, Thread
 from typing import Any, Callable
 from uuid import uuid4
 
-from flyde.io import InputMode, Input, Output, EOF, isEOF, Connection
+from flyde.io import InputMode, Input, Output, EOF, Requiredness, isEOF, Connection
 
 logger = logging.getLogger(__name__)
 
@@ -322,6 +322,7 @@ class Graph(Node):
 
         # Wire all connections
         for conn in self._connections:
+            # TODO: reuse queue on fan-in
             queue: Queue = Queue(maxsize=0)
             conn.set_queue(queue)
 
@@ -361,17 +362,22 @@ class Graph(Node):
             )
             instance.run()
 
-        # Wait for all instances to finish
-        for k, v in self._instances_stopped.items():
-            logger.debug(f"Waiting for instance {k} to stop")
-            v.wait()
-            # If the instance has a `shutdown()` handler method, call it at this point
-            if hasattr(self._instances[k], "shutdown"):
-                self._instances[k].shutdown()
-            logger.debug(f"Instance {k} stopped")
+        def worker():
+            logger.debug(f"Running {self._id} worker")
+            # Wait for all instances to finish
+            for k, v in self._instances_stopped.items():
+                logger.debug(f"Waiting for instance {k} to stop")
+                v.wait()
+                # If the instance has a `shutdown()` handler method, call it at this point
+                if hasattr(self._instances[k], "shutdown"):
+                    self._instances[k].shutdown()
+                logger.debug(f"Instance {k} stopped")
+            self.finish()
+            logger.debug(f"Graph {self._id} finished")
 
-        self.finish()
-        logger.debug(f"Graph {self._id} finished")
+        logger.debug(f"Starting {self._id} thread")
+        thread = Thread(target=worker, daemon=True)
+        thread.start()
 
     def stop(self):
         # Close all inputs and wait for all instances to stop
@@ -421,7 +427,12 @@ class Graph(Node):
         connections = [
             Connection.from_yaml(conn) for conn in yml.get("connections", [])
         ]
-        inputs = {k: Input(**v) for k, v in yml.get("inputs", {}).items()}
+        inputs = {}
+        for k, v in yml.get("inputs", {}).items():
+            if "mode" in v:
+                v["required"] = Requiredness(v["mode"])
+                del v["mode"]
+            inputs[k] = Input(**v)
         outputs = {k: Output(**v) for k, v in yml.get("outputs", {}).items()}
 
         # Instatiate through the constructor

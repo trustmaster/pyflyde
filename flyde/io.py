@@ -16,6 +16,12 @@ class InputMode(Enum):
     STATIC = "static"
 
 
+class Requiredness(Enum):
+    REQUIRED = "required"
+    OPTIONAL = "optional"
+    REQUIRED_IF_CONNECTED = "required-if-connected"
+
+
 class Input:
     """Input is an interface for getting input/output data for a component."""
 
@@ -27,6 +33,7 @@ class Input:
         mode (InputMode): The mode of the input
         typ (type): The type of the input
         value (Any): The value of the input for InputMode = InputMode.STATIC or InputMode = InputMode.STICKY
+        required (Required): The requiredness of the input
     """
 
     def __init__(
@@ -37,6 +44,7 @@ class Input:
         mode: InputMode = InputMode.QUEUE,
         type: Optional[type] = None,
         value: Any = None,
+        required: Requiredness = Requiredness.REQUIRED,
     ):
         self.id = id
         self.description = description
@@ -47,6 +55,7 @@ class Input:
             if self.type is not None and not isinstance(value, type):  # type: ignore
                 raise ValueError(f"Value {value} is not of type {self.type}")
             self.value = value
+        self.required = required
 
     def connect(self, queue: Queue):
         """Connect the input to a queue."""
@@ -91,15 +100,21 @@ class Output:
         id (str): The ID of the output
         description (str): The description of the output
         type (type): The type of the output
-        delayed (bool): If the output is delayed
+        delayed (bool): If the output is delayed [not implemented yet]
     """
 
     def __init__(
-        self, /, id: str = "", description: str = "", type: Optional[type] = None
+        self,
+        /,
+        id: str = "",
+        description: str = "",
+        type: Optional[type] = None,
+        delayed: bool = False
     ):
         self.id = id
         self.description = description
         self.type = type
+        self.delayed = delayed
 
     def connect(self, queue: Queue):
         """Connect the output to a queue."""

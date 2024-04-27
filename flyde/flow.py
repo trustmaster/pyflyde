@@ -37,6 +37,11 @@ class FlydeFlow:
         self._node.run()
 
     @property
+    def node(self) -> Graph:
+        """The root node of the flow."""
+        return self._node
+
+    @property
     def stopped(self) -> Event:
         """ "Stopped event is set when the flow has finished working."""
         return self._node.stopped
