@@ -2,28 +2,12 @@
 import argparse
 import importlib
 import logging
-import os
 import pprint
-import sys
-import yaml  # type: ignore
 
-from flyde.flow import Flow
+from flyde.flow import Flow, add_folder_to_path
 from flyde.node import Component
 
 logging.basicConfig(level=logging.INFO)
-
-
-def add_folder_to_path(path: str):
-    # Get the absolute path from the relative file path provided
-    folder = os.path.abspath(os.path.dirname(path))
-    if folder not in sys.path:
-        sys.path.append(folder)
-
-
-def load_yaml_file(yaml_file: str) -> dict:
-    with open(yaml_file, "r") as f:
-        data = yaml.safe_load(f)
-    return data
 
 
 def py_path_to_module(py_path: str) -> str:

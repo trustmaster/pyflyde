@@ -6,7 +6,7 @@ from threading import Event, Lock, Thread
 from typing import Any, Callable
 from uuid import uuid4
 
-from flyde.io import InputMode, Input, Output, EOF, Requiredness, isEOF, Connection
+from flyde.io import InputMode, Input, Output, EOF, Requiredness, is_EOF, Connection
 
 logger = logging.getLogger(__name__)
 
@@ -194,7 +194,7 @@ class Component(Node):
                     # Count EOFs received on non-static inputs
                     if is_queue:
                         queue_count += 1
-                        if isEOF(value):
+                        if is_EOF(value):
                             queue_closed_count += 1
 
                 # If all of the queue input values are EOF, stop the component
