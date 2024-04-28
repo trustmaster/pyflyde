@@ -231,7 +231,7 @@ class Component(Node):
             self.finish()
 
         logger.debug(f"Starting {self._id} thread")
-        thread = Thread(target=worker, daemon=True)
+        thread = Thread(target=worker, daemon=False)
         thread.start()
 
     def stop(self):
@@ -368,16 +368,22 @@ class Graph(Node):
             for k, v in self._instances_stopped.items():
                 logger.debug(f"Waiting for instance {k} to stop")
                 v.wait()
-                # If the instance has a `shutdown()` handler method, call it at this point
-                if hasattr(self._instances[k], "shutdown"):
-                    self._instances[k].shutdown()
                 logger.debug(f"Instance {k} stopped")
             self.finish()
             logger.debug(f"Graph {self._id} finished")
 
         logger.debug(f"Starting {self._id} thread")
-        thread = Thread(target=worker, daemon=True)
+        thread = Thread(target=worker, daemon=False)
         thread.start()
+
+    def shutdown(self):
+        """Call shutdown handlers on all instances.
+
+        This method is called from the main thread to allow cleanup and things like UI."""
+        for instance in self._instances.values():
+            # If the instance has a `shutdown()` handler method, call it at this point
+            if hasattr(instance, "shutdown"):
+                instance.shutdown()
 
     def stop(self):
         # Close all inputs and wait for all instances to stop

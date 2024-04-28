@@ -7,7 +7,7 @@ import pprint
 import sys
 import yaml  # type: ignore
 
-from flyde.flow import FlydeFlow
+from flyde.flow import Flow
 from flyde.node import Component
 
 logging.basicConfig(level=logging.INFO)
@@ -77,14 +77,13 @@ Examples:
         # Get the yaml file path from the command line argument
         yaml_file = args.path
 
-        flow = FlydeFlow.from_file(yaml_file)
+        flow = Flow.from_file(yaml_file)
 
         if logging.getLevelName(logging.root.level) == "DEBUG":
             print("Loaded flow:")
             pprint.pprint(flow.to_dict())
 
-        flow.run()
-        flow.stopped.wait()
+        flow.run_sync()
     elif args.command == "gen":
         add_folder_to_path(args.path)
         gen(args.path)

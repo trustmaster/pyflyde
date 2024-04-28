@@ -10,7 +10,7 @@ from flyde.node import Graph
 logger = logging.getLogger(__name__)
 
 
-class FlydeFlow:
+class Flow:
     def __init__(self, imports: dict[str, list[str]], node: Graph = Graph()):
         self._imports = imports
         self._node = node
@@ -33,8 +33,14 @@ class FlydeFlow:
         raise ValueError(f"Unknown class name: {class_name}")
 
     def run(self):
-        """Start the flow running."""
+        """Start the flow running. This is a non-blocking call as the flow runs in a separate thread."""
         self._node.run()
+
+    def run_sync(self):
+        """Run the flow synchronously. Shutdown handlers will be executed after the flow has finished."""
+        self._node.run()
+        self._node.stopped.wait()
+        self._node.shutdown()
 
     @property
     def node(self) -> Graph:
@@ -49,7 +55,7 @@ class FlydeFlow:
     @classmethod
     def from_yaml(cls, yml: dict):
         """Load Flyde Flow definition from parsed YAML"""
-        imports = yml.get("imports", dict())
+        imports = yml.get("imports", {})
 
         if "node" not in yml:
             raise ValueError("No node in flow definition")
