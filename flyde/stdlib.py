@@ -28,13 +28,14 @@ class GetAttribute(Component):
     }
     outputs = {"value": Output(description="The attribute value")}
 
-    def __init__(self, key, **kwargs):
+    def __init__(self, key: dict, **kwargs):
         super().__init__(**kwargs)
         self.value = None
-        if hasattr(key, "value"):
-            self.value = key.value
-        if hasattr(key, "mode"):
-            if key.mode == "static":
+        if "value" in key:
+            self.value = key["value"]
+        if "mode" in key:
+            if key["mode"] == "static":
+                print("Static")
                 self.inputs["attribute"].mode = InputMode.STATIC
                 self.inputs["attribute"].set_value(self.value)
             else:
@@ -43,5 +44,10 @@ class GetAttribute(Component):
                     self.inputs["attribute"].set_value(self.value)
 
     def process(self, object: Any, attribute: str):
-        value = getattr(object, attribute)
+        if isinstance(object, dict):
+            value = object.get(attribute, None)
+        elif hasattr(object, attribute):
+            value = getattr(object, attribute)
+        else:
+            value = None
         self.send("value", value)
