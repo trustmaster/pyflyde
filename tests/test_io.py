@@ -295,7 +295,7 @@ class TestConnection(unittest.TestCase):
         self.assertFalse(self.connection.hidden)
 
     def test_set_queue(self):
-        queue = "queue"
+        queue = Queue()
         self.connection.set_queue(queue)
         self.assertEqual(self.connection.queue, queue)
 

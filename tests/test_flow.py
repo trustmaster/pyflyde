@@ -30,3 +30,24 @@ class TestInOutFlow(unittest.TestCase):
 
         flow.stopped.wait()
         self.assertTrue(flow.stopped.is_set())
+
+
+class TestNestedFlow(unittest.TestCase):
+    def test_flow(self):
+        test_case = {
+            "inputs": ["Hello", "World", EOF],
+            "outputs": ["Hello", "World", EOF],
+        }
+        flow = Flow.from_file("tests/TestNestedFlow.flyde")
+
+        inQ = flow.node.inputs["inMsg"].queue
+        outQ = flow.node.outputs["outMsg"].queue
+
+        flow.run()
+
+        for inp, out in zip(test_case["inputs"], test_case["outputs"]):
+            inQ.put(inp)
+            self.assertEqual(out, outQ.get())
+
+        flow.stopped.wait()
+        self.assertTrue(flow.stopped.is_set())

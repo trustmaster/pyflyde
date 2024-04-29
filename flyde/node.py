@@ -356,6 +356,8 @@ class Graph(Node):
                 self._instances[to_id].inputs[conn.to_node.pin_id].queue = queue
 
     def run(self):
+        """Run the graph."""
+
         for instance in self._instances.values():
             logger.debug(
                 f"Running instance {instance._id} of type {instance._node_type}"
@@ -386,6 +388,7 @@ class Graph(Node):
                 instance.shutdown()
 
     def stop(self):
+        """Stop all instances gracefully."""
         # Close all inputs and wait for all instances to stop
         for v in self.inputs.values():
             v.queue.put(EOF)
@@ -399,14 +402,17 @@ class Graph(Node):
 
     @property
     def stopped(self) -> Event:
+        """Return the stopped event which is set when the node has stopped."""
         return self._stopped
 
     @stopped.setter
     def stopped(self, value: Event):
+        """Set the stopped event."""
         self._stopped = value
 
     @classmethod
     def from_yaml(cls, create: InstanceFactory, yml: dict):
+        """Create a Graph node from a parsed YAML dictionary."""
         # Load metadata
         node_type = yml.get("nodeId", __name__)
         id = yml["id"] if "id" in yml else create_instance_id(node_type)
@@ -455,6 +461,7 @@ class Graph(Node):
         )
 
     def to_dict(self) -> dict:
+        """Return a dictionary representation of the node."""
         return {
             "id": self._id,
             "nodeId": self._node_type,
@@ -468,4 +475,5 @@ class Graph(Node):
 
 
 def create_instance_id(node_type: str) -> str:
+    """Create a unique instance ID."""
     return f"{node_type}-{uuid4()}"
