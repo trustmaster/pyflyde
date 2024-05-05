@@ -1,0 +1,78 @@
+imports:
+  "@flyde/stdlib":
+    - InlineValue
+  components.flyde.ts:
+    - RepeatWordNTimes
+    - Capitalize
+node:
+  instances:
+    - pos:
+        x: -105.91999999999999
+        y: 47.08
+      id: RepeatWordNTimes-h30493h
+      inputConfig:
+        times:
+          mode: sticky
+      nodeId: RepeatWordNTimes
+    - pos:
+        x: 13.582794189453125
+        y: -132.9213885498047
+      id: inl-ytsuyrje4syeb4qduymsfkl2
+      inputConfig: {}
+      visibleInputs: []
+      nodeId: InlineValue__inl-ytsuyrje4syeb4qduymsfkl2
+      macroId: InlineValue
+      macroData:
+        value: 3
+        type: number
+        label: "3"
+    - pos:
+        x: -68.75665283203125
+        y: 194.59005737304688
+      id: Capitalize-790499u
+      inputConfig: {}
+      nodeId: Capitalize
+  connections:
+    - from:
+        insId: inl-ytsuyrje4syeb4qduymsfkl2
+        pinId: value
+      to:
+        insId: RepeatWordNTimes-h30493h
+        pinId: times
+    - from:
+        insId: __this
+        pinId: word
+      to:
+        insId: RepeatWordNTimes-h30493h
+        pinId: word
+    - from:
+        insId: Capitalize-790499u
+        pinId: out
+      to:
+        insId: __this
+        pinId: word3x
+    - from:
+        insId: RepeatWordNTimes-h30493h
+        pinId: out
+      to:
+        insId: Capitalize-790499u
+        pinId: inp
+  id: Repeat3Times
+  inputs:
+    word:
+      mode: required
+  outputs:
+    word3x:
+      delayed: false
+  inputsPosition:
+    word:
+      x: -92.08137329101562
+      y: -227.9133740234375
+  outputsPosition:
+    result:
+      x: -23.264428942324532
+      y: 237.25953921502617
+    word3x:
+      x: -40.05281249999999
+      y: 369.2831286621094
+  description: For each input string, sends a string with the same conent repeated 3 times

@@ -1,3 +1,4 @@
+from copy import deepcopy
 from enum import Enum
 from typing import Any, Optional
 from queue import Queue
@@ -19,6 +20,7 @@ class InputMode(Enum):
     STICKY: The input has a sticky value. It has a queue attached to it, but the last received value is returned in
     absence of new values in the queue. Thus sticky inputs are non-blocking.
     STATIC: The input has a static value that does not change."""
+
     QUEUE = "queue"
     STICKY = "sticky"
     STATIC = "static"
@@ -30,9 +32,23 @@ class Requiredness(Enum):
     REQUIRED: The input is required to be connected.
     OPTIONAL: The input is optional.
     REQUIRED_IF_CONNECTED: The input is required if it is connected to a queue."""
+
     REQUIRED = "required"
     OPTIONAL = "optional"
     REQUIRED_IF_CONNECTED = "required-if-connected"
+
+
+class OutputMode(Enum):
+    """OutputMode defines the behavior of an output if it is connected to multiple input queues.
+
+    REF: Copy-by-reference. Each connected input will receive the same object.
+    VALUE: Copy-by-value. Each connected input will receive a deep copy of the object.
+    CIRCLE: Circular. Each connected input will receive the object in a round-robin fashion.
+    """
+
+    REF = "ref"
+    VALUE = "value"
+    CIRCLE = "circle"
 
 
 class Input:
@@ -61,46 +77,55 @@ class Input:
         self.id = id
         self.description = description
         self.type = type
-        self.mode = mode
-        self.value = None
+        self._input_mode = mode
+        self._value = None
         if value is not None:
             if self.type is not None and not isinstance(value, type):  # type: ignore
                 raise ValueError(f"Value {value} is not of type {self.type}")
-            self.value = value
+            self._value = value
         self.required = required
 
-    def connect(self, queue: Queue):
-        """Connect the input to a queue."""
-        self.queue = queue
+    @property
+    def queue(self) -> Queue:
+        """Get the queue of the input."""
+        # Lazy initialization of the queue because initializing it in constructor prevents pickling
+        if not hasattr(self, "_queue"):
+            self._queue: Queue = Queue()
+        return self._queue
 
-    def set_value(self, value: Any):
-        """Set the value of the input."""
+    @property
+    def value(self) -> Any:
+        """Get the static value associated with the input."""
+        return self._value
+
+    @value.setter
+    def value(self, value: Any):
+        """Set the static value of the input."""
         # Can be set to EOF to indicate end of data
         if self.type is not None and not is_EOF(value) and not isinstance(value, self.type):  # type: ignore
             raise ValueError(f"Value {value} is not of type {self.type}")
-        self.value = value
+        self._value = value
 
     def get(self) -> Any:
-        """Get the value of the input."""
-        if self.mode == InputMode.QUEUE:
-            value = self.queue.get()
-            if is_EOF(value):
-                raise EOF
-            return value
-
-        return self.value
+        """Get the value of the input from either the queue or static value."""
+        if self._input_mode == InputMode.QUEUE:
+            return self._queue.get()
+        elif self._input_mode == InputMode.STICKY:
+            if not self._queue.empty():
+                self._value = self._queue.get()
+        return self._value
 
     def empty(self) -> bool:
         """Check if the input queue is empty."""
-        if self.mode == InputMode.QUEUE:
-            return self.queue.empty()
-        return self.value is None
+        if self._input_mode == InputMode.QUEUE:
+            return self._queue.empty()
+        return self._value is None
 
     def count(self) -> int:
         """Get the number of elements in the input queue."""
-        if self.mode == InputMode.QUEUE:
-            return self.queue.qsize()
-        return 1
+        if self._input_mode == InputMode.QUEUE:
+            return self._queue.qsize()
+        return 0 if self._value is None else 1
 
 
 class Output:
@@ -111,8 +136,9 @@ class Output:
         /,
         id: str = "",
         description: str = "",
+        mode: OutputMode = OutputMode.REF,
         type: Optional[type] = None,
-        delayed: bool = False
+        delayed: bool = False,
     ):
         """Create a new output object.
 
@@ -124,20 +150,122 @@ class Output:
         """
         self.id = id
         self.description = description
+        self._output_mode = mode
         self.type = type
         self.delayed = delayed
+        self._queues: list[Queue] = []
+        self._circle_index = 0
 
     def connect(self, queue: Queue):
-        """Connect the output to a queue."""
-        self.queue = queue
+        """Connect a queue to the output.
+
+        This method can be called multiple times to connect multiple queues to the same output.
+        """
+        self._queues.append(queue)
+
+    @property
+    def connected(self) -> bool:
+        """Check if the output is connected to a queue."""
+        return len(self._queues) > 0
 
     def send(self, value: Any):
         """Put a value in the output queue."""
         if self.type is not None and not is_EOF(value) and not isinstance(value, self.type):  # type: ignore
             raise ValueError(
-                f'Error in output "{self.id}": value {value} is not of type {self.type}'
+                f'Output "{self.id}": value {value} is not of type {self.type}'
             )
-        self.queue.put(value)
+        if len(self._queues) == 0:
+            raise ValueError(f'Output "{self.id}": has no connected queues')
+
+        if len(self._queues) == 1:
+            self._queues[0].put(value)
+            return
+
+        if self._output_mode == OutputMode.CIRCLE:
+            # Round-robin output queue selection
+            self._queues[self._circle_index].put(value)
+            self._circle_index = (self._circle_index + 1) % len(self._queues)
+            return
+
+        for i, queue in enumerate(self._queues):
+            if self._output_mode == OutputMode.REF:
+                queue.put(value)
+            elif self._output_mode == OutputMode.VALUE:
+                if i == 0:
+                    # Send the original value to the first queue
+                    queue.put(value)
+                else:
+                    # Send a deep copy of the value to the rest of the queues
+                    queue.put(deepcopy(value))
+
+
+class RedriveQueue:
+    """RedriveQueue is a fake write-only queue that is used by GraphPort
+    to redrive input values to the output queues."""
+
+    def __init__(self, output: Output):
+        self._output = output
+
+    def put(self, item: Any, block=True, timeout=None):
+        self._output.send(item)
+
+    # def put_nowait(self, item: Any):
+    #     self.put(item, block=False)
+
+    # def qsize(self):
+    #     return 0
+
+    # def empty(self):
+    #     return True
+
+    # def full(self):
+    #     return False
+
+    # def get(self):
+    #     return None
+
+    # def get_nowait(self):
+    #     return None
+
+    # def task_done(self):
+    #     pass
+
+    # def join(self):
+    #     pass
+
+
+class GraphPort(Input, Output):
+    """GraphPort is an interface between inside and outside of the graph used for input/output.
+
+    It combines Input and Output, because Graph Input acts as an Input for outside world,
+    but outputs values inside the graph. Similarly, Graph Output acts as an Output for outside world,
+    but receives values from inside the graph."""
+
+    def __init__(
+        self,
+        id: str,
+        description: str,
+        type: Optional[type] = None,
+        value: Any = None,
+        required: Requiredness = Requiredness.REQUIRED,
+        output_mode: OutputMode = OutputMode.REF,
+    ):
+        input_mode = InputMode.QUEUE
+        Input.__init__(
+            self,
+            id=id,
+            description=description,
+            type=type,
+            mode=input_mode,
+            value=value,
+            required=required,
+        )
+        Output.__init__(
+            self, id=id, description=description, type=type, mode=output_mode
+        )
+
+        # Use RedriveQueue instead of the normal input queue
+        self._queue = RedriveQueue(self)  # type: ignore
 
 
 class ConnectionNode:
@@ -151,9 +279,7 @@ class ConnectionNode:
 
 
 class Connection:
-    """Connection is a connection between two nodes.
-
-    Typically a connection has a queue attached to it."""
+    """Connection is a connection between two nodes in a graph."""
 
     def __init__(
         self,
@@ -166,10 +292,6 @@ class Connection:
         self.to_node = to_node
         self.delayed = delayed
         self.hidden = hidden
-
-    def set_queue(self, queue: Queue):
-        """Set the queue for the connection."""
-        self.queue = queue
 
     @classmethod
     def from_yaml(cls, yml: dict):

@@ -20,8 +20,8 @@ class TestComponentWithStickyInput(unittest.TestCase):
         self.assertEqual(len(node.outputs), 1)
         self.assertEqual(node.inputs["word"].description, "The input")
         self.assertEqual(node.inputs["word"].type, str)
-        self.assertEqual(node.inputs["word"].mode, InputMode.QUEUE)
-        self.assertEqual(node.inputs["times"].mode, InputMode.STICKY)
+        self.assertEqual(node.inputs["word"]._input_mode, InputMode.QUEUE)
+        self.assertEqual(node.inputs["times"]._input_mode, InputMode.STICKY)
 
     def test_run(self):
         test_cases = [
@@ -59,12 +59,12 @@ class TestComponentWithStickyInput(unittest.TestCase):
         ]
 
         node = self.node
-        in_q = Queue()
-        times_q = Queue()
+        in_q = node.inputs["word"].queue
+        times_q = node.inputs["times"].queue
+
         out_q = Queue()
-        node.inputs["word"].connect(in_q)
-        node.inputs["times"].connect(times_q)
         node.outputs["out"].connect(out_q)
+
         node.run()
 
         for test_case in test_cases:
@@ -103,9 +103,8 @@ class TestComponentWithStickyInput(unittest.TestCase):
             outputs={"out": Output(description="The output", type=str)},
         )
 
-        in_q = Queue()
+        in_q = node.inputs["word"].queue
         out_q = Queue()
-        node.inputs["word"].connect(in_q)
         node.outputs["out"].connect(out_q)
         node.run()
 
@@ -251,11 +250,10 @@ class TestSinkComponent(unittest.TestCase):
 
     def test_run(self):
         node = self.node
-        q = Queue()
-        o = Queue()
+        q = node.inputs["word"].queue
+        o = node.inputs["output"].queue
         res = Queue()
-        node.inputs["word"].connect(q)
-        node.inputs["output"].connect(o)
+
         node.run()
         q.put("Hello, world!")
         q.put(EOF)  # Stop the node
@@ -309,9 +307,8 @@ class TestCustomRunComponent(unittest.TestCase):
         for test_case in test_cases:
             with self.subTest(test_case["name"]):
                 node = CustomRunComponent(id="custom_run", display_name="Custom Run")
-                in_q = Queue()
+                in_q = node.inputs["s"].queue
                 out_q = Queue()
-                node.inputs["s"].connect(in_q)
                 node.outputs["l"].connect(out_q)
 
                 for i in range(len(test_case["inputs"])):
@@ -351,8 +348,7 @@ class InvalidSendProcess(Component):
 class TestInvalidSendProcess(unittest.TestCase):
     def test_invalid_send(self):
         node = InvalidSendProcess(id="invalid", display_name="Invalid")
-        in_q = Queue()
-        node.inputs["s"].connect(in_q)
+        in_q = node.inputs["s"].queue
 
         def handle_exception(exc):
             self.assertIsInstance(exc.exc_value, ValueError)

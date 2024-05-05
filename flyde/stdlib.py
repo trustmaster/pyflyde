@@ -36,12 +36,12 @@ class GetAttribute(Component):
         if "mode" in key:
             if key["mode"] == "static":
                 print("Static")
-                self.inputs["attribute"].mode = InputMode.STATIC
-                self.inputs["attribute"].set_value(self.value)
+                self.inputs["attribute"]._input_mode = InputMode.STATIC
+                self.inputs["attribute"].value = self.value
             else:
-                self.inputs["attribute"].mode = InputMode.STICKY
+                self.inputs["attribute"]._input_mode = InputMode.STICKY
                 if self.value is not None:
-                    self.inputs["attribute"].set_value(self.value)
+                    self.inputs["attribute"].value = self.value
 
     def process(self, object: Any, attribute: str):
         if isinstance(object, dict):

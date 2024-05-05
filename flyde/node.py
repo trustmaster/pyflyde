@@ -1,12 +1,11 @@
 import logging
 from abc import ABC, abstractmethod
 from copy import deepcopy
-from queue import Queue
 from threading import Event, Lock, Thread
 from typing import Any, Callable
 from uuid import uuid4
 
-from flyde.io import InputMode, Input, Output, EOF, Requiredness, is_EOF, Connection
+from flyde.io import GraphPort, InputMode, Input, Output, EOF, Requiredness, is_EOF, Connection
 
 logger = logging.getLogger(__name__)
 
@@ -50,9 +49,9 @@ class Node(ABC):
 
         if len(inputs) > 0:
             self.inputs = inputs
-        elif hasattr(self.__class__, "inputs") and len(self.inputs) > 0:
+        elif hasattr(self.__class__, "inputs") and len(self.__class__.inputs) > 0:
             # Copy from class definition, but instance will have own connections
-            self.inputs = deepcopy(self.inputs)
+            self.inputs = deepcopy(self.__class__.inputs)
         else:
             self.inputs = {}
 
@@ -61,9 +60,9 @@ class Node(ABC):
 
         if len(outputs) > 0:
             self.outputs = outputs
-        elif hasattr(self.__class__, "outputs") and len(self.outputs) > 0:
+        elif hasattr(self.__class__, "outputs") and len(self.__class__.outputs) > 0:
             # Copy from class definition, but instance will have own connections
-            self.outputs = deepcopy(self.outputs)
+            self.outputs = deepcopy(self.__class__.outputs)
         else:
             self.outputs = {}
 
@@ -86,8 +85,8 @@ class Node(ABC):
         """Finish the component execution gracefully by closing all its outputs and notifying others."""
         logger.debug(f"Sending EOF to all outputs of {self._id}")
         for output in self.outputs.values():
-            if hasattr(output, "queue") and output.queue is not None:
-                output.queue.put(EOF)
+            if output.connected:
+                output.send(EOF)
         logger.debug(f"Node {self._id} finished, sending stopped event")
         self._stopped.set()
         logger.debug(f"Stop event set for node {self._id}")
@@ -110,7 +109,10 @@ class Node(ABC):
         """Receive a value from an input."""
         if input_id not in self.inputs:
             raise ValueError(f"Input {input_id} not found in node {self._id}")
-        return self.inputs[input_id].get()
+        value = self.inputs[input_id].get()
+        if is_EOF(value):
+            raise value
+        return value
 
     @classmethod
     def from_yaml(cls, create: InstanceFactory, yml: dict):
@@ -168,27 +170,8 @@ class Component(Node):
                 queue_count = 0
                 queue_closed_count = 0
                 for key, inp in self.inputs.items():
-                    is_queue = False
-                    if inp.mode == InputMode.STICKY:
-                        if not inp.queue.empty():
-                            # Update the sticky value with the new value from the queue
-                            value = inp.queue.get()
-                            inp.set_value(value)
-                        elif hasattr(inp, "value") and inp.value is not None:
-                            # Use the sticky value if the queue is empty
-                            value = inp.value
-                        else:
-                            # If no value is set, wait for the next value
-                            value = inp.queue.get()
-                            inp.set_value(value)
-                    elif inp.mode == InputMode.STATIC:
-                        # Static input values don't change at all
-                        value = inp.value
-                    else:
-                        # InputMode.QUEUE is the default mode
-                        is_queue = True
-                        value = inp.queue.get()
-
+                    is_queue = inp._input_mode == InputMode.QUEUE
+                    value = inp.get()
                     inputs[key] = value
 
                     # Count EOFs received on non-static inputs
@@ -219,14 +202,10 @@ class Component(Node):
                             self.stop()
                             self.finish()
                             raise e
-                        # Check if the output is connected to a queue
-                        if hasattr(self.outputs[k], "queue") and self.outputs[k].queue is not None:
+
+                        logger.debug(f"Sending value '{v}' to output {k} of {self._id}")
+                        if self.outputs[k].connected:
                             self.outputs[k].send(v)
-                        else:
-                            # TODO: raise?
-                            logger.warning(
-                                f"Output {k} of {self._id} is not connected to a queue"
-                            )
 
             self.finish()
 
@@ -302,8 +281,8 @@ class Graph(Node):
         instances: dict[str, Node] = {},
         instances_stopped: dict[str, Event] = {},
         connections: list[Connection] = [],
-        inputs: dict[str, Input] = {},
-        outputs: dict[str, Output] = {},
+        inputs: dict[str, GraphPort] = {},
+        outputs: dict[str, GraphPort] = {},
         stopped: Event = Event(),
     ):
         super().__init__(
@@ -311,53 +290,56 @@ class Graph(Node):
             node_type=node_type,
             input_config=input_config,
             display_name=display_name,
-            inputs=inputs,
-            outputs=outputs,
             stopped=stopped,
         )
 
+        self.inputs: dict[str, GraphPort] = inputs  # type: ignore
+        self.outputs: dict[str, GraphPort] = outputs  # type: ignore
         self._connections = connections
         self._instances = instances
         self._instances_stopped = instances_stopped
 
         # Wire all connections
         for conn in self._connections:
-            # TODO: reuse queue on fan-in
-            queue: Queue = Queue(maxsize=0)
-            conn.set_queue(queue)
-
             from_id = conn.from_node.ins_id
             from_pin = conn.from_node.pin_id
             to_id = conn.to_node.ins_id
             to_pin = conn.to_node.pin_id
 
+            # Validate the ids
             if from_id == "__this":
-                # Own ports are reversed: we read from inputs and write to outputs
                 if from_pin not in self.inputs:
                     raise ValueError(f"Input {from_pin} not found in node {self._id}")
-                self.inputs[from_pin].queue = queue
             else:
-                if from_id not in self._instances:
-                    raise ValueError(f"Instance {from_id} not found")
-                if from_pin not in self._instances[from_id].outputs:
-                    raise ValueError(
-                        f"Output {from_pin} not found in instance {from_id}"
-                    )
-                self._instances[from_id].outputs[conn.from_node.pin_id].queue = queue
+                self._check_pin(from_id, from_pin)
+
             if to_id == "__this":
                 if to_pin not in self.outputs:
                     raise ValueError(f"Output {to_pin} not found in node {self._id}")
-                self.outputs[to_pin].queue = queue
             else:
-                if to_id not in self._instances:
-                    raise ValueError(f"Instance {to_id} not found")
-                if to_pin not in self._instances[to_id].inputs:
-                    raise ValueError(f"Input {to_pin} not found in instance {to_id}")
-                self._instances[to_id].inputs[conn.to_node.pin_id].queue = queue
+                self._check_pin(to_id, to_pin)
+
+            if from_id != "__this" and to_id != "__this":
+                # Simple case: connect two instances inside the graph
+                q = self._instances[to_id].inputs[to_pin].queue
+                self._instances[from_id].outputs[from_pin].connect(q)
+            elif from_id == "__this":
+                # Graph ports are reversed: we read from inputs and write to outputs
+                q = self._instances[to_id].inputs[to_pin].queue
+                self.inputs[from_pin].connect(q)
+            elif to_id == "__this":
+                q = self.outputs[to_pin].queue
+                self._instances[from_id].outputs[from_pin].connect(q)
+
+    def _check_pin(self, instance_id: str, pin_id: str):
+        """Check if the instance and pin exist."""
+        if instance_id not in self._instances:
+            raise ValueError(f"Instance {instance_id} not found")
+        if pin_id not in self._instances[instance_id].inputs:
+            raise ValueError(f"Input {pin_id} not found in instance {instance_id}")
 
     def run(self):
         """Run the graph."""
-
         for instance in self._instances.values():
             logger.debug(
                 f"Running instance {instance._id} of type {instance._node_type}"
@@ -444,8 +426,8 @@ class Graph(Node):
             if "mode" in v:
                 v["required"] = Requiredness(v["mode"])
                 del v["mode"]
-            inputs[k] = Input(**v)
-        outputs = {k: Output(**v) for k, v in yml.get("outputs", {}).items()}
+            inputs[k] = GraphPort(**v)
+        outputs = {k: GraphPort(**v) for k, v in yml.get("outputs", {}).items()}
 
         # Instatiate through the constructor
         return cls(
