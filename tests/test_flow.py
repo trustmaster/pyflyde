@@ -1,4 +1,5 @@
 import logging
+from queue import Queue
 import unittest
 from flyde.io import EOF
 from flyde.flow import Flow
@@ -23,7 +24,8 @@ class TestInOutFlow(unittest.TestCase):
         flow = Flow.from_file("tests/TestInOutFlow.flyde")
 
         in_q = flow.node.inputs["inMsg"].queue
-        out_q = flow.node.outputs["outMsg"].queue
+        out_q = Queue()
+        flow.node.outputs["outMsg"].connect(out_q)
 
         flow.run()
 

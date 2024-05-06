@@ -309,15 +309,15 @@ class Graph(Node):
             # Validate the ids
             if from_id == "__this":
                 if from_pin not in self.inputs:
-                    raise ValueError(f"Input {from_pin} not found in node {self._id}")
+                    raise ValueError(f"Input {from_pin} not found in graph {self._id}")
             else:
-                self._check_pin(from_id, from_pin)
+                self._check_pin('out', from_id, from_pin)
 
             if to_id == "__this":
                 if to_pin not in self.outputs:
-                    raise ValueError(f"Output {to_pin} not found in node {self._id}")
+                    raise ValueError(f"Output {to_pin} not found in graph {self._id}")
             else:
-                self._check_pin(to_id, to_pin)
+                self._check_pin('in', to_id, to_pin)
 
             if from_id != "__this" and to_id != "__this":
                 # Simple case: connect two instances inside the graph
@@ -331,12 +331,14 @@ class Graph(Node):
                 q = self.outputs[to_pin].queue
                 self._instances[from_id].outputs[from_pin].connect(q)
 
-    def _check_pin(self, instance_id: str, pin_id: str):
+    def _check_pin(self, pin_type: str, instance_id: str, pin_id: str):
         """Check if the instance and pin exist."""
         if instance_id not in self._instances:
             raise ValueError(f"Instance {instance_id} not found")
-        if pin_id not in self._instances[instance_id].inputs:
+        if pin_type == "in" and pin_id not in self._instances[instance_id].inputs:
             raise ValueError(f"Input {pin_id} not found in instance {instance_id}")
+        if pin_type == "out" and pin_id not in self._instances[instance_id].outputs:
+            raise ValueError(f"Output {pin_id} not found in instance {instance_id}")
 
     def run(self):
         """Run the graph."""
@@ -426,8 +428,8 @@ class Graph(Node):
             if "mode" in v:
                 v["required"] = Requiredness(v["mode"])
                 del v["mode"]
-            inputs[k] = GraphPort(**v)
-        outputs = {k: GraphPort(**v) for k, v in yml.get("outputs", {}).items()}
+            inputs[k] = GraphPort(id=k, **v)
+        outputs = {k: GraphPort(id=k, **v) for k, v in yml.get("outputs", {}).items()}
 
         # Instatiate through the constructor
         return cls(

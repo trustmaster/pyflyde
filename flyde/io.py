@@ -243,12 +243,13 @@ class GraphPort(Input, Output):
 
     def __init__(
         self,
-        id: str,
-        description: str,
+        id: str = "",
+        description: str = "",
         type: Optional[type] = None,
         value: Any = None,
         required: Requiredness = Requiredness.REQUIRED,
         output_mode: OutputMode = OutputMode.REF,
+        delayed: bool = False,
     ):
         input_mode = InputMode.QUEUE
         Input.__init__(
@@ -261,7 +262,12 @@ class GraphPort(Input, Output):
             required=required,
         )
         Output.__init__(
-            self, id=id, description=description, type=type, mode=output_mode
+            self,
+            id=id,
+            description=description,
+            type=type,
+            mode=output_mode,
+            delayed=delayed,
         )
 
         # Use RedriveQueue instead of the normal input queue
