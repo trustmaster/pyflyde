@@ -111,7 +111,7 @@ class Input:
         if self._input_mode == InputMode.QUEUE:
             return self._queue.get()
         elif self._input_mode == InputMode.STICKY:
-            if not self._queue.empty():
+            if not self._queue.empty() or self._value is None:
                 self._value = self._queue.get()
         return self._value
 
