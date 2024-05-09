@@ -3,6 +3,7 @@
 # Variables
 PYTHON = /usr/bin/env python3
 LIB_DIR = examples/mylib
+SRC_DIR = flyde
 TEST_DIR = tests
 
 # Targets
@@ -35,8 +36,9 @@ venv-activate:
 	@echo "Activating virtual environment..."
 	@source .venv/bin/activate;
 
-dist:
+builddist:
 	@echo "Building the project for distribution..."
+	@stubgen $(SRC_DIR) -o .;
 	@$(PYTHON) -m build;
 
 upload:

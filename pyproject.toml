@@ -1,6 +1,10 @@
+[build-system]
+requires = ["setuptools", "setuptools-scm"]
+build-backend = "setuptools.build_meta"
+
 [project]
 name = "pyflyde"
-version = "0.0.2"
+version = "0.0.5"
 requires-python = ">= 3.9"
 authors = [
     {name = "Vladimir Sibirov"}
@@ -28,18 +32,20 @@ dependencies = [
     "pyyaml",
 ]
 
-[build-system]
-requires = ["setuptools"]
-build-backend = "setuptools.build_meta"
+[project.scripts]
+flyde = "flyde.py:main"
 
-[tool.setuptools.packages.find]
-where = ["flyde", "examples/mylib"]
+# [tool.setuptools]
+# package-dir = { "" = "flyde" }
+# packages = ["flyde"]
 
 [project.optional-dependencies]
 dev = [
+    "setuptools",
     "build",
     "black",
     "coverage",
     "flake8",
+    "mypy",
     "twine",
 ]
