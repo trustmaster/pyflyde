@@ -1,10 +1,7 @@
-import logging
 from queue import Queue
 import unittest
 from flyde.io import EOF
 from flyde.flow import Flow
-
-logging.basicConfig(level=logging.DEBUG)
 
 
 class TestIsolatedFlow(unittest.TestCase):
@@ -37,38 +34,35 @@ class TestInOutFlow(unittest.TestCase):
         self.assertTrue(flow.stopped.is_set())
 
 
-# class TestNestedFlow(unittest.TestCase):
-#     def test_flow(self):
-#         test_case = {
-#             "inputs": {
-#                 "inp": ["Hello", "World", "!", EOF],
-#                 "n": [1, 2, EOF],
-#             },
-#             "outputs": [
-#                 "HelloHelloHello",
-#                 "WorldWorldWorldWorldWorldWorld",
-#                 "!!!!!!",
-#                 EOF,
-#             ],
-#         }
-#         flow = Flow.from_file("tests/TestNestedFlow.flyde")
+class TestNestedFlow(unittest.TestCase):
+    def test_flow(self):
+        test_case = {
+            "inputs": {
+                "inp": ["Hello", "World", "!", EOF],
+                "n": [1, 2, EOF],
+            },
+            "outputs": [
+                "HELLOHELLOHELLO",
+                "WORLDWORLDWORLDWORLDWORLDWORLD",
+                "!!!!!!",
+                EOF,
+            ],
+        }
+        flow = Flow.from_file("tests/TestNestedFlow.flyde")
 
-#         inp_q = flow.node.inputs["inp"].queue
-#         n_q = flow.node.inputs["n"].queue
-#         out_q = flow.node.outputs["out"].queue
+        inp_q = flow.node.inputs["inp"].queue
+        n_q = flow.node.inputs["n"].queue
+        out_q = Queue()
+        flow.node.outputs["out"].connect(out_q)
 
-#         flow.run()
+        flow.run()
 
-#         for i, inp in enumerate(test_case["inputs"]["inp"]):
-#             print(i, inp, test_case["outputs"][i])
-#             inp_q.put(inp)
-#             print("Sent inp")
-#             if i < len(test_case["inputs"]["n"]):
-#                 n_q.put(test_case["inputs"]["n"][i])
-#                 print("Sent n")
-#             out = out_q.get()
-#             print("Asserting", test_case["outputs"][i], out)
-#             self.assertEqual(test_case["outputs"][i], out)
+        for i, inp in enumerate(test_case["inputs"]["inp"]):
+            inp_q.put(inp)
+            if i < len(test_case["inputs"]["n"]):
+                n_q.put(test_case["inputs"]["n"][i])
+            out = out_q.get()
+            self.assertEqual(test_case["outputs"][i], out)
 
-#         flow.stopped.wait()
-#         self.assertTrue(flow.stopped.is_set())
+        flow.stopped.wait()
+        self.assertTrue(flow.stopped.is_set())

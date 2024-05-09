@@ -1,6 +1,5 @@
 imports:
-  "@flyde/stdlib":
-    - GetAttribute
+  "@flyde/stdlib": []
   Repeat3Times.flyde:
     - Repeat3Times
   components.flyde.ts:
@@ -28,17 +27,6 @@ node:
         times:
           mode: sticky
       nodeId: RepeatWordNTimes
-    - pos:
-        x: -526.1239453124999
-        y: -27.61078718248433
-      id: co9eqzcm528rokcni4qssy0d
-      inputConfig: {}
-      nodeId: GetAttribute__co9eqzcm528rokcni4qssy0d
-      macroId: GetAttribute
-      macroData:
-        key:
-          value: foo
-          mode: static
   connections:
     - from:
         insId: __this
@@ -70,19 +58,7 @@ node:
       to:
         insId: RepeatWordNTimes-pp249oy
         pinId: times
-    - from:
-        insId: __this
-        pinId: inp
-      to:
-        insId: co9eqzcm528rokcni4qssy0d
-        pinId: object
-    - from:
-        insId: co9eqzcm528rokcni4qssy0d
-        pinId: value
-      to:
-        insId: __this
-        pinId: out
-  id: Example
+  id: TestNestedFlow
   inputs:
     inp:
       mode: required

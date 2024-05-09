@@ -415,6 +415,7 @@ class Graph(Node):
                 ins["nodeId"] = ins["macroId"]
             stopped = Event()
             ins["stopped"] = stopped
+            logger.debug(f"Creating instance {ins_id}")
             instances[ins_id] = Node.from_yaml(create, ins)
             instances_stopped[ins_id] = stopped
             logger.debug(f"Loaded instance {ins_id}")
@@ -431,6 +432,12 @@ class Graph(Node):
             inputs[k] = GraphPort(id=k, **v)
         outputs = {k: GraphPort(id=k, **v) for k, v in yml.get("outputs", {}).items()}
 
+        # Initialize the stopped event
+        stopped = Event()
+        if "stopped" in yml:
+            logger.debug(f"Creating graph {id} from yaml with stopped event")
+            stopped = yml["stopped"]
+
         # Instatiate through the constructor
         return cls(
             id=id,
@@ -442,6 +449,7 @@ class Graph(Node):
             connections=connections,
             inputs=inputs,
             outputs=outputs,
+            stopped=stopped,
         )
 
     def to_dict(self) -> dict:

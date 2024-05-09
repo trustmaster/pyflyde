@@ -50,9 +50,9 @@ class Flow:
 
         It is used by the runtime to create nodes from the YAML definition or on the fly."""
         if class_name in self._graphs:
-            node = Graph.from_yaml(self.factory, self._graphs[class_name])
-            if "id" in args:
-                node._id = args["id"]
+            # Merge the blueprint YAML with the arguments
+            yml = self._graphs[class_name] | args
+            node = Graph.from_yaml(self.factory, yml)
             return node
 
         # Look up the class in the imports

@@ -35,7 +35,6 @@ class GetAttribute(Component):
             self.value = key["value"]
         if "mode" in key:
             if key["mode"] == "static":
-                print("Static")
                 self.inputs["attribute"]._input_mode = InputMode.STATIC
                 self.inputs["attribute"].value = self.value
             else:

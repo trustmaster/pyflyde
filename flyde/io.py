@@ -112,7 +112,10 @@ class Input:
             return self._queue.get()
         elif self._input_mode == InputMode.STICKY:
             if not self._queue.empty() or self._value is None:
-                self._value = self._queue.get()
+                value = self._queue.get()
+                if not is_EOF(value):
+                    # Ignore EOFs on sticky inputs, only queue inputs matter for termination
+                    self._value = value
         return self._value
 
     def empty(self) -> bool:
@@ -199,7 +202,7 @@ class Output:
                     queue.put(deepcopy(value))
 
 
-class RedriveQueue:
+class RedirectQueue:
     """RedriveQueue is a fake write-only queue that is used by GraphPort
     to redrive input values to the output queues."""
 
@@ -208,30 +211,6 @@ class RedriveQueue:
 
     def put(self, item: Any, block=True, timeout=None):
         self._output.send(item)
-
-    # def put_nowait(self, item: Any):
-    #     self.put(item, block=False)
-
-    # def qsize(self):
-    #     return 0
-
-    # def empty(self):
-    #     return True
-
-    # def full(self):
-    #     return False
-
-    # def get(self):
-    #     return None
-
-    # def get_nowait(self):
-    #     return None
-
-    # def task_done(self):
-    #     pass
-
-    # def join(self):
-    #     pass
 
 
 class GraphPort(Input, Output):
@@ -271,7 +250,7 @@ class GraphPort(Input, Output):
         )
 
         # Use RedriveQueue instead of the normal input queue
-        self._queue = RedriveQueue(self)  # type: ignore
+        self._queue = RedirectQueue(self)  # type: ignore
 
 
 class ConnectionNode:
