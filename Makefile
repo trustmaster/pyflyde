@@ -35,9 +35,9 @@ venv-activate:
 	@echo "Activating virtual environment..."
 	@source .venv/bin/activate;
 
-build:
-	@echo "Building the project..."
-	@python3 -m build;
+dist:
+	@echo "Building the project for distribution..."
+	@$(PYTHON) -m build;
 
 upload:
 	@echo "Uploading the project to PyPI..."
