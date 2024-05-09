@@ -34,3 +34,11 @@ report:
 venv-activate:
 	@echo "Activating virtual environment..."
 	@source .venv/bin/activate;
+
+build:
+	@echo "Building the project..."
+	@python3 -m build;
+
+upload:
+	@echo "Uploading the project to PyPI..."
+	@twine upload dist/*;
