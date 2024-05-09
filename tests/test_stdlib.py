@@ -16,9 +16,7 @@ class TestInlineValue(unittest.TestCase):
         node = InlineValue("Hello", id="test_inline_value")
         node.outputs["value"].connect(out_q)
         node.run()
-        self.assertEqual(
-            test_case["outputs"]["value"], node.outputs["value"].queue.get()
-        )
+        self.assertEqual(test_case["outputs"]["value"], out_q.get())
         node.stopped.wait()
         self.assertTrue(node.stopped.is_set())
 
@@ -94,13 +92,12 @@ class TestGetAttribute(unittest.TestCase):
         ]
 
         for test_case in test_cases:
-            obj_q = Queue()
             attr_q = Queue()
             out_q = Queue()
             node = GetAttribute(test_case["key"], id="test_get_attribute")
-            node.inputs["object"].connect(obj_q)
+            obj_q = node.inputs["object"].queue
             if len(test_case["inputs"]["attribute"]) > 0:
-                node.inputs["attribute"].connect(attr_q)
+                attr_q = node.inputs["attribute"].queue
             node.outputs["value"].connect(out_q)
             node.run()
             for i in range(len(test_case["inputs"]["object"])):
@@ -109,6 +106,4 @@ class TestGetAttribute(unittest.TestCase):
                     test_case["inputs"]["attribute"]
                 ):
                     attr_q.put(test_case["inputs"]["attribute"][i])
-                self.assertEqual(
-                    test_case["outputs"][i], node.outputs["value"].queue.get()
-                )
+                self.assertEqual(test_case["outputs"][i], out_q.get())

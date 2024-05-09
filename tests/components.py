@@ -12,6 +12,16 @@ class Echo(Component):
         return {"out": inp}
 
 
+class Capitalize(Component):
+    """A component that capitalizes the input."""
+
+    inputs = {"inp": Input(description="The input", type=str)}
+    outputs = {"out": Output(description="The output", type=str)}
+
+    def process(self, inp: str) -> dict[str, str]:
+        return {"out": inp.upper()}
+
+
 class RepeatWordNTimes(Component):
     """A component that has both inputs and outputs and a sticky input."""
 
