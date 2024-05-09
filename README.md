@@ -1,5 +1,7 @@
 # PyFlyde
 
+![Build](https://github.com/trustmaster/pyflyde/actions/workflows/python-package.yml/badge.svg)
+
 Python runtime for [Flyde](https://github.com/flydelabs/flyde) with Data Engineering emphasis.
 
 ![Example graph running K-means clustering with Pandas and Scikit-learn](./clustering_example.png)
