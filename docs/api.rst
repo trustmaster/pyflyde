@@ -1,7 +1,11 @@
 API Reference
 =============
 
-.. autosummary::
-   :toctree: generated
+.. automodule:: flyde.flow
+   :members:
 
-   flyde
+.. automodule:: flyde.io
+   :members:
+
+.. automodule:: flyde.node
+   :members:
