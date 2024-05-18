@@ -6,35 +6,38 @@ Python runtime for [Flyde](https://github.com/flydelabs/flyde) with Data Enginee
 
 ![Example graph running K-means clustering with Pandas and Scikit-learn](https://github.com/trustmaster/pyflyde/blob/main/clustering_example.png?raw=true)
 
-## PoC warning
-
-This is a proof-of-concept and not a final implementation. Structure and API may change drastically before public release.
-
 ## Getting started
 
 You need Python 3.9+ installed on your machine to run PyFlyde.
 
-First, you need to install its dependencies:
+Then you can install PyFlyde using pip:
 
 ```bash
-pip install .
+pip install pyflyde
 ```
 
-Then you can run the Hello World example:
+### Running the examples
+
+You can copy `examples` folder from this repository to your local project to give it a try. Then you can run the example flow with:
 
 ```bash
-./flyde.py examples/HelloPy.flyde
+pyflyde examples/HelloWorld.flyde
 ```
+
 
 ### Using the visual editor
 
-Install Flyde VSCode extension from the [marketplace](https://marketplace.visualstudio.com/items?itemName=flyde.flyde-vscode).
+Install Flyde VSCode extension from the [marketplace](https://marketplace.visualstudio.com/items?itemName=flyde.flyde-vscode). It will open existing `.flyde` files in the visual editor. You can call `Flyde: New Visual Flow` command in VSCode to create a new flow file.
 
-Whenever you change your component library classes or their interfaces, use flyde.py gen command to generate .flyde.ts definitions, e.g.:
+You can browse the component library in the panel on the right. To see your local components click the "View all" button. They will appear under the "Current project". Note that PyFlyde doesn't implement all of the Flyde's stdlib components, only a few essential ones.
+
+Whenever you change your component library classes or their interfaces, use `pyflyde gen` command to generate `.flyde.ts` definitions, e.g.:
 
 ```bash
-./flyde.py gen examples/mylib/components.py
+pyflyde gen examples/mylib/components.py
 ```
+
+Flyde editor needs `.flyde.ts` files in order to "see" your components.
 
 ## Running a Machine Learning example
 
@@ -51,7 +54,7 @@ cd ..
 After going back to the main folder you can run it with:
 
 ```bash
-./flyde.py examples/Clustering.flyde
+./pyflyde examples/Clustering.flyde
 ```
 
 ## Contributing
@@ -62,7 +65,7 @@ After going back to the main folder you can run it with:
 pip install .\[dev\]
 ```
 
-### Run tests and coverage reports
+### Run tests, linters and coverage reports
 
 To run tests only:
 
@@ -70,8 +73,14 @@ To run tests only:
 make test
 ```
 
-TO run tests with coverage and see report:
+To run tests with coverage and see report:
 
 ```bash
 make cover report
+```
+
+To run linters:
+
+```bash
+make lint
 ```
