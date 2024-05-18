@@ -54,7 +54,7 @@ cd ..
 After going back to the main folder you can run it with:
 
 ```bash
-./pyflyde examples/Clustering.flyde
+pyflyde examples/Clustering.flyde
 ```
 
 ## Contributing
