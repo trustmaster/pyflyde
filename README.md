@@ -1,6 +1,7 @@
 # PyFlyde
 
 ![Build](https://github.com/trustmaster/pyflyde/actions/workflows/python-package.yml/badge.svg)
+[<img src="https://readthedocs.org/projects/pyflyde/badge/">](https://pyflyde.readthedocs.io/en/latest/)
 
 Python runtime for [Flyde](https://github.com/flydelabs/flyde) with Data Engineering emphasis.
 
