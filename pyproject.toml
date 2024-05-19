@@ -49,4 +49,5 @@ dev = [
     "flake8",
     "mypy",
     "twine",
+    "mkdocs",
 ]

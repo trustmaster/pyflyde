@@ -21,6 +21,10 @@ lint:
 	@black $(LIB_DIR) $(TEST_DIR);
 	@flake8 $(LIB_DIR) $(TEST_DIR);
 
+stubgen:
+	@echo "Generating type stubs..."
+	@stubgen $(SRC_DIR) -o .;
+
 test:
 	@echo "Running tests..."
 	@$(PYTHON) -m unittest discover -s $(TEST_DIR) -p "test_$(if $(mod),$(mod),*).py";
