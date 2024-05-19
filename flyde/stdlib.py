@@ -133,9 +133,9 @@ class Conditional(Component):
         elif condition_type == _ConditionType.LessThanOrEqual:
             return value <= compareTo
         elif condition_type == _ConditionType.Contains:
-            return value in compareTo
+            return compareTo in value
         elif condition_type == _ConditionType.NotContains:
-            return value not in compareTo
+            return compareTo not in value
         elif condition_type == _ConditionType.RegexMatches:
             m = re.match(compareTo, value)
             return m is not None
@@ -152,6 +152,8 @@ class Conditional(Component):
         elif condition_type == _ConditionType.IsNotUndefined:
             return value is not None
         elif condition_type == _ConditionType.HasProperty:
+            if isinstance(value, dict):
+                return compareTo in value
             return hasattr(value, compareTo)
         elif condition_type == _ConditionType.LengthEqual:
             return len(value) == compareTo
@@ -162,7 +164,9 @@ class Conditional(Component):
         elif condition_type == _ConditionType.LengthLessThan:
             return len(value) < compareTo
         elif condition_type == _ConditionType.TypeEquals:
-            return type(value) == compareTo
+            if isinstance(compareTo, str):
+                return type(value).__name__ == compareTo
+            return type(value) == type(compareTo)
         elif condition_type == _ConditionType.Expression:
             raise NotImplementedError("Expression condition type is not implemented in PyFlyde.")
         else:
