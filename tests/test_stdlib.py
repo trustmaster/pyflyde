@@ -53,6 +53,70 @@ class TestConditional(unittest.TestCase):
                 },
                 "raises": None,
             },
+            {
+                "name": "equal condition dynamic property number",
+                "yml": {
+                    "compareTo": {
+                        "mode": "dynamic",
+                        "propertyPath": "price",
+                    },
+                    "propertyPath": "price",
+                    "condition": {
+                        "type": "EQUAL",
+                    },
+                    "trueValue": {
+                        "type": "value",
+                    },
+                    "falseValue": {
+                        "type": "value",
+                    },
+                },
+                "inputs": {
+                    "value": [
+                        {"price": 100},
+                        {"price": 200},
+                        {"price": 300},
+                        EOF,
+                    ],
+                    "compareTo": [
+                        {"price": 100},
+                        {"price": 200},
+                        {"price": 400},
+                        EOF,
+                    ],
+                },
+                "outputs": {
+                    "true": [{"price": 100}, {"price": 200}, EOF],
+                    "false": [{"price": 300}, EOF],
+                },
+                "raises": None,
+            },
+            {
+                "name": "not equal condition dynamic string compare to value on false",
+                "yml": {
+                    "compareTo": {
+                        "mode": "dynamic",
+                    },
+                    "condition": {
+                        "type": "NOT_EQUAL",
+                    },
+                    "trueValue": {
+                        "type": "value",
+                    },
+                    "falseValue": {
+                        "type": "compareTo",
+                    },
+                },
+                "inputs": {
+                    "value": ["Apple", "Banana", "apple", "Grape", EOF],
+                    "compareTo": ["Apple", "Orange", "apple", "Vinegar", EOF],
+                },
+                "outputs": {
+                    "true": ["Banana", "Grape", EOF],
+                    "false": ["Apple", "apple", EOF],
+                },
+                "raises": None,
+            },
         ]
 
         for test_case in test_cases:

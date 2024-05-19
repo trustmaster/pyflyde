@@ -169,18 +169,26 @@ class Conditional(Component):
             raise ValueError(f"Unsupported condition type: {condition_type}")
 
     def process(self, value: Any, compareTo: Any):
+        left_operand = value
+        right_operand = compareTo
         if self._config.property_path:
-            value = _get_attribute_by_path(value, self._config.property_path)
+            left_operand = _get_attribute_by_path(value, self._config.property_path)
 
         if self._config.compare_to_property_path:
-            compareTo = _get_attribute_by_path(compareTo, self._config.compare_to_property_path)
+            right_operand = _get_attribute_by_path(compareTo, self._config.compare_to_property_path)
 
-        result = self._evaluate(value, compareTo)
+        result = self._evaluate(left_operand, right_operand)
 
         if result:
-            self.send("true", value)
+            if self._config.true_value_type == "compareTo":
+                self.send("true", compareTo)
+            else:
+                self.send("true", value)
         else:
-            self.send("false", value)
+            if self._config.false_value_type == "compareTo":
+                self.send("false", compareTo)
+            else:
+                self.send("false", value)
 
 
 class GetAttribute(Component):
