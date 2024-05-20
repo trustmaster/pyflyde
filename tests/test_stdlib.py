@@ -91,6 +91,47 @@ class TestConditional(unittest.TestCase):
                 },
             },
             {
+                "name": "equal dynamic object property number, return compareTo property",
+                "yml": {
+                    "compareTo": {
+                        "mode": "dynamic",
+                        "propertyPath": "price",
+                    },
+                    "propertyPath": "price",
+                    "condition": {
+                        "type": "EQUAL",
+                    },
+                    "trueValue": {
+                        "type": "compareTo",
+                    },
+                    "falseValue": {
+                        "type": "compareTo",
+                    },
+                },
+                "inputs": {
+                    "value": [
+                        SimpleNamespace(price=100, src="value"),
+                        SimpleNamespace(price=200, src="value"),
+                        SimpleNamespace(price=300, src="value"),
+                        EOF,
+                    ],
+                    "compareTo": [
+                        SimpleNamespace(price=100, src="compareTo"),
+                        SimpleNamespace(price=200, src="compareTo"),
+                        SimpleNamespace(price=400, src="compareTo"),
+                        EOF,
+                    ],
+                },
+                "outputs": {
+                    "true": [
+                        SimpleNamespace(price=100, src="compareTo"),
+                        SimpleNamespace(price=200, src="compareTo"),
+                        EOF,
+                    ],
+                    "false": [SimpleNamespace(price=400, src="compareTo"), EOF],
+                },
+            },
+            {
                 "name": "not equal dynamic string compare to value on false",
                 "yml": {
                     "compareTo": {
@@ -242,7 +283,12 @@ class TestConditional(unittest.TestCase):
                     },
                 },
                 "inputs": {
-                    "value": [["Apple", "Banana"], ["Banana", "Grape"], ["Grape", "Apple"], EOF],
+                    "value": [
+                        ["Apple", "Banana"],
+                        ["Banana", "Grape"],
+                        ["Grape", "Apple"],
+                        EOF,
+                    ],
                     "compareTo": [],
                 },
                 "outputs": {
@@ -269,7 +315,13 @@ class TestConditional(unittest.TestCase):
                     },
                 },
                 "inputs": {
-                    "value": ["Apple Tart", "Banana Bread", "Grape Juice", "Fresh Apple Juice", EOF],
+                    "value": [
+                        "Apple Tart",
+                        "Banana Bread",
+                        "Grape Juice",
+                        "Fresh Apple Juice",
+                        EOF,
+                    ],
                     "compareTo": [],
                 },
                 "outputs": {
@@ -296,7 +348,13 @@ class TestConditional(unittest.TestCase):
                     },
                 },
                 "inputs": {
-                    "value": ["Apple Tart", "Banana Bread", "Grape Juice", "Fresh Apple Juice", EOF],
+                    "value": [
+                        "Apple Tart",
+                        "Banana Bread",
+                        "Grape Juice",
+                        "Fresh Apple Juice",
+                        EOF,
+                    ],
                     "compareTo": [],
                 },
                 "outputs": {
@@ -553,7 +611,11 @@ class TestConditional(unittest.TestCase):
                     "compareTo": [],
                 },
                 "outputs": {
-                    "true": [SimpleNamespace(name="Alice"), SimpleNamespace(name="Bob"), EOF],
+                    "true": [
+                        SimpleNamespace(name="Alice"),
+                        SimpleNamespace(name="Bob"),
+                        EOF,
+                    ],
                     "false": [SimpleNamespace(nananan="Charlie"), EOF],
                 },
             },
@@ -665,33 +727,208 @@ class TestConditional(unittest.TestCase):
                     "false": ["apple", "abc", "def", "banana", EOF],
                 },
             },
-            # {
-            #     "name": "type equals",
-            #     "yml": {
-            #         "compareTo": {
-            #             "mode": "static",
-            #             "type": "string",
-            #             "value": "number",
-            #         },
-            #         "condition": {
-            #             "type": "TYPE_EQUALS",
-            #         },
-            #         "trueValue": {
-            #             "type": "value",
-            #         },
-            #         "falseValue": {
-            #             "type": "value",
-            #         },
-            #     },
-            #     "inputs": {
-            #         "value": [123, "abc", 456, "def", "ghi", EOF],
-            #         "compareTo": [],
-            #     },
-            #     "outputs": {
-            #         "true": [123, 456, EOF],
-            #         "false": ["abc", "def", "ghi", EOF],
-            #     },
-            # }
+            {
+                "name": "type equals static string",
+                "yml": {
+                    "compareTo": {
+                        "mode": "static",
+                        "type": "string",
+                        "value": "int",
+                    },
+                    "condition": {
+                        "type": "TYPE_EQUALS",
+                    },
+                    "trueValue": {
+                        "type": "value",
+                    },
+                    "falseValue": {
+                        "type": "value",
+                    },
+                },
+                "inputs": {
+                    "value": [123, "abc", 456, "def", "ghi", EOF],
+                    "compareTo": [],
+                },
+                "outputs": {
+                    "true": [123, 456, EOF],
+                    "false": ["abc", "def", "ghi", EOF],
+                },
+            },
+            {
+                "name": "type equals dynamic comparison",
+                "yml": {
+                    "compareTo": {
+                        "mode": "dynamic",
+                    },
+                    "condition": {
+                        "type": "TYPE_EQUALS",
+                    },
+                    "trueValue": {
+                        "type": "value",
+                    },
+                    "falseValue": {
+                        "type": "value",
+                    },
+                },
+                "inputs": {
+                    "value": [123, "abc", 456, "def", "ghi", EOF],
+                    "compareTo": ["int", "sstringg", 999, "str", 777, EOF],
+                },
+                "outputs": {
+                    "true": [123, 456, "def", EOF],
+                    "false": ["abc", "ghi", EOF],
+                },
+            },
+            {
+                "name": "expression is unsupported",
+                "yml": {
+                    "compareTo": {
+                        "mode": "static",
+                        "type": "string",
+                        "value": "this is not important",
+                    },
+                    "condition": {
+                        "type": "EXPRESSION",
+                    },
+                    "trueValue": {
+                        "type": "value",
+                    },
+                    "falseValue": {
+                        "type": "value",
+                    },
+                },
+                "inputs": {
+                    "value": ["Apple", "Banana", "apple", EOF],
+                    "compareTo": [],
+                },
+                "outputs": {
+                    "true": [EOF],
+                    "false": [EOF],
+                },
+                "raises": NotImplementedError,
+            },
+            {
+                "name": "true value expression is unsupported",
+                "yml": {
+                    "compareTo": {
+                        "mode": "static",
+                        "type": "string",
+                        "value": "this is not important",
+                    },
+                    "condition": {
+                        "type": "EQUAL",
+                    },
+                    "trueValue": {
+                        "type": "expression",
+                        "data": "this is not important",
+                    },
+                    "falseValue": {
+                        "type": "value",
+                    },
+                },
+                "inputs": {
+                    "value": ["Apple", "Banana", "apple", EOF],
+                    "compareTo": [],
+                },
+                "outputs": {
+                    "true": [EOF],
+                    "false": ["Apple", "Banana", "apple", EOF],
+                },
+                "raises": NotImplementedError,
+            },
+            {
+                "name": "false value expression is unsupported",
+                "yml": {
+                    "compareTo": {
+                        "mode": "static",
+                        "type": "string",
+                        "value": "this is not important",
+                    },
+                    "condition": {
+                        "type": "EQUAL",
+                    },
+                    "trueValue": {
+                        "type": "value",
+                    },
+                    "falseValue": {
+                        "type": "expression",
+                        "data": "this is not important",
+                    },
+                },
+                "inputs": {
+                    "value": ["Apple", "Banana", "apple", EOF],
+                    "compareTo": [],
+                },
+                "outputs": {
+                    "true": ["Apple", "Banana", "apple", EOF],
+                    "false": [EOF],
+                },
+                "raises": NotImplementedError,
+            },
+            {
+                "name": "property path not found",
+                "yml": {
+                    "propertyPath": "nananan",
+                    "compareTo": {
+                        "mode": "static",
+                        "type": "string",
+                        "value": "this is not important",
+                    },
+                    "condition": {
+                        "type": "EQUAL",
+                    },
+                    "trueValue": {
+                        "type": "value",
+                    },
+                    "falseValue": {
+                        "type": "value",
+                    },
+                },
+                "inputs": {
+                    "value": [
+                        SimpleNamespace(name="Alice"),
+                        SimpleNamespace(name="Bob"),
+                        EOF,
+                    ],
+                    "compareTo": [],
+                },
+                "outputs": {
+                    "true": [EOF],
+                    "false": [
+                        SimpleNamespace(name="Alice"),
+                        SimpleNamespace(name="Bob"),
+                        EOF,
+                    ],
+                },
+            },
+            {
+                "name": "unsupported condition type",
+                "yml": {
+                    "compareTo": {
+                        "mode": "static",
+                        "type": "string",
+                        "value": "this is not important",
+                    },
+                    "condition": {
+                        "type": "UNSUPPORTED",
+                    },
+                    "trueValue": {
+                        "type": "value",
+                    },
+                    "falseValue": {
+                        "type": "value",
+                    },
+                },
+                "inputs": {
+                    "value": ["Apple", "Banana", "apple", EOF],
+                    "compareTo": [],
+                },
+                "outputs": {
+                    "true": [EOF],
+                    "false": [EOF],
+                },
+                "raises": ValueError,
+            }
         ]
 
         for test_case in test_cases:
@@ -701,7 +938,7 @@ class TestConditional(unittest.TestCase):
             if "raises" in test_case and test_case["raises"] is not None:
                 with self.assertRaises(test_case["raises"]):
                     node = Conditional(test_case["yml"], id="test_conditional")
-                    return
+                continue
 
             node = Conditional(test_case["yml"], id="test_conditional")
             val_q = node.inputs["value"].queue
@@ -719,13 +956,13 @@ class TestConditional(unittest.TestCase):
                 self.assertEqual(
                     test_case["outputs"]["true"][i],
                     true_q.get(),
-                    f"Test case: {test_case['name']} #{i}"
+                    f"Test case: {test_case['name']} #{i} true",
                 )
             for i in range(len(test_case["outputs"]["false"])):
                 self.assertEqual(
                     test_case["outputs"]["false"][i],
                     false_q.get(),
-                    f"Test case: {test_case['name']} #{i}"
+                    f"Test case: {test_case['name']} #{i} false",
                 )
 
             node.stopped.wait()

@@ -54,7 +54,11 @@ class _ConditionalConfig:
         self.property_path = yml.get("propertyPath", "")
 
         condition = yml.get("condition", {})
-        self.condition_type = _ConditionType(condition.get("type", "EQUAL"))
+        condition_type = condition.get("type", "EQUAL")
+        try:
+            self.condition_type = _ConditionType(condition_type)
+        except ValueError:
+            raise ValueError(f"Unsupported condition type: {condition_type}")
         self.condition_data = condition.get("data", "")
         if self.condition_type == _ConditionType.Expression:
             raise NotImplementedError("Expression condition type is not implemented in PyFlyde.")
@@ -166,9 +170,7 @@ class Conditional(Component):
         elif condition_type == _ConditionType.TypeEquals:
             if isinstance(compareTo, str):
                 return type(value).__name__ == compareTo
-            return type(value) == type(compareTo)
-        elif condition_type == _ConditionType.Expression:
-            raise NotImplementedError("Expression condition type is not implemented in PyFlyde.")
+            return type(value).__name__ == type(compareTo).__name__
         else:
             raise ValueError(f"Unsupported condition type: {condition_type}")
 
