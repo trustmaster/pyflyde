@@ -15,8 +15,8 @@ class TestIsolatedFlow(unittest.TestCase):
 class TestInOutFlow(unittest.TestCase):
     def test_flow(self):
         test_case = {
-            "inputs": ["Hello", "World", EOF],
-            "outputs": ["Hello", "World", EOF],
+            "inputs": ["Hello", "World", "", EOF],
+            "outputs": ["Hello", "World", "ERR: msg is empty", EOF],
         }
         flow = Flow.from_file("tests/TestInOutFlow.flyde")
 

@@ -9,6 +9,7 @@ from flyde.io import GraphPort, InputMode, Input, Output, EOF, Requiredness, is_
 
 logger = logging.getLogger(__name__)
 
+SUPPORTED_MACROS = ["InlineValue", "Conditional", "GetAttribute"]
 
 # InstanceFactory is a function that creates a new instance of a node.
 # It can create instances dynamically based on the node ID.
@@ -128,10 +129,7 @@ class Node(ABC):
         }
         # If macro parameters are present, pass them to the constructor
         if "macroData" in yml:
-            if "value" in yml["macroData"]:
-                args["value"] = yml["macroData"]["value"]
-            if "key" in yml["macroData"]:
-                args["key"] = yml["macroData"]["key"]
+            args["macro_data"] = yml["macroData"]
         return create(node_class_name, args)
 
     def to_dict(self) -> dict:
@@ -410,7 +408,7 @@ class Graph(Node):
             ins_id = ins["id"]
             if "macroId" in ins:
                 # Only InlineValue macros are supported for now
-                if ins["macroId"] not in ["InlineValue", "GetAttribute"]:
+                if ins["macroId"] not in SUPPORTED_MACROS:
                     raise ValueError(f'Unsupported macro: {ins["macroId"]}')
                 ins["nodeId"] = ins["macroId"]
             stopped = Event()

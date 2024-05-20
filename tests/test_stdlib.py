@@ -13,7 +13,7 @@ class TestInlineValue(unittest.TestCase):
             "outputs": {"value": "Hello"},
         }
         out_q = Queue()
-        node = InlineValue("Hello", id="test_inline_value")
+        node = InlineValue(macro_data={"value": "Hello"}, id="test_inline_value")
         node.outputs["value"].connect(out_q)
         node.run()
         self.assertEqual(test_case["outputs"]["value"], out_q.get())
@@ -928,7 +928,7 @@ class TestConditional(unittest.TestCase):
                     "false": [EOF],
                 },
                 "raises": ValueError,
-            }
+            },
         ]
 
         for test_case in test_cases:
@@ -1042,7 +1042,9 @@ class TestGetAttribute(unittest.TestCase):
         for test_case in test_cases:
             attr_q = Queue()
             out_q = Queue()
-            node = GetAttribute(test_case["key"], id="test_get_attribute")
+            node = GetAttribute(
+                macro_data={"key": test_case["key"]}, id="test_get_attribute"
+            )
             obj_q = node.inputs["object"].queue
             if len(test_case["inputs"]["attribute"]) > 0:
                 attr_q = node.inputs["attribute"].queue

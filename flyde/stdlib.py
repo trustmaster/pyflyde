@@ -11,9 +11,12 @@ class InlineValue(Component):
 
     outputs = {"value": Output(description="The constant value")}
 
-    def __init__(self, value: Any, **kwargs):
+    def __init__(self, macro_data: dict, **kwargs):
         super().__init__(**kwargs)
-        self.value = value
+        if "value" in macro_data:
+            self.value = macro_data["value"]
+        else:
+            raise ValueError("Missing value in InlineValue configuration.")
 
     def process(self):
         self.send("value", self.value)
@@ -115,9 +118,9 @@ class Conditional(Component):
         "false": Output(description="Output when the condition is false"),
     }
 
-    def __init__(self, config: dict, **kwargs):
+    def __init__(self, macro_data: dict, **kwargs):
         super().__init__(**kwargs)
-        self._config = _ConditionalConfig(config)
+        self._config = _ConditionalConfig(macro_data)
         if self._config.compare_to_mode == "static":
             self.inputs["compareTo"]._input_mode = InputMode.STATIC  # type: ignore
             self.inputs["compareTo"].value = self._config.compare_to_value
@@ -206,8 +209,11 @@ class GetAttribute(Component):
     }
     outputs = {"value": Output(description="The attribute value")}
 
-    def __init__(self, key: dict, **kwargs):
+    def __init__(self, macro_data: dict, **kwargs):
         super().__init__(**kwargs)
+        if "key" not in macro_data:
+            raise ValueError("Missing 'key' in GetAttribute configuration.")
+        key = macro_data["key"]
         self.value = None
         if "value" in key:
             self.value = key["value"]

@@ -2,6 +2,23 @@ from flyde.io import Input, InputMode, Output
 from flyde.node import Component
 
 
+class Format(Component):
+    """Formats the input value with a given format string and sends it to out."""
+
+    inputs = {
+        "inp": Input(description="The input"),
+        "format": Input(
+            description="The format string", type=str, mode=InputMode.STICKY
+        ),
+    }
+    outputs = {
+        "out": Output(description="The formatted output", type=str),
+    }
+
+    def process(self, inp: str, format: str = "{inp}"):
+        self.send("out", format.format(inp=inp))
+
+
 class Echo(Component):
     """A simple component that echoes the input."""
 
