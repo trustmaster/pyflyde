@@ -1,5 +1,18 @@
 import { CodeNode } from "@flyde/core";
 
+export const Format: CodeNode = {
+  id: "Format",
+  description: "Formats the input value with a given format string and sends it to out.",
+  inputs: {
+    inp: { description: "The input" },
+    format: { description: "The format string" }
+  },
+  outputs: {
+    out: { description: "The formatted output" }
+  },
+  run: () => { return; },
+};
+
 export const Echo: CodeNode = {
   id: "Echo",
   description: "A simple component that echoes the input.",

@@ -171,12 +171,11 @@ class TestComponentWithStickyInput(unittest.TestCase):
         }
 
         def factory(class_name: str, args: dict):
-            self.assertEqual(args["value"], yaml["macroData"]["value"])
-            self.assertEqual(args["key"], yaml["macroData"]["key"])
-            # Drop value and key from the args, otherwise there will be an exception
-            # because the constructor doesn't support them.
-            del args["value"]
-            del args["key"]
+            self.assertEqual(args["macro_data"]["value"], yaml["macroData"]["value"])
+            self.assertEqual(args["macro_data"]["key"], yaml["macroData"]["key"])
+            # Drop macro_data from the args, otherwise there will be an exception
+            # because the constructor doesn't support it.
+            del args["macro_data"]
             return RepeatWordNTimes(**args)
 
         node = Component.from_yaml(factory, yaml)

@@ -1,7 +1,10 @@
 imports:
-  "@flyde/stdlib": []
+  "@flyde/stdlib":
+    - Conditional
+    - InlineValue
   components.flyde.ts:
     - Echo
+    - Format
 node:
   instances:
     - pos:
@@ -10,19 +13,79 @@ node:
       id: Echo-h3049mb
       inputConfig: {}
       nodeId: Echo
+    - pos:
+        x: -17.077154541015602
+        y: -87.20937501999856
+      id: ppsa1z6ja2w6yyo0sig7hvww
+      inputConfig: {}
+      nodeId: Conditional__ppsa1z6ja2w6yyo0sig7hvww
+      macroId: Conditional
+      macroData:
+        compareTo:
+          mode: static
+          value: ""
+          type: string
+        propertyPath: ""
+        condition:
+          type: IS_NOT_EMPTY
+        trueValue:
+          type: value
+        falseValue:
+          type: value
+    - pos:
+        x: 96.42891601562502
+        y: 48.46386716750146
+      id: Format-ve0397r
+      inputConfig: {}
+      nodeId: Format
+    - pos:
+        x: 227.21648071289064
+        y: -86.37317262742044
+      id: apqbu37rhnui31o8qaud8ek8
+      inputConfig: {}
+      nodeId: InlineValue__apqbu37rhnui31o8qaud8ek8
+      macroId: InlineValue
+      macroData:
+        type: string
+        value: "ERR: msg is empty"
+        label: '"ERR: msg is empty"'
   connections:
-    - from:
-        insId: __this
-        pinId: inMsg
-      to:
-        insId: Echo-h3049mb
-        pinId: inp
     - from:
         insId: Echo-h3049mb
         pinId: out
       to:
         insId: __this
         pinId: outMsg
+    - from:
+        insId: __this
+        pinId: inMsg
+      to:
+        insId: ppsa1z6ja2w6yyo0sig7hvww
+        pinId: value
+    - from:
+        insId: ppsa1z6ja2w6yyo0sig7hvww
+        pinId: "true"
+      to:
+        insId: Echo-h3049mb
+        pinId: inp
+    - from:
+        insId: ppsa1z6ja2w6yyo0sig7hvww
+        pinId: "false"
+      to:
+        insId: Format-ve0397r
+        pinId: inp
+    - from:
+        insId: Format-ve0397r
+        pinId: out
+      to:
+        insId: __this
+        pinId: outMsg
+    - from:
+        insId: apqbu37rhnui31o8qaud8ek8
+        pinId: value
+      to:
+        insId: Format-ve0397r
+        pinId: format
   id: Example
   inputs:
     inMsg:
@@ -32,8 +95,8 @@ node:
       delayed: false
   inputsPosition:
     inMsg:
-      x: -65.24972534179688
-      y: -113.34333984375
+      x: 35.251495361328125
+      y: -151.84883300781252
   outputsPosition:
     result:
       x: -23.264428942324532

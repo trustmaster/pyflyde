@@ -23,7 +23,8 @@ lint:
 
 stubgen:
 	@echo "Generating type stubs..."
-	@stubgen $(SRC_DIR) -o .;
+	@rm -f $(SRC_DIR)/*.pyi;
+	@stubgen $(SRC_DIR) --include-docstrings --include-private -o .;
 
 test:
 	@echo "Running tests..."

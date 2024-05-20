@@ -36,9 +36,9 @@ dependencies = [
 [project.scripts]
 pyflyde = "flyde.cli:main"
 
-# [tool.setuptools]
+[tool.setuptools]
 # package-dir = { "" = "flyde" }
-# packages = ["flyde"]
+packages = ["flyde"]
 
 [project.optional-dependencies]
 dev = [
