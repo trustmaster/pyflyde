@@ -6,6 +6,7 @@ from threading import Event
 from typing import Any, Callable
 
 logger: Incomplete
+SUPPORTED_MACROS: Incomplete
 InstanceFactory = Callable[[str, dict], Any]
 
 class Node(ABC, metaclass=abc.ABCMeta):

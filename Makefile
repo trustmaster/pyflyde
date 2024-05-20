@@ -43,8 +43,10 @@ venv-activate:
 
 builddist:
 	@echo "Building the project for distribution..."
-	@stubgen $(SRC_DIR) -o .;
 	@$(PYTHON) -m build;
+
+release: lint test stubgen builddist
+	@echo "Releasing the project...";
 
 upload:
 	@echo "Uploading the project to PyPI..."
