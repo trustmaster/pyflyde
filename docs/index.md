@@ -4,6 +4,7 @@ PyFlyde is a Python SDK for the Flyde visual programming language. It allows you
 
 ## Documentation Contents
 
+* [Quickstart](quickstart.md)
 * [CLI Usage](usage.md)
 * [Package Reference](reference.md)
 
