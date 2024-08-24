@@ -70,6 +70,8 @@ Examples:
         flow.run_sync()
     elif args.command == "gen":
         add_folder_to_path(args.path)
+        # Add current folder to path when resolving modules relative to the current folder
+        add_folder_to_path(".")
         gen(args.path)
     else:
         raise ValueError(f"Unknown command: {args.command}")
