@@ -13,28 +13,28 @@ class InlineValue(Component):
 
 class _ConditionType(Enum):
     """Condition type enumeration."""
-    Equal: str
-    NotEqual: str
-    GreaterThan: str
-    GreaterThanOrEqual: str
-    LessThan: str
-    LessThanOrEqual: str
-    Contains: str
-    NotContains: str
-    RegexMatches: str
-    IsEmpty: str
-    IsNotEmpty: str
-    IsNull: str
-    IsNotNull: str
-    IsUndefined: str
-    IsNotUndefined: str
-    HasProperty: str
-    LengthEqual: str
-    LengthNotEqual: str
-    LengthGreaterThan: str
-    LengthLessThan: str
-    TypeEquals: str
-    Expression: str
+    Equal = 'EQUAL'
+    NotEqual = 'NOT_EQUAL'
+    GreaterThan = 'GREATER_THAN'
+    GreaterThanOrEqual = 'GREATER_THAN_OR_EQUAL'
+    LessThan = 'LESS_THAN'
+    LessThanOrEqual = 'LESS_THAN_OR_EQUAL'
+    Contains = 'CONTAINS'
+    NotContains = 'NOT_CONTAINS'
+    RegexMatches = 'REGEX_MATCHES'
+    IsEmpty = 'IS_EMPTY'
+    IsNotEmpty = 'IS_NOT_EMPTY'
+    IsNull = 'IS_NULL'
+    IsNotNull = 'IS_NOT_NULL'
+    IsUndefined = 'IS_UNDEFINED'
+    IsNotUndefined = 'IS_NOT_UNDEFINED'
+    HasProperty = 'HAS_PROPERTY'
+    LengthEqual = 'LENGTH_EQUAL'
+    LengthNotEqual = 'LENGTH_NOT_EQUAL'
+    LengthGreaterThan = 'LENGTH_GREATER_THAN'
+    LengthLessThan = 'LENGTH_LESS_THAN'
+    TypeEquals = 'TYPE_EQUALS'
+    Expression = 'EXPRESSION'
 
 class _ConditionalConfig:
     """Conditional configuration."""

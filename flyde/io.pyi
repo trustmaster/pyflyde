@@ -16,9 +16,9 @@ class InputMode(Enum):
     STICKY: The input has a sticky value. It has a queue attached to it, but the last received value is returned in
     absence of new values in the queue. Thus sticky inputs are non-blocking.
     STATIC: The input has a static value that does not change."""
-    QUEUE: str
-    STICKY: str
-    STATIC: str
+    QUEUE = 'queue'
+    STICKY = 'sticky'
+    STATIC = 'static'
 
 class Requiredness(Enum):
     """Requiredness of an input.
@@ -26,9 +26,9 @@ class Requiredness(Enum):
     REQUIRED: The input is required to be connected.
     OPTIONAL: The input is optional.
     REQUIRED_IF_CONNECTED: The input is required if it is connected to a queue."""
-    REQUIRED: str
-    OPTIONAL: str
-    REQUIRED_IF_CONNECTED: str
+    REQUIRED = 'required'
+    OPTIONAL = 'optional'
+    REQUIRED_IF_CONNECTED = 'required-if-connected'
 
 class OutputMode(Enum):
     """OutputMode defines the behavior of an output if it is connected to multiple input queues.
@@ -37,9 +37,9 @@ class OutputMode(Enum):
     VALUE: Copy-by-value. Each connected input will receive a deep copy of the object.
     CIRCLE: Circular. Each connected input will receive the object in a round-robin fashion.
     """
-    REF: str
-    VALUE: str
-    CIRCLE: str
+    REF = 'ref'
+    VALUE = 'value'
+    CIRCLE = 'circle'
 
 class Input:
     """Input is an interface for getting input/output data for a node."""
