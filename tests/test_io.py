@@ -200,6 +200,17 @@ class TestInput(unittest.TestCase):
                     self.input.value = test_case["value"]
                 self.assertEqual(self.input.count(), test_case["expected"])
 
+    def test_ref_count(self):
+        # Initial ref count is 0
+        input = Input()
+        self.assertEqual(input.ref_count, 0)
+        # Increment ref count to 1
+        input.inc_ref_count()
+        self.assertEqual(input.ref_count, 1)
+        # Decrement ref count to 0
+        input.dec_ref_count()
+        self.assertEqual(input.ref_count, 0)
+
 
 class TestOutput(unittest.TestCase):
     def setUp(self):

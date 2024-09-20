@@ -66,3 +66,42 @@ class TestNestedFlow(unittest.TestCase):
 
         flow.stopped.wait()
         self.assertTrue(flow.stopped.is_set())
+
+
+class TestFanInFlow(unittest.TestCase):
+    def test_flow(self):
+        test_case = {
+            "inputs": ["John", EOF],
+            "outputs": ["John", "JOHN", "Hello, John!", EOF],
+        }
+        flow = Flow.from_file("tests/TestFanIn.flyde")
+
+        in_q = flow.node.inputs["str"].queue
+        out_q = Queue()
+        flow.node.outputs["out"].connect(out_q)
+
+        flow.run()
+
+        # Get all outputs as set
+        expected_outputs = set(test_case["outputs"])
+        output_list = []
+        for inp in test_case["inputs"]:
+            in_q.put(inp)
+
+        # Get all outputs until EOF
+        count = 0
+        limit = len(test_case["outputs"])
+        out = None
+        while count < limit and out != EOF:
+            out = out_q.get()
+            output_list.append(out)
+            count += 1
+
+        # Check if all expected outputs are in the set
+        output_set = set(output_list)
+        self.assertTrue(expected_outputs.issubset(output_set))
+        # EOF must be the last output
+        self.assertEqual(EOF, output_list[-1])
+
+        flow.stopped.wait()
+        self.assertTrue(flow.stopped.is_set())

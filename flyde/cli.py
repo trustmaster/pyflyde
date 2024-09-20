@@ -2,12 +2,15 @@
 import argparse
 import importlib
 import logging
+import os
 import pprint
 
 from flyde.flow import Flow, add_folder_to_path
 from flyde.node import Component
 
-logging.basicConfig(level=logging.INFO)
+log_level = getattr(logging, os.getenv('LOG_LEVEL', 'INFO').upper(), logging.INFO)
+logging.basicConfig(level=log_level)
+logger = logging.getLogger(__name__)
 
 
 def py_path_to_module(py_path: str) -> str:

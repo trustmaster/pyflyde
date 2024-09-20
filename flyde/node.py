@@ -167,6 +167,7 @@ class Component(Node):
                 inputs = {}
                 queue_count = 0
                 queue_closed_count = 0
+                skip_iteration = False
                 for key, inp in self.inputs.items():
                     is_queue = inp._input_mode == InputMode.QUEUE
                     value = inp.get()
@@ -176,7 +177,18 @@ class Component(Node):
                     if is_queue:
                         queue_count += 1
                         if is_EOF(value):
-                            queue_closed_count += 1
+                            # The input may be connected to multiple outputs, so we need to count the references
+                            if inp.ref_count > 0:
+                                inp.dec_ref_count()
+                            if inp.ref_count == 0:
+                                queue_closed_count += 1
+                            else:
+                                # Ignore this EOF, it's not the last one
+                                inputs[key] = None
+                                skip_iteration = True
+
+                if skip_iteration:
+                    continue
 
                 # If all of the queue input values are EOF, stop the component
                 if queue_count > 0 and queue_count == queue_closed_count:
@@ -319,15 +331,24 @@ class Graph(Node):
 
             if from_id != "__this" and to_id != "__this":
                 # Simple case: connect two instances inside the graph
-                q = self._instances[to_id].inputs[to_pin].queue
-                self._instances[from_id].outputs[from_pin].connect(q)
+                input = self._instances[to_id].inputs[to_pin]
+                q = input.queue
+                output = self._instances[from_id].outputs[from_pin]
+                output.connect(q)
+                input.inc_ref_count()
             elif from_id == "__this":
                 # Graph ports are reversed: we read from inputs and write to outputs
-                q = self._instances[to_id].inputs[to_pin].queue
-                self.inputs[from_pin].connect(q)
+                input = self._instances[to_id].inputs[to_pin]
+                q = input.queue
+                output = self.inputs[from_pin]
+                output.connect(q)
+                input.inc_ref_count()
             elif to_id == "__this":
-                q = self.outputs[to_pin].queue
-                self._instances[from_id].outputs[from_pin].connect(q)
+                input = self.outputs[to_pin]
+                q = input.queue
+                output = self._instances[from_id].outputs[from_pin]
+                output.connect(q)
+                input.inc_ref_count()
 
     def _check_pin(self, pin_type: str, instance_id: str, pin_id: str):
         """Check if the instance and pin exist."""
@@ -373,7 +394,8 @@ class Graph(Node):
         """Stop all instances gracefully."""
         # Close all inputs and wait for all instances to stop
         for v in self.inputs.values():
-            v.queue.put(EOF)
+            if v.queue is not None and v.ref_count == 0:
+                v.queue.put(EOF)
 
     def terminate(self):
         """Terminate all instances immediately."""

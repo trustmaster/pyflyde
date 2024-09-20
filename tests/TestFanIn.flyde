@@ -1,0 +1,98 @@
+imports:
+  "@flyde/stdlib":
+    - InlineValue
+  components.flyde.ts:
+    - Format
+    - Capitalize
+    - Echo
+node:
+  instances:
+    - pos:
+        x: -295.88691528320317
+        y: 102.49996948242188
+      id: Format-4s04bag
+      inputConfig: {}
+      nodeId: Format
+    - pos:
+        x: -64.1663818359375
+        y: 56.65972900390625
+      id: Capitalize-ch04buf
+      inputConfig: {}
+      nodeId: Capitalize
+    - pos:
+        x: -148.65975585937497
+        y: 238.9669189453125
+      id: Echo-eb14b06
+      inputConfig: {}
+      nodeId: Echo
+    - pos:
+        x: -328.1567211914063
+        y: -90.1646710205078
+      id: xzi4aah4ewf1iw7q4a3jz9oj
+      inputConfig: {}
+      nodeId: InlineValue__xzi4aah4ewf1iw7q4a3jz9oj
+      macroId: InlineValue
+      macroData:
+        type: string
+        value: Hello, {inp}!
+  connections:
+    - from:
+        insId: Format-4s04bag
+        pinId: out
+      to:
+        insId: Echo-eb14b06
+        pinId: inp
+    - from:
+        insId: Capitalize-ch04buf
+        pinId: out
+      to:
+        insId: Echo-eb14b06
+        pinId: inp
+    - from:
+        insId: __this
+        pinId: str
+      to:
+        insId: Format-4s04bag
+        pinId: inp
+    - from:
+        insId: __this
+        pinId: str
+      to:
+        insId: Capitalize-ch04buf
+        pinId: inp
+    - from:
+        insId: __this
+        pinId: str
+      to:
+        insId: Echo-eb14b06
+        pinId: inp
+    - from:
+        insId: xzi4aah4ewf1iw7q4a3jz9oj
+        pinId: value
+      to:
+        insId: Format-4s04bag
+        pinId: format
+    - from:
+        insId: Echo-eb14b06
+        pinId: out
+      to:
+        insId: __this
+        pinId: out
+  id: Example
+  inputs:
+    str:
+      mode: required
+  outputs:
+    out:
+      delayed: false
+  inputsPosition:
+    str:
+      x: -119.99874877929688
+      y: -99.46359436035156
+  outputsPosition:
+    result:
+      x: -23.264428942324532
+      y: 237.25953921502617
+    out:
+      x: -120.79533203125001
+      y: 390.6666717529297

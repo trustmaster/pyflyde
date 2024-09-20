@@ -84,6 +84,7 @@ class Input:
                 raise ValueError(f"Value {value} is not of type {self.type}")
             self._value = value
         self.required = required
+        self._ref_count = 0
 
     @property
     def queue(self) -> Queue:
@@ -129,6 +130,19 @@ class Input:
         if self._input_mode == InputMode.QUEUE:
             return self._queue.qsize()
         return 0 if self._value is None else 1
+
+    def inc_ref_count(self):
+        """Increment the reference count of the input."""
+        self._ref_count += 1
+
+    def dec_ref_count(self):
+        """Decrement the reference count of the input."""
+        self._ref_count -= 1
+
+    @property
+    def ref_count(self) -> int:
+        """Get the reference count of the input."""
+        return self._ref_count
 
 
 class Output:

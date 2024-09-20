@@ -49,6 +49,7 @@ class Input:
     _input_mode: Incomplete
     _value: Incomplete
     required: Incomplete
+    _ref_count: int
     def __init__(self, /, id: str = '', description: str = '', mode: InputMode = ..., type: type | None = None, value: Any = None, required: Requiredness = ...) -> None:
         """Create a new input object.
 
@@ -76,6 +77,13 @@ class Input:
         """Check if the input queue is empty."""
     def count(self) -> int:
         """Get the number of elements in the input queue."""
+    def inc_ref_count(self) -> None:
+        """Increment the reference count of the input."""
+    def dec_ref_count(self) -> None:
+        """Decrement the reference count of the input."""
+    @property
+    def ref_count(self) -> int:
+        """Get the reference count of the input."""
 
 class Output:
     """Output is an interface for setting output data for a component."""
