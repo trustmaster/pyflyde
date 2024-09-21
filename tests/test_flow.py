@@ -71,44 +71,49 @@ logging.basicConfig(level=logging.DEBUG)
 
 
 class TestFanInFlow(unittest.TestCase):
-#     def test_with_component(self):
-#         test_case = {
-#             "inputs": ["John", EOF],
-#             "outputs": ["John", "JOHN", "Hello, John!", EOF],
-#         }
-#         flow = Flow.from_file("tests/TestFanIn.flyde")
+    #     def test_with_component(self):
+    #         test_case = {
+    #             "inputs": ["John", EOF],
+    #             "outputs": ["John", "JOHN", "Hello, John!", EOF],
+    #         }
+    #         flow = Flow.from_file("tests/TestFanIn.flyde")
 
-#         in_q = flow.node.inputs["str"].queue
-#         out_q = Queue()
-#         flow.node.outputs["out"].connect(out_q)
+    #         in_q = flow.node.inputs["str"].queue
+    #         out_q = Queue()
+    #         flow.node.outputs["out"].connect(out_q)
 
-#         flow.run()
+    #         flow.run()
 
-#         for inp in test_case["inputs"]:
-#             in_q.put(inp)
+    #         for inp in test_case["inputs"]:
+    #             in_q.put(inp)
 
-#         # Get all outputs until EOF
-#         output_list = []
-#         count = 0
-#         limit = len(test_case["outputs"])
-#         out = None
-#         while count < limit and out != EOF:
-#             out = out_q.get()
-#             output_list.append(out)
-#             count += 1
+    #         # Get all outputs until EOF
+    #         output_list = []
+    #         count = 0
+    #         limit = len(test_case["outputs"])
+    #         out = None
+    #         while count < limit and out != EOF:
+    #             out = out_q.get()
+    #             output_list.append(out)
+    #             count += 1
 
-#         # Compare expected and actual lists ignoring the order of elements
-#         self.assertCountEqual(test_case["outputs"], output_list)
-#         # EOF must be the last output
-#         self.assertEqual(EOF, output_list[-1])
+    #         # Compare expected and actual lists ignoring the order of elements
+    #         self.assertCountEqual(test_case["outputs"], output_list)
+    #         # EOF must be the last output
+    #         self.assertEqual(EOF, output_list[-1])
 
-#         flow.stopped.wait()
-#         self.assertTrue(flow.stopped.is_set())
+    #         flow.stopped.wait()
+    #         self.assertTrue(flow.stopped.is_set())
 
     def test_with_graph(self):
         test_case = {
             "inputs": ["John", EOF],
-            "outputs": ["JOHNJOHNJOHN", "JOHNJOHNJOHN", "HELLO, JOHN!HELLO, JOHN!HELLO, JOHN!", EOF],
+            "outputs": [
+                "JOHNJOHNJOHN",
+                "JOHNJOHNJOHN",
+                "HELLO, JOHN!HELLO, JOHN!HELLO, JOHN!",
+                EOF,
+            ],
         }
         flow = Flow.from_file("tests/TestFanInGraph.flyde")
 
