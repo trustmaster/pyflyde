@@ -222,9 +222,26 @@ class RedirectQueue:
 
     def __init__(self, output: Output):
         self._output = output
+        self._ref_count = 0
+
+    @property
+    def ref_count(self) -> int:
+        return self._ref_count
+
+    def inc_ref_count(self):
+        self._ref_count += 1
+
+    def dec_ref_count(self):
+        self._ref_count -= 1
 
     def put(self, item: Any, block=True, timeout=None):
-        self._output.send(item)
+        if item is EOF:
+            # Count references and only send EOF when all references are removed as we might have multiple inputs connected
+            self.dec_ref_count()
+            if self._ref_count <= 0:
+                self._output.send(item)
+        else:
+            self._output.send(item)
 
 
 class GraphPort(Input, Output):
@@ -265,6 +282,15 @@ class GraphPort(Input, Output):
 
         # Use RedriveQueue instead of the normal input queue
         self._queue = RedirectQueue(self)  # type: ignore
+
+    def inc_ref_count(self):
+        # Need to increase ref count of the RedriveQueue
+        self._queue.inc_ref_count() # type: ignore
+        return super().inc_ref_count()
+
+    def dec_ref_count(self):
+        self._queue.dec_ref_count() # type: ignore
+        return super().dec_ref_count()
 
 
 class ConnectionNode:

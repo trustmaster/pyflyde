@@ -1,0 +1,99 @@
+imports:
+  "@flyde/stdlib":
+    - InlineValue
+  components.flyde.ts:
+    - Format
+    - Capitalize
+  Repeat3Times.flyde:
+    - Repeat3Times
+node:
+  instances:
+    - pos:
+        x: -295.88691528320317
+        y: 102.49996948242188
+      id: Format-4s04bag
+      inputConfig: {}
+      nodeId: Format
+    - pos:
+        x: -44.16827392578125
+        y: 63.02734375
+      id: Capitalize-ch04buf
+      inputConfig: {}
+      nodeId: Capitalize
+    - pos:
+        x: -328.1567211914063
+        y: -90.1646710205078
+      id: xzi4aah4ewf1iw7q4a3jz9oj
+      inputConfig: {}
+      nodeId: InlineValue__xzi4aah4ewf1iw7q4a3jz9oj
+      macroId: InlineValue
+      macroData:
+        type: string
+        value: Hello, {inp}!
+    - pos:
+        x: -185.60189453125
+        y: 240.50311500933114
+      id: Repeat3Times-ou04byd
+      inputConfig: {}
+      nodeId: Repeat3Times
+  connections:
+    - from:
+        insId: __this
+        pinId: str
+      to:
+        insId: Format-4s04bag
+        pinId: inp
+    - from:
+        insId: __this
+        pinId: str
+      to:
+        insId: Capitalize-ch04buf
+        pinId: inp
+    - from:
+        insId: xzi4aah4ewf1iw7q4a3jz9oj
+        pinId: value
+      to:
+        insId: Format-4s04bag
+        pinId: format
+    - from:
+        insId: Capitalize-ch04buf
+        pinId: out
+      to:
+        insId: Repeat3Times-ou04byd
+        pinId: word
+    - from:
+        insId: __this
+        pinId: str
+      to:
+        insId: Repeat3Times-ou04byd
+        pinId: word
+    - from:
+        insId: Format-4s04bag
+        pinId: out
+      to:
+        insId: Repeat3Times-ou04byd
+        pinId: word
+    - from:
+        insId: Repeat3Times-ou04byd
+        pinId: word3x
+      to:
+        insId: __this
+        pinId: out
+  id: Example
+  inputs:
+    str:
+      mode: required
+  outputs:
+    out:
+      delayed: false
+  inputsPosition:
+    str:
+      x: -119.99874877929688
+      y: -99.46359436035156
+  outputsPosition:
+    result:
+      x: -23.264428942324532
+      y: 237.25953921502617
+    out:
+      x: -120.79533203125001
+      y: 390.6666717529297
