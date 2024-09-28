@@ -4,13 +4,11 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "pyflyde"
-version = "0.0.9"
+version = "0.0.10"
 requires-python = ">= 3.9"
-authors = [
-    {name = "Vladimir Sibirov"}
-]
-description="Python SDK and runtime for Flyde - a visual flow-based programming language and IDE."
-readme="README.md"
+authors = [{ name = "Vladimir Sibirov" }]
+description = "Python SDK and runtime for Flyde - a visual flow-based programming language and IDE."
+readme = "README.md"
 classifiers = [
     "Development Status :: 3 - Alpha",
     "Intended Audience :: Developers",
@@ -29,9 +27,7 @@ classifiers = [
 ]
 license = { file = "LICENSE" }
 
-dependencies = [
-    "pyyaml",
-]
+dependencies = ["pyyaml"]
 
 [project.scripts]
 pyflyde = "flyde.cli:main"
