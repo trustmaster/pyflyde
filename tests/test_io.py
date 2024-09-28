@@ -1,6 +1,14 @@
 import unittest
 from queue import Queue
-from flyde.io import Input, InputMode, Output, EOF, Connection, ConnectionNode
+from flyde.io import (
+    Input,
+    InputMode,
+    Output,
+    EOF,
+    Connection,
+    ConnectionNode,
+    Requiredness,
+)
 
 
 class TestInput(unittest.TestCase):
@@ -79,6 +87,26 @@ class TestInput(unittest.TestCase):
                     self.input.value = test_case["value"]
                     self.assertEqual(self.input._value, test_case["expected"])
 
+    def test_is_connected(self):
+        test_cases = [
+            {
+                "name": "input not connected",
+                "expected": False,
+                "connect_queue": False,
+            },
+            {
+                "name": "input connected",
+                "expected": True,
+                "connect_queue": True,
+            },
+        ]
+        for test_case in test_cases:
+            with self.subTest(case=test_case["name"]):
+                self.input = Input()
+                if test_case["connect_queue"]:
+                    _ = self.input.queue  # Accessing the queue to connect it
+                self.assertEqual(self.input.is_connected, test_case["expected"])
+
     def test_get(self):
         test_cases = [
             {
@@ -86,31 +114,67 @@ class TestInput(unittest.TestCase):
                 "mode": InputMode.QUEUE,
                 "queue_values": [10],
                 "expected": 10,
+                "connected": True,
+                "required": Requiredness.REQUIRED,
             },
             {
                 "name": "get value in static mode",
                 "mode": InputMode.STATIC,
                 "value": 10,
                 "expected": 10,
+                "connected": False,
+                "required": Requiredness.REQUIRED,
             },
             {
                 "name": "get value in sticky mode",
                 "mode": InputMode.STICKY,
                 "value": 10,
                 "expected": 10,
+                "connected": True,
+                "required": Requiredness.REQUIRED,
+            },
+            {
+                "name": "get value in queue mode with optional input",
+                "mode": InputMode.QUEUE,
+                "value": 5,
+                "queue_values": [],
+                "expected": 5,
+                "connected": False,
+                "required": Requiredness.OPTIONAL,
+            },
+            {
+                "name": "get value in sticky mode with required if connected",
+                "mode": InputMode.STICKY,
+                "value": 10,
+                "expected": 10,
+                "connected": True,
+                "required": Requiredness.REQUIRED_IF_CONNECTED,
+            },
+            {
+                "name": "get value in sticky mode with required if not connected",
+                "mode": InputMode.STICKY,
+                "value": 10,
+                "expected": 10,
+                "connected": False,
+                "required": Requiredness.REQUIRED_IF_CONNECTED,
             },
         ]
         for test_case in test_cases:
             with self.subTest(case=test_case["name"]):
-                self.input = Input(mode=test_case["mode"])
-                if "queue_values" in test_case:
+                self.input = Input(
+                    mode=test_case["mode"],
+                    required=test_case["required"],
+                    value=test_case.get("value"),
+                )
+                if test_case["connected"]:
+                    _ = self.input.queue  # Accessing the queue to connect it
+                if "queue_values" in test_case and len(test_case["queue_values"]) > 0:
                     queue = self.input.queue
                     for value in test_case["queue_values"]:
                         queue.put(value)
-                if "value" in test_case:
-                    self.input.value = test_case["value"]
-                else:
-                    self.assertEqual(self.input.get(), test_case["expected"])
+
+                result = self.input.get()
+                self.assertEqual(result, test_case["expected"])
 
     def test_empty(self):
         test_cases = [

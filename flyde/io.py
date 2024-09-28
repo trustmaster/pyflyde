@@ -95,6 +95,11 @@ class Input:
         return self._queue
 
     @property
+    def is_connected(self) -> bool:
+        """Check if the input is connected to a queue."""
+        return hasattr(self, "_queue") and self._queue is not None
+
+    @property
     def value(self) -> Any:
         """Get the static value associated with the input."""
         return self._value
@@ -109,6 +114,10 @@ class Input:
 
     def get(self) -> Any:
         """Get the value of the input from either the queue or static value."""
+        if not self.is_connected and (
+            self.required == Requiredness.OPTIONAL or
+            self.required == Requiredness.REQUIRED_IF_CONNECTED):
+            return self._value
         if self._input_mode == InputMode.QUEUE:
             return self._queue.get()
         elif self._input_mode == InputMode.STICKY:

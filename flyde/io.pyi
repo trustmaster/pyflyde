@@ -66,6 +66,9 @@ class Input:
     def queue(self) -> Queue:
         """Get the queue of the input."""
     @property
+    def is_connected(self) -> bool:
+        """Check if the input is connected to a queue."""
+    @property
     def value(self) -> Any:
         """Get the static value associated with the input."""
     @value.setter
