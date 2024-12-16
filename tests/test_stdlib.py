@@ -20,6 +20,19 @@ class TestInlineValue(unittest.TestCase):
         node.stopped.wait()
         self.assertTrue(node.stopped.is_set())
 
+    def test_inline_value_dict(self):
+        test_case = {
+            "inputs": {},
+            "outputs": {"value": "Hello"},
+        }
+        out_q = Queue()
+        node = InlineValue(macro_data={"value": {"type": "string", "value": "Hello"}}, id="test_inline_value")
+        node.outputs["value"].connect(out_q)
+        node.run()
+        self.assertEqual(test_case["outputs"]["value"], out_q.get())
+        node.stopped.wait()
+        self.assertTrue(node.stopped.is_set())
+
 
 class TestConditional(unittest.TestCase):
     def test_conditional(self):

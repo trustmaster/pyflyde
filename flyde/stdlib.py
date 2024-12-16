@@ -14,7 +14,8 @@ class InlineValue(Component):
     def __init__(self, macro_data: dict, **kwargs):
         super().__init__(**kwargs)
         if "value" in macro_data:
-            self.value = macro_data["value"]
+            value = macro_data["value"]
+            self.value = self._get_inline_value(value) if self._is_inline_dict(value) else value
         else:
             raise ValueError("Missing value in InlineValue configuration.")
 
@@ -22,6 +23,15 @@ class InlineValue(Component):
         self.send("value", self.value)
         # Inline value only runs once
         self.stop()
+
+    def _is_inline_dict(self, value: Any) -> bool:
+        """Check if a value is an inline Flyde value dict, which has `type` and `value` keys."""
+        supported_inline_types = ["dynamic", "string", "number", "boolean", "json", "select", "longtext"]
+        return isinstance(value, dict) and "type" in value and value["type"] in supported_inline_types
+
+    def _get_inline_value(self, value: Any) -> Any:
+        """Get the value from an inline Flyde value output."""
+        return value["value"]
 
 
 class _ConditionType(Enum):
