@@ -26,7 +26,10 @@ class TestInlineValue(unittest.TestCase):
             "outputs": {"value": "Hello"},
         }
         out_q = Queue()
-        node = InlineValue(macro_data={"value": {"type": "string", "value": "Hello"}}, id="test_inline_value")
+        node = InlineValue(
+            macro_data={"value": {"type": "string", "value": "Hello"}},
+            id="test_inline_value",
+        )
         node.outputs["value"].connect(out_q)
         node.run()
         self.assertEqual(test_case["outputs"]["value"], out_q.get())
@@ -998,7 +1001,7 @@ class TestGetAttribute(unittest.TestCase):
                         {"nananan": "Charlie"},
                         EOF,
                     ],
-                    "attribute": [],
+                    "key": [],
                 },
                 "outputs": ["Alice", "Bob", None, EOF],
             },
@@ -1015,7 +1018,7 @@ class TestGetAttribute(unittest.TestCase):
                         SimpleNamespace(nananan="Charlie"),
                         EOF,
                     ],
-                    "attribute": ["name"],
+                    "key": ["name"],
                 },
                 "outputs": ["Alice", "Bob", None, EOF],
             },
@@ -1029,7 +1032,7 @@ class TestGetAttribute(unittest.TestCase):
                         {"nananan": "Charlie"},
                         EOF,
                     ],
-                    "attribute": ["name", "name", "nananan", EOF],
+                    "key": ["name", "name", "nananan", EOF],
                 },
                 "outputs": ["Alice", "Bob", "Charlie", EOF],
             },
@@ -1046,7 +1049,7 @@ class TestGetAttribute(unittest.TestCase):
                         123,
                         EOF,
                     ],
-                    "attribute": ["name"],
+                    "key": ["name"],
                 },
                 "outputs": ["Alice", None, None, EOF],
             },
@@ -1059,14 +1062,14 @@ class TestGetAttribute(unittest.TestCase):
                 macro_data={"key": test_case["key"]}, id="test_get_attribute"
             )
             obj_q = node.inputs["object"].queue
-            if len(test_case["inputs"]["attribute"]) > 0:
-                attr_q = node.inputs["attribute"].queue
+            if len(test_case["inputs"]["key"]) > 0:
+                attr_q = node.inputs["key"].queue
             node.outputs["value"].connect(out_q)
             node.run()
             for i in range(len(test_case["inputs"]["object"])):
                 obj_q.put(test_case["inputs"]["object"][i])
-                if len(test_case["inputs"]["attribute"]) > 0 and i < len(
-                    test_case["inputs"]["attribute"]
+                if len(test_case["inputs"]["key"]) > 0 and i < len(
+                    test_case["inputs"]["key"]
                 ):
-                    attr_q.put(test_case["inputs"]["attribute"][i])
+                    attr_q.put(test_case["inputs"]["key"][i])
                 self.assertEqual(test_case["outputs"][i], out_q.get())

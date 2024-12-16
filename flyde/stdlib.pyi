@@ -10,6 +10,10 @@ class InlineValue(Component):
     value: Incomplete
     def __init__(self, macro_data: dict, **kwargs) -> None: ...
     def process(self) -> None: ...
+    def _is_inline_dict(self, value: Any) -> bool:
+        """Check if a value is an inline Flyde value dict, which has `type` and `value` keys."""
+    def _get_inline_value(self, value: Any) -> Any:
+        """Get the value from an inline Flyde value output."""
 
 class _ConditionType(Enum):
     """Condition type enumeration."""
@@ -69,4 +73,4 @@ class GetAttribute(Component):
     outputs: Incomplete
     value: Incomplete
     def __init__(self, macro_data: dict, **kwargs) -> None: ...
-    def process(self, object: Any, attribute: str): ...
+    def process(self, object: Any, key: str): ...

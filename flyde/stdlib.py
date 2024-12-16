@@ -215,7 +215,7 @@ class GetAttribute(Component):
 
     inputs = {
         "object": Input(description="The object or dictionary"),
-        "attribute": Input(description="The attribute name", type=str),
+        "key": Input(description="The attribute name", type=str),
     }
     outputs = {"value": Output(description="The attribute value")}
 
@@ -229,18 +229,18 @@ class GetAttribute(Component):
             self.value = key["value"]
         if "type" in key:
             if key["type"] == "static":
-                self.inputs["attribute"]._input_mode = InputMode.STATIC  # type: ignore
-                self.inputs["attribute"].value = self.value
+                self.inputs["key"]._input_mode = InputMode.STATIC  # type: ignore
+                self.inputs["key"].value = self.value
             else:
-                self.inputs["attribute"]._input_mode = InputMode.STICKY  # type: ignore
+                self.inputs["key"]._input_mode = InputMode.STICKY  # type: ignore
                 if self.value is not None:
-                    self.inputs["attribute"].value = self.value
+                    self.inputs["key"].value = self.value
 
-    def process(self, object: Any, attribute: str):
+    def process(self, object: Any, key: str):
         if isinstance(object, dict):
-            value = object.get(attribute, None)
-        elif hasattr(object, attribute):
-            value = getattr(object, attribute)
+            value = object.get(key, None)
+        elif hasattr(object, key):
+            value = getattr(object, key)
         else:
             value = None
         self.send("value", value)
