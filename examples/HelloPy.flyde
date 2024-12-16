@@ -19,9 +19,9 @@ node:
       nodeId: InlineValue__vzy5s9fyaacybwutaijgttv1
       macroId: InlineValue
       macroData:
-        type: string
-        value: Hello Flyde!
-        label: '"Hello Flyde!"'
+        value:
+          type: string
+          value: Hello Flyde!
   connections:
     - from:
         insId: vzy5s9fyaacybwutaijgttv1

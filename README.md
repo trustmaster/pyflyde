@@ -16,10 +16,16 @@ Links:
 
 You need Python 3.9+ installed on your machine to run PyFlyde.
 
-Then you can install PyFlyde using pip:
+Then you can install PyFlyde to your environment using pip:
 
 ```bash
 pip install pyflyde
+```
+
+On some systems Python3 requires `pip3` command instead:
+
+```bash
+pip3 install pyflyde
 ```
 
 ### Running the examples
@@ -30,10 +36,23 @@ You can copy `examples` folder from this repository to your local project to giv
 pyflyde examples/HelloWorld.flyde
 ```
 
+Or you can install this package locally after cloning this repository and run the examples directly:
+
+```bash
+pip install .
+./pyflyde examples/HelloWorld.flyde
+```
+
 To run other examples you would need to install their dependencies:
 
 ```bash
 pip install examples/
+```
+
+Then you can run e.g.
+
+```bash
+./pyflyde examples/Clustering.flyde
 ```
 
 ### Using the visual editor

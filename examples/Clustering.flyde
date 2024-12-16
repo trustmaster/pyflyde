@@ -26,9 +26,15 @@ node:
       nodeId: InlineValue__mc4t4fqqezd1gns4fb7ckxmc
       macroId: InlineValue
       macroData:
-        type: string
-        value: examples/datasets/wine-clustering.csv
-        label: wine-clustering.csv
+        type:
+          type: string
+          value: string
+        value:
+          type: string
+          value: examples/datasets/wine-clustering.csv
+        label:
+          type: string
+          value: wine-clustering.csv
     - pos:
         x: -21.232984619140666
         y: 59.69538116455078
@@ -55,9 +61,15 @@ node:
       nodeId: InlineValue__yquy5xqil6xp9tmb42ktmosp
       macroId: InlineValue
       macroData:
-        value: 20
-        type: number
-        label: "20"
+        value:
+          type: number
+          value: 20
+        type:
+          type: string
+          value: number
+        label:
+          type: string
+          value: "20"
     - pos:
         x: -264.7014599609375
         y: 436.35204895019535
@@ -85,7 +97,7 @@ node:
       macroId: GetAttribute
       macroData:
         key:
-          mode: dynamic
+          type: dynamic
     - pos:
         x: -94.66524780273448
         y: 458.4299138098137
@@ -94,9 +106,15 @@ node:
       nodeId: InlineValue__xb5xo767x6u0ubdvvegi0e53
       macroId: InlineValue
       macroData:
-        type: string
-        value: centroids
-        label: '"centroids"'
+        type:
+          type: string
+          value: string
+        value:
+          type: string
+          value: centroids
+        label:
+          type: string
+          value: '"centroids"'
   connections:
     - from:
         insId: mc4t4fqqezd1gns4fb7ckxmc
@@ -145,7 +163,7 @@ node:
         pinId: value
       to:
         insId: nmt2k6i80qpwu9fyuckbqefw
-        pinId: attribute
+        pinId: key
     - from:
         insId: Scale-dz139az
         pinId: scaled_dataframe
