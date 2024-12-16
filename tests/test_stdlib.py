@@ -988,7 +988,7 @@ class TestGetAttribute(unittest.TestCase):
             {
                 "name": "static attribute from a dict",
                 "key": {
-                    "mode": "static",
+                    "type": "static",
                     "value": "name",
                 },
                 "inputs": {
@@ -1005,7 +1005,7 @@ class TestGetAttribute(unittest.TestCase):
             {
                 "name": "sticky attribute from an object",
                 "key": {
-                    "mode": "sticky",
+                    "type": "sticky",
                     "value": "name",
                 },
                 "inputs": {
@@ -1036,7 +1036,7 @@ class TestGetAttribute(unittest.TestCase):
             {
                 "name": "sticky attribute and non-object",
                 "key": {
-                    "mode": "sticky",
+                    "type": "sticky",
                     "value": "name",
                 },
                 "inputs": {

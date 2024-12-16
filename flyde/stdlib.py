@@ -227,8 +227,8 @@ class GetAttribute(Component):
         self.value = None
         if "value" in key:
             self.value = key["value"]
-        if "mode" in key:
-            if key["mode"] == "static":
+        if "type" in key:
+            if key["type"] == "static":
                 self.inputs["attribute"]._input_mode = InputMode.STATIC  # type: ignore
                 self.inputs["attribute"].value = self.value
             else:
