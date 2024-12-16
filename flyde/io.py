@@ -112,6 +112,18 @@ class Input:
             raise ValueError(f"Value {value} is not of type {self.type}")
         self._value = value
 
+
+    def _is_inline_value(self, value: Any) -> bool:
+        """Check if a value is an inline Flyde value output, which is a dict with `type` and `value` keys."""
+        supported_inline_types = ["dynamic", "string", "number", "boolean", "json", "select", "longtext"]
+        return isinstance(value, dict) and "type" in value and value["type"] in supported_inline_types
+
+
+    def _get_inline_value(self, value: Any) -> Any:
+        """Get the value from an inline Flyde value output."""
+        return value["value"]
+
+
     def get(self) -> Any:
         """Get the value of the input from either the queue or static value."""
         if not self.is_connected and (
@@ -119,10 +131,15 @@ class Input:
             self.required == Requiredness.REQUIRED_IF_CONNECTED):
             return self._value
         if self._input_mode == InputMode.QUEUE:
-            return self._queue.get()
+            value = self._queue.get()
+            if self._is_inline_value(value):
+                value = self._get_inline_value(value)
+            return value
         elif self._input_mode == InputMode.STICKY:
             if not self._queue.empty() or self._value is None:
                 value = self._queue.get()
+                if self._is_inline_value(value):
+                    value = self._get_inline_value(value)
                 if not is_EOF(value):
                     # Ignore EOFs on sticky inputs, only queue inputs matter for termination
                     self._value = value

@@ -158,6 +158,22 @@ class TestInput(unittest.TestCase):
                 "connected": False,
                 "required": Requiredness.REQUIRED_IF_CONNECTED,
             },
+            {
+                "name": "get an inline string value from a queue",
+                "mode": InputMode.QUEUE,
+                "queue_values": [{"type": "string", "value": "foo"}],
+                "expected": "foo",
+                "connected": True,
+                "required": Requiredness.REQUIRED,
+            },
+            {
+                "name": "get an inline number value in sticky mode",
+                "mode": InputMode.STICKY,
+                "queue_values": [{"type": "number", "value": 10}],
+                "expected": 10,
+                "connected": True,
+                "required": Requiredness.REQUIRED_IF_CONNECTED,
+            }
         ]
         for test_case in test_cases:
             with self.subTest(case=test_case["name"]):
