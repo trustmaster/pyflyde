@@ -28,8 +28,12 @@ node:
       nodeId: InlineValue__xzi4aah4ewf1iw7q4a3jz9oj
       macroId: InlineValue
       macroData:
-        type: string
-        value: Hello, {inp}!
+        type:
+          type: string
+          value: string
+        value:
+          type: string
+          value: Hello, {inp}!
     - pos:
         x: -185.60189453125
         y: 240.50311500933114

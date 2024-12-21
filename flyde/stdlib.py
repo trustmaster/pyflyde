@@ -36,28 +36,14 @@ class InlineValue(Component):
 
 class _ConditionType(Enum):
     """Condition type enumeration."""
+
     Equal = "EQUAL"
     NotEqual = "NOT_EQUAL"
-    GreaterThan = "GREATER_THAN"
-    GreaterThanOrEqual = "GREATER_THAN_OR_EQUAL"
-    LessThan = "LESS_THAN"
-    LessThanOrEqual = "LESS_THAN_OR_EQUAL"
     Contains = "CONTAINS"
     NotContains = "NOT_CONTAINS"
     RegexMatches = "REGEX_MATCHES"
-    IsEmpty = "IS_EMPTY"
-    IsNotEmpty = "IS_NOT_EMPTY"
-    IsNull = "IS_NULL"
-    IsNotNull = "IS_NOT_NULL"
-    IsUndefined = "IS_UNDEFINED"
-    IsNotUndefined = "IS_NOT_UNDEFINED"
-    HasProperty = "HAS_PROPERTY"
-    LengthEqual = "LENGTH_EQUAL"
-    LengthNotEqual = "LENGTH_NOT_EQUAL"
-    LengthGreaterThan = "LENGTH_GREATER_THAN"
-    LengthLessThan = "LENGTH_LESS_THAN"
-    TypeEquals = "TYPE_EQUALS"
-    Expression = "EXPRESSION"
+    Exists = "EXISTS"
+    DoesNotExist = "DOES_NOT_EXIST"
 
 
 class _ConditionalConfig:
@@ -73,55 +59,25 @@ class _ConditionalConfig:
         except ValueError:
             raise ValueError(f"Unsupported condition type: {condition_type}")
         self.condition_data = condition.get("data", "")
-        if self.condition_type == _ConditionType.Expression:
-            raise NotImplementedError("Expression condition type is not implemented in PyFlyde.")
 
-        compare_to = yml.get("compareTo", {})
-        self.compare_to_mode = compare_to.get("mode", "static")
-        if self.compare_to_mode == "static":
-            self.compare_to_value = compare_to.get("value", None)
-            self.compare_to_type = compare_to.get("type", "string")
-            self.compare_to_property_path = ""
-        else:
-            self.compare_to_value = None
-            self.compare_to_type = None
-            self.compare_to_property_path = compare_to.get("propertyPath", "")
-
-        true_value = yml.get("trueValue", {})
-        self.true_value_type = true_value.get("type", "value")
-        if self.true_value_type == "expression":
-            self.true_value_expression = true_value.get("data", "")
-            raise NotImplementedError("Expression value type is not implemented in PyFlyde.")
-        else:
-            self.true_value_expression = None
-
-        false_value = yml.get("falseValue", {})
-        self.false_value_type = false_value.get("type", "value")
-        if self.false_value_type == "expression":
-            self.false_value_expression = false_value.get("data", "")
-            raise NotImplementedError("Expression value type is not implemented in PyFlyde.")
-        else:
-            self.false_value_expression = None
-
-
-def _get_attribute_by_path(obj: Any, path: str) -> Any:
-    """Gets nested attribute by property path."""
-    for attr in path.split("."):
-        if isinstance(obj, dict):
-            obj = obj.get(attr, None)
-        elif hasattr(obj, attr):
-            obj = getattr(obj, attr)
-        else:
-            return None
-    return obj
+        left_operand = yml.get("leftOperand", {})
+        self.left_operand = {
+            "type": left_operand.get("type", "dynamic"),
+            "value": left_operand.get("value", ""),
+        }
+        right_operand = yml.get("rightOperand", {})
+        self.right_operand = {
+            "type": right_operand.get("type", "dynamic"),
+            "value": right_operand.get("value", ""),
+        }
 
 
 class Conditional(Component):
     """Conditional component evaluates a condition against the input and sends the result to output."""
 
     inputs = {
-        "value": Input(description="Left operand of the comparison"),
-        "compareTo": Input(description="Right operand of the comparison"),
+        "leftOperand": Input(description="Left operand of the condition"),
+        "rightOperand": Input(description="Right operand of the condition"),
     }
     outputs = {
         "true": Output(description="Output when the condition is true"),
@@ -131,83 +87,40 @@ class Conditional(Component):
     def __init__(self, macro_data: dict, **kwargs):
         super().__init__(**kwargs)
         self._config = _ConditionalConfig(macro_data)
-        if self._config.compare_to_mode == "static":
-            self.inputs["compareTo"]._input_mode = InputMode.STATIC  # type: ignore
-            self.inputs["compareTo"].value = self._config.compare_to_value
+        if self._config.left_operand["type"] != "dynamic":
+            self.inputs["leftOperand"]._input_mode = InputMode.STATIC
+            self.inputs["leftOperand"].value = self._config.left_operand["value"]
+        if self._config.right_operand["type"] != "dynamic":
+            self.inputs["rightOperand"]._input_mode = InputMode.STATIC
+            self.inputs["rightOperand"].value = self._config.right_operand["value"]
 
-    def _evaluate(self, value: Any, compareTo: Any) -> bool:
+    def _evaluate(self, left_operand: Any, right_operand: Any) -> bool:
         condition_type = self._config.condition_type
         if condition_type == _ConditionType.Equal:
-            return value == compareTo
+            return left_operand == right_operand
         elif condition_type == _ConditionType.NotEqual:
-            return value != compareTo
-        elif condition_type == _ConditionType.GreaterThan:
-            return value > compareTo
-        elif condition_type == _ConditionType.GreaterThanOrEqual:
-            return value >= compareTo
-        elif condition_type == _ConditionType.LessThan:
-            return value < compareTo
-        elif condition_type == _ConditionType.LessThanOrEqual:
-            return value <= compareTo
+            return left_operand != right_operand
         elif condition_type == _ConditionType.Contains:
-            return compareTo in value
+            return right_operand in left_operand
         elif condition_type == _ConditionType.NotContains:
-            return compareTo not in value
+            return right_operand not in left_operand
         elif condition_type == _ConditionType.RegexMatches:
-            m = re.match(compareTo, value)
+            m = re.match(right_operand, left_operand)
             return m is not None
-        elif condition_type == _ConditionType.IsEmpty:
-            return value == ""
-        elif condition_type == _ConditionType.IsNotEmpty:
-            return value != ""
-        elif condition_type == _ConditionType.IsNull:
-            return value is None
-        elif condition_type == _ConditionType.IsNotNull:
-            return value is not None
-        elif condition_type == _ConditionType.IsUndefined:
-            return value is None
-        elif condition_type == _ConditionType.IsNotUndefined:
-            return value is not None
-        elif condition_type == _ConditionType.HasProperty:
-            if isinstance(value, dict):
-                return compareTo in value
-            return hasattr(value, compareTo)
-        elif condition_type == _ConditionType.LengthEqual:
-            return len(value) == compareTo
-        elif condition_type == _ConditionType.LengthNotEqual:
-            return len(value) != compareTo
-        elif condition_type == _ConditionType.LengthGreaterThan:
-            return len(value) > compareTo
-        elif condition_type == _ConditionType.LengthLessThan:
-            return len(value) < compareTo
-        elif condition_type == _ConditionType.TypeEquals:
-            if isinstance(compareTo, str):
-                return type(value).__name__ == compareTo
-            return type(value).__name__ == type(compareTo).__name__
+        elif condition_type == _ConditionType.Exists:
+            return left_operand is not None and left_operand != "" and left_operand != []
+        elif condition_type == _ConditionType.DoesNotExist:
+            return left_operand is None or left_operand == "" or left_operand == []
         else:
             raise ValueError(f"Unsupported condition type: {condition_type}")
 
-    def process(self, value: Any, compareTo: Any):
-        left_operand = value
-        right_operand = compareTo
-        if self._config.property_path:
-            left_operand = _get_attribute_by_path(value, self._config.property_path)
-
-        if self._config.compare_to_property_path:
-            right_operand = _get_attribute_by_path(compareTo, self._config.compare_to_property_path)
-
-        result = self._evaluate(left_operand, right_operand)
+    def process(self, leftOperand: Any, rightOperand: Any):
+        result = self._evaluate(leftOperand, rightOperand)
 
         if result:
-            if self._config.true_value_type == "compareTo":
-                self.send("true", compareTo)
-            else:
-                self.send("true", value)
+            self.send("true", leftOperand)
         else:
-            if self._config.false_value_type == "compareTo":
-                self.send("false", compareTo)
-            else:
-                self.send("false", value)
+            self.send("false", leftOperand)
 
 
 class GetAttribute(Component):

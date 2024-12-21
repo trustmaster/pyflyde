@@ -13,9 +13,9 @@ node:
       nodeId: InlineValue__qxavnllf1foh9ivxvtz2hkad
       macroId: InlineValue
       macroData:
-        type: string
-        value: Hello
-        label: '"Hello"'
+        value:
+          type: string
+          value: Hello
     - pos:
         x: -83.18318359374999
         y: 60.36263549804687

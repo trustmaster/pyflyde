@@ -21,17 +21,14 @@ node:
       nodeId: Conditional__ppsa1z6ja2w6yyo0sig7hvww
       macroId: Conditional
       macroData:
-        compareTo:
-          mode: static
+        leftOperand:
+          type: dynamic
+          value: "{{value}}"
+        rightOperand:
           value: ""
           type: string
-        propertyPath: ""
         condition:
-          type: IS_NOT_EMPTY
-        trueValue:
-          type: value
-        falseValue:
-          type: value
+          type: EXISTS
     - pos:
         x: 96.42891601562502
         y: 48.46386716750146
@@ -46,9 +43,15 @@ node:
       nodeId: InlineValue__apqbu37rhnui31o8qaud8ek8
       macroId: InlineValue
       macroData:
-        type: string
-        value: "ERR: msg is empty"
-        label: '"ERR: msg is empty"'
+        type:
+          type: string
+          value: string
+        value:
+          type: string
+          value: "ERR: msg is empty"
+        label:
+          type: string
+          value: '"ERR: msg is empty"'
   connections:
     - from:
         insId: Echo-h3049mb
@@ -61,7 +64,7 @@ node:
         pinId: inMsg
       to:
         insId: ppsa1z6ja2w6yyo0sig7hvww
-        pinId: value
+        pinId: leftOperand
     - from:
         insId: ppsa1z6ja2w6yyo0sig7hvww
         pinId: "true"

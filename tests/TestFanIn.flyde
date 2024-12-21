@@ -33,8 +33,12 @@ node:
       nodeId: InlineValue__xzi4aah4ewf1iw7q4a3jz9oj
       macroId: InlineValue
       macroData:
-        type: string
-        value: Hello, {inp}!
+        type:
+          type: string
+          value: string
+        value:
+          type: string
+          value: Hello, {inp}!
   connections:
     - from:
         insId: Format-4s04bag

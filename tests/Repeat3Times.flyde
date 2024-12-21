@@ -23,9 +23,9 @@ node:
       nodeId: InlineValue__inl-ytsuyrje4syeb4qduymsfkl2
       macroId: InlineValue
       macroData:
-        value: 3
-        type: number
-        label: "3"
+        value:
+          type: number
+          value: 3
     - pos:
         x: -68.75665283203125
         y: 194.59005737304688
