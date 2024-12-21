@@ -159,7 +159,14 @@ class TestConditional(unittest.TestCase):
                     },
                 },
                 "inputs": {
-                    "leftOperand": ["Apple", "banana", "Grape", "apple", "2cherries", EOF],
+                    "leftOperand": [
+                        "Apple",
+                        "banana",
+                        "Grape",
+                        "apple",
+                        "2cherries",
+                        EOF,
+                    ],
                     "rightOperand": [],
                 },
                 "outputs": {
@@ -349,7 +356,9 @@ class TestGetAttribute(unittest.TestCase):
         for test_case in test_cases:
             attr_q = Queue()
             out_q = Queue()
-            node = GetAttribute(macro_data={"key": test_case["key"]}, id="test_get_attribute")
+            node = GetAttribute(
+                macro_data={"key": test_case["key"]}, id="test_get_attribute"
+            )
             obj_q = node.inputs["object"].queue
             if len(test_case["inputs"]["key"]) > 0:
                 attr_q = node.inputs["key"].queue
@@ -357,6 +366,8 @@ class TestGetAttribute(unittest.TestCase):
             node.run()
             for i in range(len(test_case["inputs"]["object"])):
                 obj_q.put(test_case["inputs"]["object"][i])
-                if len(test_case["inputs"]["key"]) > 0 and i < len(test_case["inputs"]["key"]):
+                if len(test_case["inputs"]["key"]) > 0 and i < len(
+                    test_case["inputs"]["key"]
+                ):
                     attr_q.put(test_case["inputs"]["key"][i])
                 self.assertEqual(test_case["outputs"][i], out_q.get())
