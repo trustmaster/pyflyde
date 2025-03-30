@@ -23,7 +23,7 @@ class _ConditionType(Enum):
     NotContains = 'NOT_CONTAINS'
     RegexMatches = 'REGEX_MATCHES'
     Exists = 'EXISTS'
-    DoesNotExist = 'DOES_NOT_EXIST'
+    NotExists = 'NOT_EXISTS'
 
 class _ConditionalConfig:
     """Conditional configuration."""

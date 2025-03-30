@@ -43,6 +43,7 @@ venv-activate:
 
 builddist:
 	@echo "Building the project for distribution..."
+	@rm -f ./dist/*
 	@$(PYTHON) -m build;
 
 release: lint test stubgen builddist
