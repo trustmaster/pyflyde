@@ -208,7 +208,7 @@ class TestConditional(unittest.TestCase):
                         "value": "this is not important",
                     },
                     "condition": {
-                        "type": "DOES_NOT_EXIST",
+                        "type": "NOT_EXISTS",
                     },
                 },
                 "inputs": {
@@ -351,14 +351,46 @@ class TestGetAttribute(unittest.TestCase):
                 },
                 "outputs": ["Alice", None, None, EOF],
             },
+            {
+                "name": "nested attribute with dot key notation",
+                "key": {
+                    "type": "static",
+                    "value": "address.city",
+                },
+                "inputs": {
+                    "object": [
+                        {"name": "Alice", "address": {"city": "New York"}},
+                        {"name": "Bob", "address": {"city": "Los Angeles"}},
+                        {"nananan": "Charlie"},
+                        EOF,
+                    ],
+                    "key": [],
+                },
+                "outputs": ["New York", "Los Angeles", None, EOF],
+            },
+            {
+                "name": "nested 3 levels deep",
+                "key": {
+                    "type": "static",
+                    "value": "address.city.zip",
+                },
+                "inputs": {
+                    "object": [
+                        {"name": "Alice", "address": {"city": {"zip": 10001}}},
+                        {"name": "Bob", "address": {"city": {"zip": 90001}}},
+                        {"nananan": "Charlie"},
+                        EOF,
+                    ],
+                    "key": [],
+                },
+                "outputs": [10001, 90001, None, EOF],
+            },
         ]
 
         for test_case in test_cases:
             attr_q = Queue()
             out_q = Queue()
-            node = GetAttribute(
-                macro_data={"key": test_case["key"]}, id="test_get_attribute"
-            )
+            node = GetAttribute(macro_data={"key": test_case["key"]}, id="test_get_attribute")
             obj_q = node.inputs["object"].queue
             if len(test_case["inputs"]["key"]) > 0:
                 attr_q = node.inputs["key"].queue
@@ -366,8 +398,6 @@ class TestGetAttribute(unittest.TestCase):
             node.run()
             for i in range(len(test_case["inputs"]["object"])):
                 obj_q.put(test_case["inputs"]["object"][i])
-                if len(test_case["inputs"]["key"]) > 0 and i < len(
-                    test_case["inputs"]["key"]
-                ):
+                if len(test_case["inputs"]["key"]) > 0 and i < len(test_case["inputs"]["key"]):
                     attr_q.put(test_case["inputs"]["key"][i])
                 self.assertEqual(test_case["outputs"][i], out_q.get())

@@ -43,7 +43,7 @@ class _ConditionType(Enum):
     NotContains = "NOT_CONTAINS"
     RegexMatches = "REGEX_MATCHES"
     Exists = "EXISTS"
-    DoesNotExist = "DOES_NOT_EXIST"
+    NotExists = "NOT_EXISTS"
 
 
 class _ConditionalConfig:
@@ -109,7 +109,7 @@ class Conditional(Component):
             return m is not None
         elif condition_type == _ConditionType.Exists:
             return left_operand is not None and left_operand != "" and left_operand != []
-        elif condition_type == _ConditionType.DoesNotExist:
+        elif condition_type == _ConditionType.NotExists:
             return left_operand is None or left_operand == "" or left_operand == []
         else:
             raise ValueError(f"Unsupported condition type: {condition_type}")
@@ -150,10 +150,14 @@ class GetAttribute(Component):
                     self.inputs["key"].value = self.value
 
     def process(self, object: Any, key: str):
-        if isinstance(object, dict):
-            value = object.get(key, None)
-        elif hasattr(object, key):
-            value = getattr(object, key)
-        else:
-            value = None
+        keys = key.split(".")
+        value = object
+        for k in keys:
+            if isinstance(value, dict):
+                value = value.get(k, None)
+            elif hasattr(value, k):
+                value = getattr(value, k)
+            else:
+                value = None
+                break
         self.send("value", value)
