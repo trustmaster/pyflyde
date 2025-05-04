@@ -1,9 +1,10 @@
 import threading
 import unittest
-from threading import Thread
 from queue import Queue
-from flyde.io import Input, InputMode, Output, EOF
-from flyde.node import Component
+from threading import Thread
+
+from flyde.io import EOF, Input, InputMode, Output
+from flyde.node import Component, InstanceArgs
 from tests.components import RepeatWordNTimes
 
 
@@ -133,27 +134,21 @@ class TestComponentWithStickyInput(unittest.TestCase):
   run: () => { return; },
 };
 
-""".replace(
-                "{NAME}", name
-            )
+""".replace("{NAME}", name)
 
-        self.assertEqual(
-            RepeatWordNTimes.to_ts(), expected_typescript("RepeatWordNTimes")
-        )
-        self.assertEqual(
-            RepeatWordNTimes.to_ts("RepeatWord"), expected_typescript("RepeatWord")
-        )
+        self.assertEqual(RepeatWordNTimes.to_ts(), expected_typescript("RepeatWordNTimes"))
+        self.assertEqual(RepeatWordNTimes.to_ts("RepeatWord"), expected_typescript("RepeatWord"))
 
     def test_from_yaml(self):
         yaml = {
             "id": "repeat",
             "nodeId": "RepeatWordNTimes",
-            "inputConfig": {},
+            "config": {},
             "displayName": "Repeat",
         }
 
-        def factory(class_name: str, args: dict):
-            return RepeatWordNTimes(**args)
+        def factory(class_name: str, args: InstanceArgs):
+            return RepeatWordNTimes(**args.to_dict())
 
         node = Component.from_yaml(factory, yaml)
         self.assertEqual(node._id, "repeat")
@@ -165,18 +160,21 @@ class TestComponentWithStickyInput(unittest.TestCase):
         yaml = {
             "id": "repeat",
             "nodeId": "RepeatWordNTimes",
-            "inputConfig": {},
+            "config": {},
             "displayName": "Repeat",
             "macroData": {"value": 100, "key": "foo"},
         }
 
-        def factory(class_name: str, args: dict):
-            self.assertEqual(args["macro_data"]["value"], yaml["macroData"]["value"])
-            self.assertEqual(args["macro_data"]["key"], yaml["macroData"]["key"])
+        def factory(class_name: str, args: InstanceArgs):
+            self.assertIsNotNone(args.macro_data)
+            if args.macro_data is None:
+                raise ValueError("macro_data is None")
+            self.assertEqual(args.macro_data["value"], yaml["macroData"]["value"])
+            self.assertEqual(args.macro_data["key"], yaml["macroData"]["key"])
             # Drop macro_data from the args, otherwise there will be an exception
             # because the constructor doesn't support it.
-            del args["macro_data"]
-            return RepeatWordNTimes(**args)
+            args.macro_data = None
+            return RepeatWordNTimes(**args.to_dict())
 
         node = Component.from_yaml(factory, yaml)
         self.assertEqual(node._id, "repeat")
@@ -189,10 +187,74 @@ class TestComponentWithStickyInput(unittest.TestCase):
         expected = {
             "id": "repeat",
             "nodeId": "RepeatWordNTimes",
-            "inputConfig": {},
+            "config": {},
             "displayName": "Repeat",
         }
         self.assertEqual(node.to_dict(), expected)
+
+
+class AllStickyInputsComponent(Component):
+    """A component with only sticky inputs to test single execution."""
+
+    inputs = {
+        "a": Input(description="First sticky input", type=int, mode=InputMode.STICKY, value=5),
+        "b": Input(description="Second sticky input", type=int, mode=InputMode.STICKY, value=10),
+    }
+
+    outputs = {"result": Output(description="Result of operation", type=int)}
+
+    def process(self, a: int, b: int) -> dict[str, int]:
+        return {"result": a + b}
+
+
+class TestAllStickyInputsComponent(unittest.TestCase):
+    def test_all_sticky_inputs_run_once(self):
+        """Test that a component with all sticky inputs runs only once."""
+        node = AllStickyInputsComponent(id="sticky_test", display_name="Sticky Test")
+
+        # Connect an output queue to capture results
+        out_q = Queue()
+        node.outputs["result"].connect(out_q)
+
+        # Run the component
+        node.run()
+
+        # Check that it produced a single result and then EOF
+        self.assertEqual(out_q.get(), 15)  # 5 + 10
+        self.assertEqual(out_q.get(), EOF)
+
+        # Verify that the component has stopped
+        node.stopped.wait(timeout=1)
+        self.assertTrue(node.stopped.is_set(), "Component should have stopped after one execution")
+
+    def test_all_sticky_inputs_with_config(self):
+        """Test that a component with all sticky inputs initializes from config and runs once."""
+        from flyde.io import InputConfig, InputType
+
+        # Create node with config values
+        node = AllStickyInputsComponent(
+            id="sticky_test",
+            display_name="Sticky Test",
+            config={
+                "a": InputConfig(type=InputType.NUMBER, value=20),
+                "b": InputConfig(type=InputType.NUMBER, value=30),
+            },
+        )
+
+        # Connect an output queue to capture results
+        out_q = Queue()
+        node.outputs["result"].connect(out_q)
+
+        # Run the component
+        node.run()
+
+        # Check that it produced a single result with the configured values and then EOF
+        self.assertEqual(out_q.get(), 50)  # 20 + 30
+        self.assertEqual(out_q.get(), EOF)
+
+        # Verify that the component has stopped
+        node.stopped.wait(timeout=1)
+        self.assertTrue(node.stopped.is_set(), "Component should have stopped after one execution")
 
 
 class SourceComponent(Component):

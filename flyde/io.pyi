@@ -1,4 +1,5 @@
 from _typeshed import Incomplete
+from dataclasses import dataclass
 from enum import Enum
 from queue import Queue
 from typing import Any
@@ -7,6 +8,21 @@ EOF: Incomplete
 
 def is_EOF(value: Any) -> bool:
     """Checks if a value is an EOF signal."""
+
+class InputType(Enum):
+    """Input type contains all input types supported by Flyde."""
+    DYNAMIC = 'dynamic'
+    NUMBER = 'number'
+    BOOLEAN = 'boolean'
+    JSON = 'json'
+    STRING = 'string'
+
+@dataclass
+class InputConfig:
+    """Configuration of an input in a Flyde flow."""
+    type: InputType
+    value: Any
+    def __init__(self, type, value) -> None: ...
 
 class InputMode(Enum):
     """InputMode is the mode of an input.
@@ -87,6 +103,8 @@ class Input:
     @property
     def ref_count(self) -> int:
         """Get the reference count of the input."""
+    def apply_config(self, config: InputConfig):
+        """Apply config from the flyde flow to the input."""
 
 class Output:
     """Output is an interface for setting output data for a component."""

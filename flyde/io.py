@@ -1,7 +1,8 @@
 from copy import deepcopy
+from dataclasses import dataclass
 from enum import Enum
-from typing import Any, Optional
 from queue import Queue
+from typing import Any, Optional
 
 EOF = Exception("__EOF__")
 """EOF is a signal to indicate the end of data."""
@@ -10,6 +11,24 @@ EOF = Exception("__EOF__")
 def is_EOF(value: Any) -> bool:
     """Checks if a value is an EOF signal."""
     return isinstance(value, Exception) and value.args[0] == "__EOF__"
+
+
+class InputType(Enum):
+    """Input type contains all input types supported by Flyde."""
+
+    DYNAMIC = "dynamic"
+    NUMBER = "number"
+    BOOLEAN = "boolean"
+    JSON = "json"
+    STRING = "string"
+
+
+@dataclass
+class InputConfig:
+    """Configuration of an input in a Flyde flow."""
+
+    type: InputType
+    value: Any
 
 
 class InputMode(Enum):
@@ -115,14 +134,14 @@ class Input:
     def get(self) -> Any:
         """Get the value of the input from either the queue or static value."""
         if not self.is_connected and (
-            self.required == Requiredness.OPTIONAL or
-            self.required == Requiredness.REQUIRED_IF_CONNECTED):
+            self.required == Requiredness.OPTIONAL or self.required == Requiredness.REQUIRED_IF_CONNECTED
+        ):
             return self._value
         if self._input_mode == InputMode.QUEUE:
-            return self._queue.get()
+            return self.queue.get()
         elif self._input_mode == InputMode.STICKY:
-            if not self._queue.empty() or self._value is None:
-                value = self._queue.get()
+            if not self.queue.empty() or self._value is None:
+                value = self.queue.get()
                 if not is_EOF(value):
                     # Ignore EOFs on sticky inputs, only queue inputs matter for termination
                     self._value = value
@@ -152,6 +171,23 @@ class Input:
     def ref_count(self) -> int:
         """Get the reference count of the input."""
         return self._ref_count
+
+    def apply_config(self, config: InputConfig):
+        """Apply config from the flyde flow to the input."""
+        self._value = config.value
+        if config.type == InputType.DYNAMIC:
+            self._input_mode = InputMode.QUEUE
+        else:
+            self._input_mode = InputMode.STICKY
+
+        # Apply Python type hint based on supported config type
+        if config.type != InputType.DYNAMIC and self.type is None:
+            self.type = {
+                InputType.NUMBER: int,
+                InputType.BOOLEAN: bool,
+                InputType.JSON: dict,
+                InputType.STRING: str,
+            }[config.type]
 
 
 class Output:
@@ -197,9 +233,7 @@ class Output:
     def send(self, value: Any):
         """Put a value in the output queue."""
         if self.type is not None and not is_EOF(value) and not isinstance(value, self.type):  # type: ignore
-            raise ValueError(
-                f'Output "{self.id}": value {value} is not of type {self.type}'
-            )
+            raise ValueError(f'Output "{self.id}": value {value} is not of type {self.type}')
         if len(self._queues) == 0:
             raise ValueError(f'Output "{self.id}": has no connected queues')
 
@@ -294,11 +328,11 @@ class GraphPort(Input, Output):
 
     def inc_ref_count(self):
         # Need to increase ref count of the RedriveQueue
-        self._queue.inc_ref_count() # type: ignore
+        self._queue.inc_ref_count()  # type: ignore
         return super().inc_ref_count()
 
     def dec_ref_count(self):
-        self._queue.dec_ref_count() # type: ignore
+        self._queue.dec_ref_count()  # type: ignore
         return super().dec_ref_count()
 
 
