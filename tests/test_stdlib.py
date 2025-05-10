@@ -2,8 +2,8 @@ import unittest
 from queue import Queue
 from types import SimpleNamespace
 
-from flyde.io import EOF
-from flyde.stdlib import InlineValue, Conditional, GetAttribute
+from flyde.io import EOF, InputConfig, InputType
+from flyde.stdlib import Conditional, GetAttribute, InlineValue, _ConditionConfig, _ConditionType
 
 
 class TestInlineValue(unittest.TestCase):
@@ -13,7 +13,7 @@ class TestInlineValue(unittest.TestCase):
             "outputs": {"value": "Hello"},
         }
         out_q = Queue()
-        node = InlineValue(macro_data={"value": "Hello"}, id="test_inline_value")
+        node = InlineValue(id="test_inline_value", config={"value": InputConfig(type=InputType.STRING, value="Hello")})
         node.outputs["value"].connect(out_q)
         node.run()
         self.assertEqual(test_case["outputs"]["value"], out_q.get())
@@ -26,10 +26,7 @@ class TestInlineValue(unittest.TestCase):
             "outputs": {"value": "Hello"},
         }
         out_q = Queue()
-        node = InlineValue(
-            macro_data={"value": {"type": "string", "value": "Hello"}},
-            id="test_inline_value",
-        )
+        node = InlineValue(id="test_inline_value", config={"value": InputConfig(type=InputType.STRING, value="Hello")})
         node.outputs["value"].connect(out_q)
         node.run()
         self.assertEqual(test_case["outputs"]["value"], out_q.get())
@@ -42,17 +39,14 @@ class TestConditional(unittest.TestCase):
         test_cases = [
             {
                 "name": "equal static string",
-                "yml": {
-                    "leftOperand": {
-                        "type": "static",
-                        "value": "Apple",
-                    },
-                    "rightOperand": {
-                        "type": "dynamic",
-                    },
-                    "condition": {
-                        "type": "EQUAL",
-                    },
+                "config": {
+                    "leftOperand": InputConfig(type=InputType.STRING, value="Apple"),
+                    "rightOperand": InputConfig(
+                        type=InputType.DYNAMIC,
+                    ),
+                    "condition": _ConditionConfig(
+                        type=_ConditionType.Equal,
+                    ),
                 },
                 "inputs": {
                     "leftOperand": [],
@@ -66,16 +60,16 @@ class TestConditional(unittest.TestCase):
             },
             {
                 "name": "not equal dynamic string",
-                "yml": {
-                    "leftOperand": {
-                        "type": "dynamic",
-                    },
-                    "rightOperand": {
-                        "type": "dynamic",
-                    },
-                    "condition": {
-                        "type": "NOT_EQUAL",
-                    },
+                "config": {
+                    "leftOperand": InputConfig(
+                        type=InputType.DYNAMIC,
+                    ),
+                    "rightOperand": InputConfig(
+                        type=InputType.DYNAMIC,
+                    ),
+                    "condition": _ConditionConfig(
+                        type=_ConditionType.NotEqual,
+                    ),
                 },
                 "inputs": {
                     "leftOperand": ["Apple", "Banana", "apple", "Grape", EOF],
@@ -88,17 +82,14 @@ class TestConditional(unittest.TestCase):
             },
             {
                 "name": "contains static string",
-                "yml": {
-                    "leftOperand": {
-                        "type": "dynamic",
-                    },
-                    "rightOperand": {
-                        "type": "static",
-                        "value": "Apple",
-                    },
-                    "condition": {
-                        "type": "CONTAINS",
-                    },
+                "config": {
+                    "leftOperand": InputConfig(
+                        type=InputType.DYNAMIC,
+                    ),
+                    "rightOperand": InputConfig(type=InputType.STRING, value="Apple"),
+                    "condition": _ConditionConfig(
+                        type=_ConditionType.Contains,
+                    ),
                 },
                 "inputs": {
                     "leftOperand": [
@@ -117,17 +108,14 @@ class TestConditional(unittest.TestCase):
             },
             {
                 "name": "not contains static string",
-                "yml": {
-                    "leftOperand": {
-                        "type": "dynamic",
-                    },
-                    "rightOperand": {
-                        "type": "static",
-                        "value": "Apple",
-                    },
-                    "condition": {
-                        "type": "NOT_CONTAINS",
-                    },
+                "config": {
+                    "leftOperand": InputConfig(
+                        type=InputType.DYNAMIC,
+                    ),
+                    "rightOperand": InputConfig(type=InputType.STRING, value="Apple"),
+                    "condition": _ConditionConfig(
+                        type=_ConditionType.NotContains,
+                    ),
                 },
                 "inputs": {
                     "leftOperand": [
@@ -146,17 +134,14 @@ class TestConditional(unittest.TestCase):
             },
             {
                 "name": "regex matches static",
-                "yml": {
-                    "leftOperand": {
-                        "type": "dynamic",
-                    },
-                    "rightOperand": {
-                        "type": "static",
-                        "value": "^[A-Z]",
-                    },
-                    "condition": {
-                        "type": "REGEX_MATCHES",
-                    },
+                "config": {
+                    "leftOperand": InputConfig(
+                        type=InputType.DYNAMIC,
+                    ),
+                    "rightOperand": InputConfig(type=InputType.STRING, value="^[A-Z]"),
+                    "condition": _ConditionConfig(
+                        type=_ConditionType.RegexMatches,
+                    ),
                 },
                 "inputs": {
                     "leftOperand": [
@@ -176,17 +161,14 @@ class TestConditional(unittest.TestCase):
             },
             {
                 "name": "exists",
-                "yml": {
-                    "leftOperand": {
-                        "type": "dynamic",
-                    },
-                    "rightOperand": {
-                        "type": "static",
-                        "value": "this is not important",
-                    },
-                    "condition": {
-                        "type": "EXISTS",
-                    },
+                "config": {
+                    "leftOperand": InputConfig(
+                        type=InputType.DYNAMIC,
+                    ),
+                    "rightOperand": InputConfig(type=InputType.STRING, value="this is not important"),
+                    "condition": _ConditionConfig(
+                        type=_ConditionType.Exists,
+                    ),
                 },
                 "inputs": {
                     "leftOperand": ["Apple", "", " ", "  ", "banana", EOF],
@@ -199,17 +181,14 @@ class TestConditional(unittest.TestCase):
             },
             {
                 "name": "does not exist",
-                "yml": {
-                    "leftOperand": {
-                        "type": "dynamic",
-                    },
-                    "rightOperand": {
-                        "type": "static",
-                        "value": "this is not important",
-                    },
-                    "condition": {
-                        "type": "NOT_EXISTS",
-                    },
+                "config": {
+                    "leftOperand": InputConfig(
+                        type=InputType.DYNAMIC,
+                    ),
+                    "rightOperand": InputConfig(type=InputType.STRING, value="this is not important"),
+                    "condition": _ConditionConfig(
+                        type=_ConditionType.NotExists,
+                    ),
                 },
                 "inputs": {
                     "leftOperand": ["Apple", "", " ", "  ", "banana", EOF],
@@ -222,16 +201,14 @@ class TestConditional(unittest.TestCase):
             },
             {
                 "name": "unsupported condition type",
-                "yml": {
-                    "leftOperand": {
-                        "type": "dynamic",
-                    },
-                    "rightOperand": {
-                        "type": "dynamic",
-                    },
-                    "condition": {
-                        "type": "UNSUPPORTED",
-                    },
+                "config": {
+                    "leftOperand": InputConfig(
+                        type=InputType.DYNAMIC,
+                    ),
+                    "rightOperand": InputConfig(
+                        type=InputType.DYNAMIC,
+                    ),
+                    "condition": {"type": "UNSUPPORTED"},  # Will cause a ValueError in parse_config
                 },
                 "inputs": {
                     "leftOperand": ["Apple", "Banana", "apple", EOF],
@@ -251,10 +228,10 @@ class TestConditional(unittest.TestCase):
 
             if "raises" in test_case and test_case["raises"] is not None:
                 with self.assertRaises(test_case["raises"]):
-                    node = Conditional(test_case["yml"], id="test_conditional")
+                    node = Conditional(id="test_conditional", config=test_case["config"])
                 continue
 
-            node = Conditional(test_case["yml"], id="test_conditional")
+            node = Conditional(id="test_conditional", config=test_case["config"])
             left_q = node.inputs["leftOperand"].queue
             right_q = node.inputs["rightOperand"].queue
             node.outputs["true"].connect(true_q)
@@ -288,9 +265,11 @@ class TestGetAttribute(unittest.TestCase):
         test_cases = [
             {
                 "name": "static attribute from a dict",
-                "key": {
-                    "type": "static",
-                    "value": "name",
+                "config": {
+                    "key": InputConfig(
+                        type=InputType.STRING,
+                        value="name",
+                    ),
                 },
                 "inputs": {
                     "object": [
@@ -305,9 +284,11 @@ class TestGetAttribute(unittest.TestCase):
             },
             {
                 "name": "sticky attribute from an object",
-                "key": {
-                    "type": "sticky",
-                    "value": "name",
+                "config": {
+                    "key": InputConfig(
+                        type=InputType.STRING,
+                        value="name",
+                    ),
                 },
                 "inputs": {
                     "object": [
@@ -316,13 +297,18 @@ class TestGetAttribute(unittest.TestCase):
                         SimpleNamespace(nananan="Charlie"),
                         EOF,
                     ],
-                    "key": ["name"],
+                    "key": ["name", EOF],
                 },
                 "outputs": ["Alice", "Bob", None, EOF],
             },
             {
                 "name": "dynamic attribute from a dict",
-                "key": {},
+                "config": {
+                    "key": InputConfig(
+                        type=InputType.DYNAMIC,
+                        value=None,
+                    ),
+                },
                 "inputs": {
                     "object": [
                         {"name": "Alice"},
@@ -335,10 +321,12 @@ class TestGetAttribute(unittest.TestCase):
                 "outputs": ["Alice", "Bob", "Charlie", EOF],
             },
             {
-                "name": "sticky attribute and non-object",
-                "key": {
-                    "type": "sticky",
-                    "value": "name",
+                "name": "static attribute and non-object",
+                "config": {
+                    "key": InputConfig(
+                        type=InputType.STRING,
+                        value="name",
+                    ),
                 },
                 "inputs": {
                     "object": [
@@ -347,15 +335,17 @@ class TestGetAttribute(unittest.TestCase):
                         123,
                         EOF,
                     ],
-                    "key": ["name"],
+                    "key": ["name", EOF],
                 },
                 "outputs": ["Alice", None, None, EOF],
             },
             {
                 "name": "nested attribute with dot key notation",
-                "key": {
-                    "type": "static",
-                    "value": "address.city",
+                "config": {
+                    "key": InputConfig(
+                        type=InputType.STRING,
+                        value="address.city",
+                    ),
                 },
                 "inputs": {
                     "object": [
@@ -370,9 +360,11 @@ class TestGetAttribute(unittest.TestCase):
             },
             {
                 "name": "nested 3 levels deep",
-                "key": {
-                    "type": "static",
-                    "value": "address.city.zip",
+                "config": {
+                    "key": InputConfig(
+                        type=InputType.STRING,
+                        value="address.city.zip",
+                    ),
                 },
                 "inputs": {
                     "object": [
@@ -390,9 +382,9 @@ class TestGetAttribute(unittest.TestCase):
         for test_case in test_cases:
             attr_q = Queue()
             out_q = Queue()
-            node = GetAttribute(
-                macro_data={"key": test_case["key"]}, id="test_get_attribute"
-            )
+            config = test_case["config"]
+
+            node = GetAttribute(id="test_get_attribute", config=config)
             obj_q = node.inputs["object"].queue
             if len(test_case["inputs"]["key"]) > 0:
                 attr_q = node.inputs["key"].queue
@@ -400,8 +392,9 @@ class TestGetAttribute(unittest.TestCase):
             node.run()
             for i in range(len(test_case["inputs"]["object"])):
                 obj_q.put(test_case["inputs"]["object"][i])
-                if len(test_case["inputs"]["key"]) > 0 and i < len(
-                    test_case["inputs"]["key"]
-                ):
+                if len(test_case["inputs"]["key"]) > 0 and i < len(test_case["inputs"]["key"]):
                     attr_q.put(test_case["inputs"]["key"][i])
                 self.assertEqual(test_case["outputs"][i], out_q.get())
+
+            node.stopped.wait()
+            self.assertTrue(node.stopped.is_set())

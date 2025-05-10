@@ -1,27 +1,34 @@
-imports:
-  "@flyde/stdlib":
-    - InlineValue
-  components.flyde.ts:
-    - Echo
+imports: {}
 node:
   instances:
     - pos:
-        x: -95.34318359375001
-        y: -154.18736450195314
+        x: -336.34318359375004
+        y: 59.81263549804686
       id: qxavnllf1foh9ivxvtz2hkad
       inputConfig: {}
-      nodeId: InlineValue__qxavnllf1foh9ivxvtz2hkad
-      macroId: InlineValue
-      macroData:
+      nodeId: InlineValue
+      config:
         value:
           type: string
           value: Hello
+      type: code
+      source:
+        type: package
+        data: "@flyde/stdlib"
     - pos:
         x: -83.18318359374999
         y: 60.36263549804687
       id: Echo-x8049tw
       inputConfig: {}
       nodeId: Echo
+      config:
+        inp:
+          type: dynamic
+          value: "{{inp}}"
+      type: code
+      source:
+        type: file
+        data: components.flyde.ts
   connections:
     - from:
         insId: qxavnllf1foh9ivxvtz2hkad
