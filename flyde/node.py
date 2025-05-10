@@ -132,10 +132,11 @@ class Node(ABC):
         """Parse the raw config into a typed config dictionary."""
         result = {}
         for key, value in config.items():
-            if isinstance(value, dict) and "type" in value and "value" in value:
+            if isinstance(value, dict) and "type" in value and value["type"] in InputType:
+                config_value = value.get("value", None)
                 result[key] = InputConfig(
                     type=InputType(value["type"]),
-                    value=value["value"],
+                    value=config_value,
                 )
             else:
                 result[key] = value

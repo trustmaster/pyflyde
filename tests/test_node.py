@@ -3,7 +3,7 @@ import unittest
 from queue import Queue
 from threading import Thread
 
-from flyde.io import EOF, Input, InputMode, Output
+from flyde.io import EOF, Input, InputConfig, InputMode, InputType, Output
 from flyde.node import Component, InstanceArgs
 from tests.components import RepeatWordNTimes
 
@@ -187,6 +187,21 @@ class TestComponentWithStickyInput(unittest.TestCase):
             "displayName": "Repeat",
         }
         self.assertEqual(node.to_dict(), expected)
+
+    def test_parse_config_with_type_only(self):
+        config = {"times": {"type": "number"}, "word": {"type": "string", "value": "default"}}
+
+        node = RepeatWordNTimes(id="repeat", display_name="Repeat", config=config)
+
+        self.assertIn("times", node._config)
+        self.assertIsInstance(node._config["times"], InputConfig)
+        self.assertEqual(node._config["times"].type, InputType.NUMBER)
+        self.assertIsNone(node._config["times"].value)
+
+        self.assertIn("word", node._config)
+        self.assertIsInstance(node._config["word"], InputConfig)
+        self.assertEqual(node._config["word"].type, InputType.STRING)
+        self.assertEqual(node._config["word"].value, "default")
 
 
 class AllStickyInputsComponent(Component):

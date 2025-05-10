@@ -1,31 +1,27 @@
-imports:
-  "@flyde/stdlib":
-    - InlineValue
-    - GetAttribute
-  mylib/dataframe.flyde.ts:
-    - LoadDataset
-    - Scale
-  mylib/kmeans.flyde.ts:
-    - KMeansNClusters
-    - KMeansCluster
-    - PCA2
-    - Visualize
+imports: {}
 node:
   instances:
     - pos:
-        x: -44.67793457031249
-        y: -40.51885223388672
+        x: -688.3592700195312
+        y: 60.69355010986328
       id: LoadDataset-1a039uk
       inputConfig: {}
       nodeId: LoadDataset
+      config:
+        file_path:
+          type: dynamic
+          value: "{{file_path}}"
+      type: code
+      source:
+        type: file
+        data: mylib/dataframe.flyde.ts
     - pos:
-        x: -81.67130859374998
-        y: -124.01171112060547
+        x: -939.2435131835937
+        y: 61.415870666503906
       id: mc4t4fqqezd1gns4fb7ckxmc
       inputConfig: {}
-      nodeId: InlineValue__mc4t4fqqezd1gns4fb7ckxmc
-      macroId: InlineValue
-      macroData:
+      nodeId: InlineValue
+      config:
         type:
           type: string
           value: string
@@ -35,32 +31,65 @@ node:
         label:
           type: string
           value: wine-clustering.csv
+      type: code
+      source:
+        type: package
+        data: "@flyde/stdlib"
     - pos:
-        x: -21.232984619140666
-        y: 59.69538116455078
+        x: -436.9881726074219
+        y: 60.95093536376953
       id: Scale-dz139az
       inputConfig: {}
       nodeId: Scale
+      config:
+        dataframe:
+          type: dynamic
+          value: "{{dataframe}}"
+      type: code
+      source:
+        type: file
+        data: mylib/dataframe.flyde.ts
     - pos:
-        x: 115.65844161987303
-        y: 212.51250839233398
+        x: -24.11493484497072
+        y: 62.353389739990234
       id: KMeansNClusters-5m2390u
       inputConfig: {}
       nodeId: KMeansNClusters
+      config:
+        scaled_dataframe:
+          type: dynamic
+          value: "{{scaled_dataframe}}"
+        max_clusters:
+          type: dynamic
+          value: "{{max_clusters}}"
+      type: code
+      source:
+        type: file
+        data: mylib/kmeans.flyde.ts
     - pos:
-        x: -21.067138671875
-        y: 348.4979133605957
+        x: 234.1243896484375
+        y: 185.80514907836914
       id: KMeansCluster-ql339i4
       inputConfig: {}
       nodeId: KMeansCluster
+      config:
+        scaled_dataframe:
+          type: dynamic
+          value: "{{scaled_dataframe}}"
+        n_clusters:
+          type: dynamic
+          value: "{{n_clusters}}"
+      type: code
+      source:
+        type: file
+        data: mylib/kmeans.flyde.ts
     - pos:
-        x: 233.42520244598387
-        y: 80.12830471992493
+        x: -431.2221974563599
+        y: -46.37674593925476
       id: yquy5xqil6xp9tmb42ktmosp
       inputConfig: {}
-      nodeId: InlineValue__yquy5xqil6xp9tmb42ktmosp
-      macroId: InlineValue
-      macroData:
+      nodeId: InlineValue
+      config:
         value:
           type: number
           value: 20
@@ -70,42 +99,81 @@ node:
         label:
           type: string
           value: "20"
+      type: code
+      source:
+        type: package
+        data: "@flyde/stdlib"
     - pos:
-        x: -264.7014599609375
-        y: 436.35204895019535
+        x: 234.12208740234377
+        y: 410.2254124450684
       id: PCA2-mz439jk
       inputConfig: {}
       nodeId: PCA2
+      config:
+        scaled_dataframe:
+          type: dynamic
+          value: "{{scaled_dataframe}}"
+      type: code
+      source:
+        type: file
+        data: mylib/kmeans.flyde.ts
     - pos:
-        x: -194.03480346679686
-        y: 829.8976345825196
+        x: 1010.514711303711
+        y: 252.2306843566895
       id: Visualize-yz539m4
       inputConfig: {}
       nodeId: Visualize
+      config:
+        pca_components:
+          type: dynamic
+          value: "{{pca_components}}"
+        pca_centroids:
+          type: dynamic
+          value: "{{pca_centroids}}"
+        kmeans_result:
+          type: dynamic
+          value: "{{kmeans_result}}"
+      type: code
+      source:
+        type: file
+        data: mylib/kmeans.flyde.ts
     - pos:
-        x: -85.56712158203123
-        y: 675.0107851791382
+        x: 736.7720812988282
+        y: 149.70720727920536
       id: PCA2-e5639ct
       inputConfig: {}
       nodeId: PCA2
+      config:
+        scaled_dataframe:
+          type: dynamic
+          value: "{{scaled_dataframe}}"
+      type: code
+      source:
+        type: file
+        data: mylib/kmeans.flyde.ts
     - pos:
-        x: -158.16623901367188
-        y: 567.0884128027336
+        x: 513.1246850585937
+        y: 141.11043981841965
       id: nmt2k6i80qpwu9fyuckbqefw
       inputConfig: {}
-      nodeId: GetAttribute__nmt2k6i80qpwu9fyuckbqefw
-      macroId: GetAttribute
-      macroData:
+      nodeId: GetAttribute
+      config:
         key:
           type: dynamic
+        object:
+          type: dynamic
+          value: "{{object}}"
+      type: code
+      source:
+        type: package
+        data: "@flyde/stdlib"
     - pos:
-        x: -94.66524780273448
-        y: 458.4299138098137
+        x: 234.12473022460927
+        y: 310.8023236303703
       id: xb5xo767x6u0ubdvvegi0e53
       inputConfig: {}
-      nodeId: InlineValue__xb5xo767x6u0ubdvvegi0e53
-      macroId: InlineValue
-      macroData:
+      nodeId: InlineValue
+      config:
         type:
           type: string
           value: string
@@ -115,6 +183,10 @@ node:
         label:
           type: string
           value: '"centroids"'
+      type: code
+      source:
+        type: package
+        data: "@flyde/stdlib"
   connections:
     - from:
         insId: mc4t4fqqezd1gns4fb7ckxmc
