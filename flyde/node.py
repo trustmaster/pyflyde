@@ -4,7 +4,7 @@ from copy import deepcopy
 from dataclasses import dataclass
 from enum import Enum
 from threading import Event, Lock, Thread
-from typing import Any, Callable
+from typing import Any, Callable, Optional
 from uuid import uuid4
 
 from flyde.io import EOF, Connection, GraphPort, Input, InputConfig, InputMode, InputType, Output, Requiredness, is_EOF
@@ -49,10 +49,10 @@ class InstanceArgs:
 
     id: str
     display_name: str
-    stopped: Event | None
+    stopped: Optional[Event]
     config: dict[str, Any]
     type: InstanceType = InstanceType.CODE
-    source: InstanceSource | None = None
+    source: Optional[InstanceSource] = None
 
     def to_dict(self) -> dict:
         """Convert the instance arguments to a dictionary."""

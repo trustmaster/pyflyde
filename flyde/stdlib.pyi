@@ -50,6 +50,5 @@ class GetAttribute(Component):
     """Get an attribute from an object or dictionary."""
     inputs: Incomplete
     outputs: Incomplete
-    value: Incomplete
     def __init__(self, **kwargs) -> None: ...
     def process(self, object: Any, key: str): ...
