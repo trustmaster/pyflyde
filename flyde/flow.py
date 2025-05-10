@@ -24,6 +24,9 @@ class Flow:
         self._graphs: dict[str, dict] = {}
 
     def _preload_imports(self, base_path: str, imports: dict[str, list[str]]):
+        if not imports:
+            return
+            
         for module, classes in imports.items():
             logger.debug(f"Importing {module}")
             # If module name ends with .flyde it's a Graph
@@ -57,6 +60,10 @@ class Flow:
 
     def _load_component(self, name: str, path: str):
         """Loads a component from a Python module."""
+        # If component is already loaded, return
+        if name in self._components:
+            return
+
         # Translate typescript file path to python module
         path = path.replace("/", ".").replace(".flyde.ts", "").replace("@", "")
         logger.debug(f"Importing module {path}")
@@ -79,6 +86,9 @@ class Flow:
             if args.source is None:
                 raise ValueError(f"Component {name} does not have a valid source")
             self._load_component(name, args.source.data)
+
+        if name not in self._components:
+            raise ValueError(f"Component {name} could not be loaded")
 
         # Create the component instance
         component = self._components[name]

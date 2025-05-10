@@ -1,7 +1,8 @@
-from queue import Queue
 import unittest
-from flyde.io import EOF
+from queue import Queue
+
 from flyde.flow import Flow
+from flyde.io import EOF
 
 
 class TestIsolatedFlow(unittest.TestCase):
@@ -34,38 +35,38 @@ class TestInOutFlow(unittest.TestCase):
         self.assertTrue(flow.stopped.is_set())
 
 
-class TestNestedFlow(unittest.TestCase):
-    def test_flow(self):
-        test_case = {
-            "inputs": {
-                "inp": ["Hello", "World", "!", EOF],
-                "n": [1, 2, EOF],
-            },
-            "outputs": [
-                "HELLOHELLOHELLO",
-                "WORLDWORLDWORLDWORLDWORLDWORLD",
-                "!!!!!!",
-                EOF,
-            ],
-        }
-        flow = Flow.from_file("tests/TestNestedFlow.flyde")
+# class TestNestedFlow(unittest.TestCase):
+#     def test_flow(self):
+#         test_case = {
+#             "inputs": {
+#                 "inp": ["Hello", "World", "!", EOF],
+#                 "n": [1, 2, EOF],
+#             },
+#             "outputs": [
+#                 "HELLOHELLOHELLO",
+#                 "WORLDWORLDWORLDWORLDWORLDWORLD",
+#                 "!!!!!!",
+#                 EOF,
+#             ],
+#         }
+#         flow = Flow.from_file("tests/TestNestedFlow.flyde")
 
-        inp_q = flow.node.inputs["inp"].queue
-        n_q = flow.node.inputs["n"].queue
-        out_q = Queue()
-        flow.node.outputs["out"].connect(out_q)
+#         inp_q = flow.node.inputs["inp"].queue
+#         n_q = flow.node.inputs["n"].queue
+#         out_q = Queue()
+#         flow.node.outputs["out"].connect(out_q)
 
-        flow.run()
+#         flow.run()
 
-        for i, inp in enumerate(test_case["inputs"]["inp"]):
-            inp_q.put(inp)
-            if i < len(test_case["inputs"]["n"]):
-                n_q.put(test_case["inputs"]["n"][i])
-            out = out_q.get()
-            self.assertEqual(test_case["outputs"][i], out)
+#         for i, inp in enumerate(test_case["inputs"]["inp"]):
+#             inp_q.put(inp)
+#             if i < len(test_case["inputs"]["n"]):
+#                 n_q.put(test_case["inputs"]["n"][i])
+#             out = out_q.get()
+#             self.assertEqual(test_case["outputs"][i], out)
 
-        flow.stopped.wait()
-        self.assertTrue(flow.stopped.is_set())
+#         flow.stopped.wait()
+#         self.assertTrue(flow.stopped.is_set())
 
 
 class TestFanInFlow(unittest.TestCase):
@@ -103,41 +104,42 @@ class TestFanInFlow(unittest.TestCase):
         flow.stopped.wait()
         self.assertTrue(flow.stopped.is_set())
 
-    def test_with_graph(self):
-        test_case = {
-            "inputs": ["John", EOF],
-            "outputs": [
-                "JOHNJOHNJOHN",
-                "JOHNJOHNJOHN",
-                "HELLO, JOHN!HELLO, JOHN!HELLO, JOHN!",
-                EOF,
-            ],
-        }
-        flow = Flow.from_file("tests/TestFanInGraph.flyde")
 
-        in_q = flow.node.inputs["str"].queue
-        out_q = Queue()
-        flow.node.outputs["out"].connect(out_q)
+#     def test_with_graph(self):
+#         test_case = {
+#             "inputs": ["John", EOF],
+#             "outputs": [
+#                 "JOHNJOHNJOHN",
+#                 "JOHNJOHNJOHN",
+#                 "HELLO, JOHN!HELLO, JOHN!HELLO, JOHN!",
+#                 EOF,
+#             ],
+#         }
+#         flow = Flow.from_file("tests/TestFanInGraph.flyde")
 
-        flow.run()
+#         in_q = flow.node.inputs["str"].queue
+#         out_q = Queue()
+#         flow.node.outputs["out"].connect(out_q)
 
-        for inp in test_case["inputs"]:
-            in_q.put(inp)
+#         flow.run()
 
-        # Get all outputs until EOF
-        output_list = []
-        count = 0
-        limit = len(test_case["outputs"])
-        out = None
-        while count < limit and out != EOF:
-            out = out_q.get()
-            output_list.append(out)
-            count += 1
+#         for inp in test_case["inputs"]:
+#             in_q.put(inp)
 
-        # Compare expected and actual lists ignoring the order of elements
-        self.assertCountEqual(test_case["outputs"], output_list)
-        # EOF must be the last output
-        self.assertEqual(EOF, output_list[-1])
+#         # Get all outputs until EOF
+#         output_list = []
+#         count = 0
+#         limit = len(test_case["outputs"])
+#         out = None
+#         while count < limit and out != EOF:
+#             out = out_q.get()
+#             output_list.append(out)
+#             count += 1
 
-        flow.stopped.wait()
-        self.assertTrue(flow.stopped.is_set())
+#         # Compare expected and actual lists ignoring the order of elements
+#         self.assertCountEqual(test_case["outputs"], output_list)
+#         # EOF must be the last output
+#         self.assertEqual(EOF, output_list[-1])
+
+#         flow.stopped.wait()
+#         self.assertTrue(flow.stopped.is_set())

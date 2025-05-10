@@ -3,7 +3,7 @@ from _typeshed import Incomplete
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from enum import Enum
-from flyde.io import Connection as Connection, EOF as EOF, GraphPort as GraphPort, Input as Input, InputConfig as InputConfig, InputMode as InputMode, Output as Output, Requiredness as Requiredness, is_EOF as is_EOF
+from flyde.io import Connection as Connection, EOF as EOF, GraphPort as GraphPort, Input as Input, InputConfig as InputConfig, InputMode as InputMode, InputType as InputType, Output as Output, Requiredness as Requiredness, is_EOF as is_EOF
 from threading import Event
 from typing import Any, Callable
 
@@ -40,13 +40,12 @@ class InstanceArgs:
     id: str
     display_name: str
     stopped: Event | None
-    config: dict[str, InputConfig]
-    macro_data: dict[str, Any] | None = ...
+    config: dict[str, Any]
     type: InstanceType = ...
     source: InstanceSource | None = ...
     def to_dict(self) -> dict:
         """Convert the instance arguments to a dictionary."""
-    def __init__(self, id, display_name, stopped, config, macro_data=..., type=..., source=...) -> None: ...
+    def __init__(self, id, display_name, stopped, config, type=..., source=...) -> None: ...
 InstanceFactory = Callable[[str, InstanceArgs], Any]
 
 class Node(ABC, metaclass=abc.ABCMeta):
@@ -65,9 +64,12 @@ class Node(ABC, metaclass=abc.ABCMeta):
     _node_type: Incomplete
     _id: Incomplete
     _display_name: Incomplete
+    _config_raw: Incomplete
     _config: Incomplete
     _stopped: Incomplete
     def __init__(self, /, id: str, node_type: str = '', display_name: str = '', inputs: dict[str, Input] = {}, outputs: dict[str, Output] = {}, stopped: Event = ..., config: dict[str, InputConfig] = {}) -> None: ...
+    def parse_config(self, config: dict[str, Any]) -> dict[str, Any]:
+        """Parse the raw config into a typed config dictionary."""
     @abstractmethod
     def run(self):
         """Run the node. This method should be overridden by subclasses."""

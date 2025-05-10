@@ -21,8 +21,8 @@ class InputType(Enum):
 class InputConfig:
     """Configuration of an input in a Flyde flow."""
     type: InputType
-    value: Any
-    def __init__(self, type, value) -> None: ...
+    value: Any | None = ...
+    def __init__(self, type, value=...) -> None: ...
 
 class InputMode(Enum):
     """InputMode is the mode of an input.

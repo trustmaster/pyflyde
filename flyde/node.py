@@ -7,7 +7,7 @@ from threading import Event, Lock, Thread
 from typing import Any, Callable
 from uuid import uuid4
 
-from flyde.io import EOF, Connection, GraphPort, Input, InputConfig, InputMode, Output, Requiredness, is_EOF
+from flyde.io import EOF, Connection, GraphPort, Input, InputConfig, InputMode, InputType, Output, Requiredness, is_EOF
 
 logger = logging.getLogger(__name__)
 
@@ -50,8 +50,7 @@ class InstanceArgs:
     id: str
     display_name: str
     stopped: Event | None
-    config: dict[str, InputConfig]
-    macro_data: dict[str, Any] | None = None
+    config: dict[str, Any]
     type: InstanceType = InstanceType.CODE
     source: InstanceSource | None = None
 
@@ -100,7 +99,8 @@ class Node(ABC):
         self._node_type = node_type
         self._id = id if id else create_instance_id(node_type)
         self._display_name = display_name if display_name else node_type
-        self._config = config
+        self._config_raw = config or {}
+        self._config = self.parse_config(self._config_raw)
 
         if len(inputs) > 0:
             self.inputs = inputs
@@ -127,6 +127,19 @@ class Node(ABC):
             vv.id = f"{self._id}.{k}"
 
         self._stopped = stopped
+
+    def parse_config(self, config: dict[str, Any]) -> dict[str, Any]:
+        """Parse the raw config into a typed config dictionary."""
+        result = {}
+        for key, value in config.items():
+            if isinstance(value, dict) and "type" in value and "value" in value:
+                result[key] = InputConfig(
+                    type=InputType(value["type"]),
+                    value=value["value"],
+                )
+            else:
+                result[key] = value
+        return result
 
     @abstractmethod
     def run(self):
@@ -178,7 +191,7 @@ class Node(ABC):
         if node_class_name == "VisualNode":
             return Graph.from_yaml(create, yml)
 
-        config = {k: InputConfig(**v) for k, v in yml.get("config", {}).items()}
+        config = yml.get("config", {})
 
         source = InstanceSource(
             type=InstanceSourceType(yml.get("source", {}).get("type", "file").lower()),
@@ -192,7 +205,6 @@ class Node(ABC):
             config=config,
             type=InstanceType(yml.get("type", "code").lower()),
             source=source,
-            macro_data=yml.get("macroData", {}),
         )
         return create(node_class_name, args)
 
@@ -489,11 +501,6 @@ class Graph(Node):
         instances_stopped = {}
         for ins in yml.get("instances", []):
             ins_id = ins["id"]
-            if "macroId" in ins:
-                # Only InlineValue macros are supported for now
-                if ins["macroId"] not in SUPPORTED_MACROS:
-                    raise ValueError(f"Unsupported macro: {ins['macroId']}")
-                ins["nodeId"] = ins["macroId"]
             stopped = Event()
             ins["stopped"] = stopped
             logger.debug(f"Creating instance {ins_id}")

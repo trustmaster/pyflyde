@@ -28,7 +28,7 @@ class InputConfig:
     """Configuration of an input in a Flyde flow."""
 
     type: InputType
-    value: Any
+    value: Optional[Any] = None
 
 
 class InputMode(Enum):

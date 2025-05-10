@@ -160,20 +160,16 @@ class TestComponentWithStickyInput(unittest.TestCase):
         yaml = {
             "id": "repeat",
             "nodeId": "RepeatWordNTimes",
-            "config": {},
             "displayName": "Repeat",
-            "macroData": {"value": 100, "key": "foo"},
+            "config": {"value": 100, "key": "foo"},
         }
 
         def factory(class_name: str, args: InstanceArgs):
-            self.assertIsNotNone(args.macro_data)
-            if args.macro_data is None:
+            self.assertIsNotNone(args.config)
+            if args.config is None:
                 raise ValueError("macro_data is None")
-            self.assertEqual(args.macro_data["value"], yaml["macroData"]["value"])
-            self.assertEqual(args.macro_data["key"], yaml["macroData"]["key"])
-            # Drop macro_data from the args, otherwise there will be an exception
-            # because the constructor doesn't support it.
-            args.macro_data = None
+            self.assertEqual(args.config["value"], yaml["config"]["value"])
+            self.assertEqual(args.config["key"], yaml["config"]["key"])
             return RepeatWordNTimes(**args.to_dict())
 
         node = Component.from_yaml(factory, yaml)
