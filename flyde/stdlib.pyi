@@ -1,7 +1,7 @@
 from _typeshed import Incomplete
 from dataclasses import dataclass
 from enum import Enum
-from flyde.io import Input as Input, InputConfig as InputConfig, InputMode as InputMode, InputType as InputType, Output as Output
+from flyde.io import Input as Input, InputConfig as InputConfig, InputMode as InputMode, InputType as InputType, Output as Output, Requiredness as Requiredness
 from flyde.node import Component as Component
 from typing import Any
 
@@ -52,3 +52,10 @@ class GetAttribute(Component):
     outputs: Incomplete
     def __init__(self, **kwargs) -> None: ...
     def process(self, object: Any, key: str): ...
+
+class Http(Component):
+    """Http component makes HTTP requests with urllib."""
+    inputs: Incomplete
+    outputs: Incomplete
+    def __init__(self, **kwargs) -> None: ...
+    def process(self, url: str, method: str, headers: dict | None = None, params: dict | None = None, data: dict | None = None): ...

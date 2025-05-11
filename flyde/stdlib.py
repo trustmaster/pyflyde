@@ -1,9 +1,11 @@
+import json
 import re
 from dataclasses import dataclass
 from enum import Enum
-from typing import Any, Union
+from typing import Any, Optional, Union
+from urllib import error, parse, request
 
-from flyde.io import Input, InputConfig, InputMode, InputType, Output
+from flyde.io import Input, InputConfig, InputMode, InputType, Output, Requiredness
 from flyde.node import Component
 
 
@@ -160,3 +162,134 @@ class GetAttribute(Component):
                 value = None
                 break
         self.send("value", value)
+
+
+class Http(Component):
+    """Http component makes HTTP requests with urllib."""
+
+    inputs = {
+        "url": Input(description="URL to request", required=Requiredness.REQUIRED),
+        "method": Input(description="HTTP method", type=str, required=Requiredness.REQUIRED),
+        "headers": Input(description="HTTP headers", type=dict, required=Requiredness.OPTIONAL),
+        "params": Input(description="URL parameters", type=dict, required=Requiredness.OPTIONAL),
+        "data": Input(description="Request body", type=dict, required=Requiredness.OPTIONAL),
+    }
+    outputs = {
+        "data": Output(description="Response data"),
+    }
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+
+        if "method" in self._config and isinstance(self._config["method"], InputConfig):
+            if self._config["method"].type == InputType.DYNAMIC:
+                self.inputs["method"]._input_mode = InputMode.STICKY
+            else:
+                self.inputs["method"]._input_mode = InputMode.STATIC
+                self.inputs["method"].value = self._config["method"].value
+        else:
+            self.inputs["method"]._input_mode = InputMode.STATIC
+            self.inputs["method"].value = "GET"
+
+        if "url" in self._config and isinstance(self._config["url"], InputConfig):
+            if self._config["url"].type == InputType.DYNAMIC:
+                self.inputs["url"]._input_mode = InputMode.QUEUE
+            else:
+                self.inputs["url"]._input_mode = InputMode.STATIC
+                self.inputs["url"].value = self._config["url"].value
+
+        if "headers" in self._config and isinstance(self._config["headers"], InputConfig):
+            if self._config["headers"].type == InputType.DYNAMIC:
+                self.inputs["headers"]._input_mode = InputMode.STICKY
+            else:
+                self.inputs["headers"]._input_mode = InputMode.STATIC
+                self.inputs["headers"].value = self._config["headers"].value
+        else:
+            self.inputs["headers"]._input_mode = InputMode.STATIC
+            self.inputs["headers"].value = {}
+
+        if "params" in self._config and isinstance(self._config["params"], InputConfig):
+            if self._config["params"].type == InputType.DYNAMIC:
+                self.inputs["params"]._input_mode = InputMode.STICKY
+            else:
+                self.inputs["params"]._input_mode = InputMode.STATIC
+                self.inputs["params"].value = self._config["params"].value
+        else:
+            self.inputs["params"]._input_mode = InputMode.STATIC
+            self.inputs["params"].value = {}
+
+        if "data" in self._config and isinstance(self._config["data"], InputConfig):
+            if self._config["data"].type == InputType.DYNAMIC:
+                self.inputs["data"]._input_mode = InputMode.STICKY
+            else:
+                self.inputs["data"]._input_mode = InputMode.STATIC
+                self.inputs["data"].value = self._config["data"].value
+        else:
+            self.inputs["data"]._input_mode = InputMode.STATIC
+            self.inputs["data"].value = {}
+
+    def process(
+        self,
+        url: str,
+        method: str,
+        headers: Optional[dict] = None,
+        params: Optional[dict] = None,
+        data: Optional[dict] = None,
+    ):
+        try:
+            if params:
+                url_parts = list(parse.urlparse(url))
+                query = dict(parse.parse_qsl(url_parts[4]))
+                query.update(params)
+                url_parts[4] = parse.urlencode(query)
+                url = parse.urlunparse(url_parts)
+
+            req = request.Request(url)
+            req.method = method
+
+            if headers:
+                for key, value in headers.items():
+                    req.add_header(key, value)
+
+            data_bytes = None
+            if data and method != "GET":
+                data_bytes = json.dumps(data).encode("utf-8")
+                req.add_header("Content-Type", "application/json")
+                req.add_header("Content-Length", str(len(data_bytes)))
+
+            with request.urlopen(req, data=data_bytes) as response:
+                content_type = response.headers.get('Content-Type', '')
+                response_data = response.read()
+                
+                # Handle text-based responses
+                if 'text/' in content_type or 'json' in content_type or 'xml' in content_type or 'application/javascript' in content_type:
+                    # Extract charset from content-type header if present
+                    charset = 'utf-8'  # Default charset
+                    if 'charset=' in content_type:
+                        charset_part = content_type.split('charset=')[1]
+                        if ';' in charset_part:
+                            charset = charset_part.split(';')[0].strip()
+                        else:
+                            charset = charset_part.strip()
+                    
+                    try:
+                        response_data = response_data.decode(charset)
+                    except (UnicodeDecodeError, LookupError):
+                        # Fallback to utf-8 if specified charset fails
+                        response_data = response_data.decode('utf-8', errors='replace')
+                    
+                    # Try to parse JSON if the content type indicates JSON
+                    if 'json' in content_type:
+                        try:
+                            response_data = json.loads(response_data)
+                        except json.JSONDecodeError:
+                            pass
+                # Binary data remains as bytes
+                
+                self.send("data", response_data)
+        except error.HTTPError as e:
+            raise e
+        except error.URLError as e:
+            raise e
+        except Exception as e:
+            raise e
