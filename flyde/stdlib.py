@@ -1,9 +1,12 @@
+import json
 import re
+from dataclasses import dataclass
 from enum import Enum
-from typing import Any
+from typing import Any, Optional, Union
+from urllib import error, parse, request
 
+from flyde.io import Input, InputConfig, InputMode, InputType, Output, Requiredness
 from flyde.node import Component
-from flyde.io import Input, Output, InputMode
 
 
 class InlineValue(Component):
@@ -11,11 +14,11 @@ class InlineValue(Component):
 
     outputs = {"value": Output(description="The constant value")}
 
-    def __init__(self, macro_data: dict, **kwargs):
+    def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        if "value" in macro_data:
-            value = macro_data["value"]
-            self.value = self._get_inline_value(value) if self._is_inline_dict(value) else value
+        if "value" in self._config:
+            value = self._config["value"]
+            self.value = value.value
         else:
             raise ValueError("Missing value in InlineValue configuration.")
 
@@ -23,15 +26,6 @@ class InlineValue(Component):
         self.send("value", self.value)
         # Inline value only runs once
         self.stop()
-
-    def _is_inline_dict(self, value: Any) -> bool:
-        """Check if a value is an inline Flyde value dict, which has `type` and `value` keys."""
-        supported_inline_types = ["dynamic", "string", "number", "boolean", "json", "select", "longtext"]
-        return isinstance(value, dict) and "type" in value and value["type"] in supported_inline_types
-
-    def _get_inline_value(self, value: Any) -> Any:
-        """Get the value from an inline Flyde value output."""
-        return value["value"]
 
 
 class _ConditionType(Enum):
@@ -46,30 +40,29 @@ class _ConditionType(Enum):
     NotExists = "NOT_EXISTS"
 
 
+@dataclass
+class _ConditionConfig:
+    """Configuration etry for the condition type."""
+
+    type: _ConditionType
+
+
 class _ConditionalConfig:
     """Conditional configuration."""
 
-    def __init__(self, yml: dict):
-        self.property_path = yml.get("propertyPath", "")
+    def __init__(self, config: dict[str, Union[InputConfig, _ConditionConfig]]):
+        if "condition" not in config:
+            raise ValueError("Missing 'condition' in Conditional configuration.")
+        if not isinstance(config["condition"], _ConditionConfig):
+            raise ValueError("Invalid 'condition' in Conditional configuration.")
+        condition = config["condition"]
+        self.condition_type = _ConditionType(condition.type)
 
-        condition = yml.get("condition", {})
-        condition_type = condition.get("type", "EQUAL")
-        try:
-            self.condition_type = _ConditionType(condition_type)
-        except ValueError:
-            raise ValueError(f"Unsupported condition type: {condition_type}")
-        self.condition_data = condition.get("data", "")
+        if "leftOperand" in config and isinstance(config["leftOperand"], InputConfig):
+            self.left_operand: InputConfig = config["leftOperand"]
 
-        left_operand = yml.get("leftOperand", {})
-        self.left_operand = {
-            "type": left_operand.get("type", "dynamic"),
-            "value": left_operand.get("value", ""),
-        }
-        right_operand = yml.get("rightOperand", {})
-        self.right_operand = {
-            "type": right_operand.get("type", "dynamic"),
-            "value": right_operand.get("value", ""),
-        }
+        if "rightOperand" in config and isinstance(config["rightOperand"], InputConfig):
+            self.right_operand = config["rightOperand"]
 
 
 class Conditional(Component):
@@ -84,15 +77,25 @@ class Conditional(Component):
         "false": Output(description="Output when the condition is false"),
     }
 
-    def __init__(self, macro_data: dict, **kwargs):
+    def parse_config(self, config: dict[str, Any]) -> dict[str, Any]:
+        """Parse the raw config, handling the 'condition' special case."""
+        result = super().parse_config(config)  # type: ignore
+
+        # Handle the condition special case
+        if "condition" in result and isinstance(result["condition"], dict) and "type" in result["condition"]:
+            result["condition"] = _ConditionConfig(**result["condition"])
+
+        return result
+
+    def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self._config = _ConditionalConfig(macro_data)
-        if self._config.left_operand["type"] != "dynamic":
+        self._config = _ConditionalConfig(self._config)
+        if hasattr(self._config, "left_operand") and self._config.left_operand.type != InputType.DYNAMIC:
             self.inputs["leftOperand"]._input_mode = InputMode.STATIC
-            self.inputs["leftOperand"].value = self._config.left_operand["value"]
-        if self._config.right_operand["type"] != "dynamic":
+            self.inputs["leftOperand"].value = self._config.left_operand.value
+        if hasattr(self._config, "right_operand") and self._config.right_operand.type != InputType.DYNAMIC:
             self.inputs["rightOperand"]._input_mode = InputMode.STATIC
-            self.inputs["rightOperand"].value = self._config.right_operand["value"]
+            self.inputs["rightOperand"].value = self._config.right_operand.value
 
     def _evaluate(self, left_operand: Any, right_operand: Any) -> bool:
         condition_type = self._config.condition_type
@@ -132,22 +135,20 @@ class GetAttribute(Component):
     }
     outputs = {"value": Output(description="The attribute value")}
 
-    def __init__(self, macro_data: dict, **kwargs):
+    def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        if "key" not in macro_data:
+        if "key" not in self._config:
             raise ValueError("Missing 'key' in GetAttribute configuration.")
-        key = macro_data["key"]
-        self.value = None
-        if "value" in key:
-            self.value = key["value"]
-        if "type" in key:
-            if key["type"] == "static":
-                self.inputs["key"]._input_mode = InputMode.STATIC  # type: ignore
-                self.inputs["key"].value = self.value
-            else:
-                self.inputs["key"]._input_mode = InputMode.STICKY  # type: ignore
-                if self.value is not None:
-                    self.inputs["key"].value = self.value
+        key = self._config["key"]
+        if not isinstance(key, InputConfig):
+            raise ValueError("Invalid 'key' in GetAttribute configuration.")
+        if key.type == InputType.DYNAMIC:
+            self.inputs["key"]._input_mode = InputMode.STICKY  # type: ignore
+            if key.value is not None:
+                self.inputs["key"].value = key.value
+        else:
+            self.inputs["key"]._input_mode = InputMode.STATIC  # type: ignore
+            self.inputs["key"].value = key.value
 
     def process(self, object: Any, key: str):
         keys = key.split(".")
@@ -161,3 +162,134 @@ class GetAttribute(Component):
                 value = None
                 break
         self.send("value", value)
+
+
+class Http(Component):
+    """Http component makes HTTP requests with urllib."""
+
+    inputs = {
+        "url": Input(description="URL to request", required=Requiredness.REQUIRED),
+        "method": Input(description="HTTP method", type=str, required=Requiredness.REQUIRED),
+        "headers": Input(description="HTTP headers", type=dict, required=Requiredness.OPTIONAL),
+        "params": Input(description="URL parameters", type=dict, required=Requiredness.OPTIONAL),
+        "data": Input(description="Request body", type=dict, required=Requiredness.OPTIONAL),
+    }
+    outputs = {
+        "data": Output(description="Response data"),
+    }
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+
+        if "method" in self._config and isinstance(self._config["method"], InputConfig):
+            if self._config["method"].type == InputType.DYNAMIC:
+                self.inputs["method"]._input_mode = InputMode.STICKY
+            else:
+                self.inputs["method"]._input_mode = InputMode.STATIC
+                self.inputs["method"].value = self._config["method"].value
+        else:
+            self.inputs["method"]._input_mode = InputMode.STATIC
+            self.inputs["method"].value = "GET"
+
+        if "url" in self._config and isinstance(self._config["url"], InputConfig):
+            if self._config["url"].type == InputType.DYNAMIC:
+                self.inputs["url"]._input_mode = InputMode.QUEUE
+            else:
+                self.inputs["url"]._input_mode = InputMode.STATIC
+                self.inputs["url"].value = self._config["url"].value
+
+        if "headers" in self._config and isinstance(self._config["headers"], InputConfig):
+            if self._config["headers"].type == InputType.DYNAMIC:
+                self.inputs["headers"]._input_mode = InputMode.STICKY
+            else:
+                self.inputs["headers"]._input_mode = InputMode.STATIC
+                self.inputs["headers"].value = self._config["headers"].value
+        else:
+            self.inputs["headers"]._input_mode = InputMode.STATIC
+            self.inputs["headers"].value = {}
+
+        if "params" in self._config and isinstance(self._config["params"], InputConfig):
+            if self._config["params"].type == InputType.DYNAMIC:
+                self.inputs["params"]._input_mode = InputMode.STICKY
+            else:
+                self.inputs["params"]._input_mode = InputMode.STATIC
+                self.inputs["params"].value = self._config["params"].value
+        else:
+            self.inputs["params"]._input_mode = InputMode.STATIC
+            self.inputs["params"].value = {}
+
+        if "data" in self._config and isinstance(self._config["data"], InputConfig):
+            if self._config["data"].type == InputType.DYNAMIC:
+                self.inputs["data"]._input_mode = InputMode.STICKY
+            else:
+                self.inputs["data"]._input_mode = InputMode.STATIC
+                self.inputs["data"].value = self._config["data"].value
+        else:
+            self.inputs["data"]._input_mode = InputMode.STATIC
+            self.inputs["data"].value = {}
+
+    def process(
+        self,
+        url: str,
+        method: str,
+        headers: Optional[dict] = None,
+        params: Optional[dict] = None,
+        data: Optional[dict] = None,
+    ):
+        try:
+            if params:
+                url_parts = list(parse.urlparse(url))
+                query = dict(parse.parse_qsl(url_parts[4]))
+                query.update(params)
+                url_parts[4] = parse.urlencode(query)
+                url = parse.urlunparse(url_parts)
+
+            req = request.Request(url)
+            req.method = method
+
+            if headers:
+                for key, value in headers.items():
+                    req.add_header(key, value)
+
+            data_bytes = None
+            if data and method != "GET":
+                data_bytes = json.dumps(data).encode("utf-8")
+                req.add_header("Content-Type", "application/json")
+                req.add_header("Content-Length", str(len(data_bytes)))
+
+            with request.urlopen(req, data=data_bytes) as response:
+                content_type = response.headers.get('Content-Type', '')
+                response_data = response.read()
+                
+                # Handle text-based responses
+                if 'text/' in content_type or 'json' in content_type or 'xml' in content_type or 'application/javascript' in content_type:
+                    # Extract charset from content-type header if present
+                    charset = 'utf-8'  # Default charset
+                    if 'charset=' in content_type:
+                        charset_part = content_type.split('charset=')[1]
+                        if ';' in charset_part:
+                            charset = charset_part.split(';')[0].strip()
+                        else:
+                            charset = charset_part.strip()
+                    
+                    try:
+                        response_data = response_data.decode(charset)
+                    except (UnicodeDecodeError, LookupError):
+                        # Fallback to utf-8 if specified charset fails
+                        response_data = response_data.decode('utf-8', errors='replace')
+                    
+                    # Try to parse JSON if the content type indicates JSON
+                    if 'json' in content_type:
+                        try:
+                            response_data = json.loads(response_data)
+                        except json.JSONDecodeError:
+                            pass
+                # Binary data remains as bytes
+                
+                self.send("data", response_data)
+        except error.HTTPError as e:
+            raise e
+        except error.URLError as e:
+            raise e
+        except Exception as e:
+            raise e

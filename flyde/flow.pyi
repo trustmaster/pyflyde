@@ -1,5 +1,5 @@
 from _typeshed import Incomplete
-from flyde.node import Graph as Graph
+from flyde.node import Graph as Graph, InstanceArgs as InstanceArgs, InstanceType as InstanceType
 from threading import Event
 
 logger: Incomplete
@@ -8,12 +8,19 @@ class Flow:
     """Flow is a root-level runnable directed acyclic graph of nodes."""
     _imports: Incomplete
     _path: str
+    _base_path: str
     _node: Incomplete
     _components: Incomplete
     _graphs: Incomplete
     def __init__(self, imports: dict[str, list[str]]) -> None: ...
     def _preload_imports(self, base_path: str, imports: dict[str, list[str]]): ...
-    def factory(self, class_name: str, args: dict):
+    def _load_graph(self, name: str, path: str):
+        """Loads a graph YAML."""
+    def _load_component(self, name: str, path: str):
+        """Loads a component from a Python module."""
+    def create_graph(self, name: str, args: InstanceArgs): ...
+    def create_component(self, name: str, args: InstanceArgs): ...
+    def factory(self, class_name: str, args: InstanceArgs):
         """Factory method to create a node from a class name and arguments.
 
         It is used by the runtime to create nodes from the YAML definition or on the fly."""
