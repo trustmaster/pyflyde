@@ -33,7 +33,7 @@ node:
       type: code
       source:
         type: package
-        data: "@flyde/stdlib"
+        data: "@flyde/nodes"
     - pos:
         x: 109.24334716796875
         y: 55.590057373046875

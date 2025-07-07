@@ -14,7 +14,7 @@ node:
       type: code
       source:
         type: package
-        data: "@flyde/stdlib"
+        data: "@flyde/nodes"
     - pos:
         x: -83.18318359374999
         y: 60.36263549804687

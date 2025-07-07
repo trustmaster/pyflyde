@@ -1,0 +1,51 @@
+imports: {}
+node:
+  instances:
+    - pos:
+        x: -150
+        y: 20
+      id: Http-dd04gea
+      inputConfig: {}
+      nodeId: Http
+      config:
+        method:
+          type: select
+          value: GET
+        url:
+          type: string
+          value: https://www.flyde.dev
+        data:
+          type: json
+          value: {}
+        params:
+          type: json
+          value:
+            ref: pyflyde
+        headers:
+          type: json
+          value:
+            User-Agent: PyFlyde v0.1
+      type: code
+      source:
+        type: package
+        data: "@flyde/nodes"
+  connections:
+    - from:
+        insId: Http-dd04gea
+        pinId: data
+      to:
+        insId: __this
+        pinId: response
+  id: Example
+  inputs: {}
+  outputs:
+    response:
+      delayed: false
+  inputsPosition: {}
+  outputsPosition:
+    result:
+      x: -23.264428942324532
+      y: 237.25953921502617
+    response:
+      x: 124.5
+      y: 19

@@ -6,7 +6,14 @@ from urllib import error
 from http import client
 
 from flyde.io import EOF, InputConfig, InputType
-from flyde.stdlib import Conditional, GetAttribute, Http, InlineValue, _ConditionConfig, _ConditionType
+from flyde.nodes import (
+    Conditional,
+    GetAttribute,
+    Http,
+    InlineValue,
+    _ConditionConfig,
+    _ConditionType,
+)
 
 
 class TestInlineValue(unittest.TestCase):
@@ -16,7 +23,10 @@ class TestInlineValue(unittest.TestCase):
             "outputs": {"value": "Hello"},
         }
         out_q = Queue()
-        node = InlineValue(id="test_inline_value", config={"value": InputConfig(type=InputType.STRING, value="Hello")})
+        node = InlineValue(
+            id="test_inline_value",
+            config={"value": InputConfig(type=InputType.STRING, value="Hello")},
+        )
         node.outputs["value"].connect(out_q)
         node.run()
         self.assertEqual(test_case["outputs"]["value"], out_q.get())
@@ -29,7 +39,10 @@ class TestInlineValue(unittest.TestCase):
             "outputs": {"value": "Hello"},
         }
         out_q = Queue()
-        node = InlineValue(id="test_inline_value", config={"value": InputConfig(type=InputType.STRING, value="Hello")})
+        node = InlineValue(
+            id="test_inline_value",
+            config={"value": InputConfig(type=InputType.STRING, value="Hello")},
+        )
         node.outputs["value"].connect(out_q)
         node.run()
         self.assertEqual(test_case["outputs"]["value"], out_q.get())
@@ -168,7 +181,9 @@ class TestConditional(unittest.TestCase):
                     "leftOperand": InputConfig(
                         type=InputType.DYNAMIC,
                     ),
-                    "rightOperand": InputConfig(type=InputType.STRING, value="this is not important"),
+                    "rightOperand": InputConfig(
+                        type=InputType.STRING, value="this is not important"
+                    ),
                     "condition": _ConditionConfig(
                         type=_ConditionType.Exists,
                     ),
@@ -188,7 +203,9 @@ class TestConditional(unittest.TestCase):
                     "leftOperand": InputConfig(
                         type=InputType.DYNAMIC,
                     ),
-                    "rightOperand": InputConfig(type=InputType.STRING, value="this is not important"),
+                    "rightOperand": InputConfig(
+                        type=InputType.STRING, value="this is not important"
+                    ),
                     "condition": _ConditionConfig(
                         type=_ConditionType.NotExists,
                     ),
@@ -211,7 +228,9 @@ class TestConditional(unittest.TestCase):
                     "rightOperand": InputConfig(
                         type=InputType.DYNAMIC,
                     ),
-                    "condition": {"type": "UNSUPPORTED"},  # Will cause a ValueError in parse_config
+                    "condition": {
+                        "type": "UNSUPPORTED"
+                    },  # Will cause a ValueError in parse_config
                 },
                 "inputs": {
                     "leftOperand": ["Apple", "Banana", "apple", EOF],
@@ -231,7 +250,9 @@ class TestConditional(unittest.TestCase):
 
             if "raises" in test_case and test_case["raises"] is not None:
                 with self.assertRaises(test_case["raises"]):
-                    node = Conditional(id="test_conditional", config=test_case["config"])
+                    node = Conditional(
+                        id="test_conditional", config=test_case["config"]
+                    )
                 continue
 
             node = Conditional(id="test_conditional", config=test_case["config"])
@@ -395,7 +416,9 @@ class TestGetAttribute(unittest.TestCase):
             node.run()
             for i in range(len(test_case["inputs"]["object"])):
                 obj_q.put(test_case["inputs"]["object"][i])
-                if len(test_case["inputs"]["key"]) > 0 and i < len(test_case["inputs"]["key"]):
+                if len(test_case["inputs"]["key"]) > 0 and i < len(
+                    test_case["inputs"]["key"]
+                ):
                     attr_q.put(test_case["inputs"]["key"][i])
                 self.assertEqual(test_case["outputs"][i], out_q.get())
 
@@ -404,11 +427,11 @@ class TestGetAttribute(unittest.TestCase):
 
 
 class TestHttp(unittest.TestCase):
-    @patch('urllib.request.urlopen')
+    @patch("urllib.request.urlopen")
     def test_http_get(self, mock_urlopen):
         mock_response = MagicMock()
         mock_response.status = 200
-        mock_response.headers = {'Content-Type': 'application/json'}
+        mock_response.headers = {"Content-Type": "application/json"}
         mock_response.read.return_value = b'{"message": "Hello, World!"}'
         mock_response.__enter__.return_value = mock_response
         mock_urlopen.return_value = mock_response
@@ -417,8 +440,12 @@ class TestHttp(unittest.TestCase):
             "name": "simple GET request",
             "config": {
                 "method": InputConfig(type=InputType.STRING, value="GET"),
-                "url": InputConfig(type=InputType.STRING, value="https://example.com/api"),
-                "headers": InputConfig(type=InputType.JSON, value={"User-Agent": "PyFlyde Test"}),
+                "url": InputConfig(
+                    type=InputType.STRING, value="https://example.com/api"
+                ),
+                "headers": InputConfig(
+                    type=InputType.JSON, value={"User-Agent": "PyFlyde Test"}
+                ),
                 "params": InputConfig(type=InputType.JSON, value={"q": "test"}),
             },
         }
@@ -432,7 +459,7 @@ class TestHttp(unittest.TestCase):
             url="https://example.com/api",
             method="GET",
             headers={"User-Agent": "PyFlyde Test"},
-            params={"q": "test"}
+            params={"q": "test"},
         )
 
         self.assertEqual({"message": "Hello, World!"}, data_q.get_nowait())
@@ -442,7 +469,7 @@ class TestHttp(unittest.TestCase):
         args, _ = mock_urlopen.call_args
         self.assertTrue("https://example.com/api?q=test" in str(args[0].full_url))
         self.assertEqual("GET", args[0].method)
-        
+
         # Check that the User-Agent header was set
         user_agent = None
         for key, value in args[0].headers.items():
@@ -451,57 +478,66 @@ class TestHttp(unittest.TestCase):
                 break
         self.assertEqual("PyFlyde Test", user_agent)
 
-    @patch('urllib.request.urlopen')
+    @patch("urllib.request.urlopen")
     def test_http_html_response(self, mock_urlopen):
         mock_response = MagicMock()
         mock_response.status = 200
-        mock_response.headers = {'Content-Type': 'text/html; charset=utf-8'}
-        mock_response.read.return_value = b'<!DOCTYPE html><html><body><h1>Test Page</h1></body></html>'
+        mock_response.headers = {"Content-Type": "text/html; charset=utf-8"}
+        mock_response.read.return_value = (
+            b"<!DOCTYPE html><html><body><h1>Test Page</h1></body></html>"
+        )
         mock_response.__enter__.return_value = mock_response
         mock_urlopen.return_value = mock_response
 
         data_q = Queue()
 
-        node = Http(id="test_http", config={
-            "method": InputConfig(type=InputType.STRING, value="GET"),
-            "url": InputConfig(type=InputType.STRING, value="https://example.com"),
-        })
+        node = Http(
+            id="test_http",
+            config={
+                "method": InputConfig(type=InputType.STRING, value="GET"),
+                "url": InputConfig(type=InputType.STRING, value="https://example.com"),
+            },
+        )
         node.outputs["data"].connect(data_q)
 
-        node.process(
-            url="https://example.com",
-            method="GET"
-        )
+        node.process(url="https://example.com", method="GET")
 
-        self.assertEqual("<!DOCTYPE html><html><body><h1>Test Page</h1></body></html>", data_q.get_nowait())
+        self.assertEqual(
+            "<!DOCTYPE html><html><body><h1>Test Page</h1></body></html>",
+            data_q.get_nowait(),
+        )
 
         mock_urlopen.assert_called_once()
         args, _ = mock_urlopen.call_args
         self.assertEqual("https://example.com", str(args[0].full_url))
         self.assertEqual("GET", args[0].method)
 
-    @patch('urllib.request.urlopen')
+    @patch("urllib.request.urlopen")
     def test_http_binary_response(self, mock_urlopen):
         mock_response = MagicMock()
         mock_response.status = 200
-        mock_response.headers = {'Content-Type': 'application/octet-stream'}
-        binary_data = b'\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR\x00\x00'  # Start of a PNG file
+        mock_response.headers = {"Content-Type": "application/octet-stream"}
+        binary_data = (
+            b"\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR\x00\x00"  # Start of a PNG file
+        )
         mock_response.read.return_value = binary_data
         mock_response.__enter__.return_value = mock_response
         mock_urlopen.return_value = mock_response
 
         data_q = Queue()
 
-        node = Http(id="test_http", config={
-            "method": InputConfig(type=InputType.STRING, value="GET"),
-            "url": InputConfig(type=InputType.STRING, value="https://example.com/image.png"),
-        })
+        node = Http(
+            id="test_http",
+            config={
+                "method": InputConfig(type=InputType.STRING, value="GET"),
+                "url": InputConfig(
+                    type=InputType.STRING, value="https://example.com/image.png"
+                ),
+            },
+        )
         node.outputs["data"].connect(data_q)
 
-        node.process(
-            url="https://example.com/image.png",
-            method="GET"
-        )
+        node.process(url="https://example.com/image.png", method="GET")
 
         # Binary data should be returned as is
         self.assertEqual(binary_data, data_q.get_nowait())
@@ -511,29 +547,31 @@ class TestHttp(unittest.TestCase):
         self.assertEqual("https://example.com/image.png", str(args[0].full_url))
         self.assertEqual("GET", args[0].method)
 
-    @patch('urllib.request.urlopen')
+    @patch("urllib.request.urlopen")
     def test_http_non_utf8_encoding(self, mock_urlopen):
         mock_response = MagicMock()
         mock_response.status = 200
-        mock_response.headers = {'Content-Type': 'text/html; charset=ISO-8859-1'}
+        mock_response.headers = {"Content-Type": "text/html; charset=ISO-8859-1"}
         # Latin-1 encoded text with special characters
-        latin1_data = b'Espa\xf1ol Fran\xe7ais Portugu\xeas'
+        latin1_data = b"Espa\xf1ol Fran\xe7ais Portugu\xeas"
         mock_response.read.return_value = latin1_data
         mock_response.__enter__.return_value = mock_response
         mock_urlopen.return_value = mock_response
 
         data_q = Queue()
 
-        node = Http(id="test_http", config={
-            "method": InputConfig(type=InputType.STRING, value="GET"),
-            "url": InputConfig(type=InputType.STRING, value="https://example.com/latin1.html"),
-        })
+        node = Http(
+            id="test_http",
+            config={
+                "method": InputConfig(type=InputType.STRING, value="GET"),
+                "url": InputConfig(
+                    type=InputType.STRING, value="https://example.com/latin1.html"
+                ),
+            },
+        )
         node.outputs["data"].connect(data_q)
 
-        node.process(
-            url="https://example.com/latin1.html",
-            method="GET"
-        )
+        node.process(url="https://example.com/latin1.html", method="GET")
 
         # Should be properly decoded using ISO-8859-1 charset
         self.assertEqual("Español Français Português", data_q.get_nowait())
@@ -543,11 +581,11 @@ class TestHttp(unittest.TestCase):
         self.assertEqual("https://example.com/latin1.html", str(args[0].full_url))
         self.assertEqual("GET", args[0].method)
 
-    @patch('urllib.request.urlopen')
+    @patch("urllib.request.urlopen")
     def test_http_post(self, mock_urlopen):
         mock_response = MagicMock()
         mock_response.status = 201
-        mock_response.headers = {'Content-Type': 'application/json'}
+        mock_response.headers = {"Content-Type": "application/json"}
         mock_response.read.return_value = b'{"id": 1, "success": true}'
         mock_response.__enter__.return_value = mock_response
         mock_urlopen.return_value = mock_response
@@ -556,9 +594,16 @@ class TestHttp(unittest.TestCase):
             "name": "POST request with data",
             "config": {
                 "method": InputConfig(type=InputType.STRING, value="POST"),
-                "url": InputConfig(type=InputType.STRING, value="https://example.com/api/users"),
-                "headers": InputConfig(type=InputType.JSON, value={"User-Agent": "PyFlyde Test"}),
-                "data": InputConfig(type=InputType.JSON, value={"name": "Test User", "email": "test@example.com"}),
+                "url": InputConfig(
+                    type=InputType.STRING, value="https://example.com/api/users"
+                ),
+                "headers": InputConfig(
+                    type=InputType.JSON, value={"User-Agent": "PyFlyde Test"}
+                ),
+                "data": InputConfig(
+                    type=InputType.JSON,
+                    value={"name": "Test User", "email": "test@example.com"},
+                ),
             },
         }
 
@@ -571,7 +616,7 @@ class TestHttp(unittest.TestCase):
             url="https://example.com/api/users",
             method="POST",
             headers={"User-Agent": "PyFlyde Test"},
-            data={"name": "Test User", "email": "test@example.com"}
+            data={"name": "Test User", "email": "test@example.com"},
         )
 
         self.assertEqual({"id": 1, "success": True}, data_q.get_nowait())
@@ -581,7 +626,7 @@ class TestHttp(unittest.TestCase):
         args, kwargs = mock_urlopen.call_args
         self.assertEqual("https://example.com/api/users", str(args[0].full_url))
         self.assertEqual("POST", args[0].method)
-        
+
         # Check that the User-Agent header was set
         user_agent = None
         for key, value in args[0].headers.items():
@@ -589,15 +634,17 @@ class TestHttp(unittest.TestCase):
                 user_agent = value
                 break
         self.assertEqual("PyFlyde Test", user_agent)
-        
-        self.assertEqual(b'{"name": "Test User", "email": "test@example.com"}', kwargs["data"])
 
-    @patch('urllib.request.urlopen')
+        self.assertEqual(
+            b'{"name": "Test User", "email": "test@example.com"}', kwargs["data"]
+        )
+
+    @patch("urllib.request.urlopen")
     def test_http_error(self, mock_urlopen):
         # Create a mock headers object for HTTPError
         headers = client.HTTPMessage()
-        headers.add_header('Content-Type', 'text/plain')
-        
+        headers.add_header("Content-Type", "text/plain")
+
         mock_urlopen.side_effect = error.HTTPError(
             url="https://example.com/api/error",
             code=404,
@@ -610,7 +657,9 @@ class TestHttp(unittest.TestCase):
             "name": "HTTP error handling",
             "config": {
                 "method": InputConfig(type=InputType.STRING, value="GET"),
-                "url": InputConfig(type=InputType.STRING, value="https://example.com/api/error"),
+                "url": InputConfig(
+                    type=InputType.STRING, value="https://example.com/api/error"
+                ),
             },
         }
 
@@ -620,11 +669,8 @@ class TestHttp(unittest.TestCase):
         node.outputs["data"].connect(data_q)
 
         with self.assertRaises(error.HTTPError) as context:
-            node.process(
-                url="https://example.com/api/error",
-                method="GET"
-            )
-            
+            node.process(url="https://example.com/api/error", method="GET")
+
         self.assertEqual(404, context.exception.code)
         self.assertEqual("Not Found", context.exception.msg)
 
