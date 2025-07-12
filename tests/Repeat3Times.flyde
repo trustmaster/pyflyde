@@ -3,7 +3,7 @@ node:
   instances:
     - pos:
         x: -105.91999999999999
-        y: 47.08
+        y: 49.08
       id: RepeatWordNTimes-h30493h
       inputConfig:
         times:
@@ -91,4 +91,4 @@ node:
     word3x:
       x: 345.94718750000004
       y: 57.28312866210939
-  description: For each input string, sends a string with the same conent repeated 3 times
+  description: For each input string, sends a string with the same content repeated 3 times

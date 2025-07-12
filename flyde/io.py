@@ -175,10 +175,13 @@ class Input:
     def apply_config(self, config: InputConfig):
         """Apply config from the flyde flow to the input."""
         self._value = config.value
-        if config.type == InputType.DYNAMIC:
-            self._input_mode = InputMode.QUEUE
-        else:
-            self._input_mode = InputMode.STICKY
+        # If input mode is STICKY already, stick to it
+        # as it may be important for the node to function correctly
+        if self._input_mode != InputMode.STICKY:
+            if config.type == InputType.DYNAMIC:
+                self._input_mode = InputMode.QUEUE
+            else:
+                self._input_mode = InputMode.STICKY
 
         # Apply Python type hint based on supported config type
         if config.type != InputType.DYNAMIC and self.type is None:

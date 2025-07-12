@@ -26,7 +26,7 @@ class Flow:
     def _preload_imports(self, base_path: str, imports: dict[str, list[str]]):
         if not imports:
             return
-            
+
         for module, classes in imports.items():
             logger.debug(f"Importing {module}")
             # If module name ends with .flyde it's a Graph
@@ -51,7 +51,8 @@ class Flow:
 
     def _load_graph(self, name: str, path: str):
         """Loads a graph YAML."""
-        yml = load_yaml_file(path)
+        full_path = os.path.join(self._base_path, path)
+        yml = load_yaml_file(full_path)
         if not isinstance(yml, dict):
             raise ValueError(f"Invalid YAML file {path}")
         # Save the blueprint YAML for the graph to be instantiated later
@@ -97,7 +98,8 @@ class Flow:
     def factory(self, class_name: str, args: InstanceArgs):
         """Factory method to create a node from a class name and arguments.
 
-        It is used by the runtime to create nodes from the YAML definition or on the fly."""
+        It is used by the runtime to create nodes from the YAML definition or on the fly.
+        """
         if args.type == InstanceType.VISUAL:
             return self.create_graph(class_name, args)
 
