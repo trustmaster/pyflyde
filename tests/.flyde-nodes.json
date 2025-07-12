@@ -1,0 +1,421 @@
+{
+  "nodes": {
+    "Capitalize": {
+      "id": "Capitalize",
+      "type": "code",
+      "displayName": "Capitalize",
+      "description": "A component that capitalizes the input.",
+      "source": {
+        "type": "custom",
+        "data": "custom://Capitalize"
+      },
+      "editorNode": {
+        "id": "Capitalize",
+        "displayName": "Capitalize",
+        "description": "A component that capitalizes the input.",
+        "inputs": {
+          "inp": {
+            "description": "The input"
+          }
+        },
+        "outputs": {
+          "out": {
+            "description": "The output"
+          }
+        },
+        "editorConfig": {
+          "type": "structured"
+        },
+        "icon": "fa-solid fa-user"
+      },
+      "config": {},
+      "icon": "fa-solid fa-user"
+    },
+    "Echo": {
+      "id": "Echo",
+      "type": "code",
+      "displayName": "Echo",
+      "description": "A simple component that echoes the input.",
+      "source": {
+        "type": "custom",
+        "data": "custom://Echo"
+      },
+      "editorNode": {
+        "id": "Echo",
+        "displayName": "Echo",
+        "description": "A simple component that echoes the input.",
+        "inputs": {
+          "inp": {
+            "description": "The input"
+          }
+        },
+        "outputs": {
+          "out": {
+            "description": "The output"
+          }
+        },
+        "editorConfig": {
+          "type": "structured"
+        },
+        "icon": "fa-solid fa-user"
+      },
+      "config": {},
+      "icon": "fa-solid fa-user"
+    },
+    "Format": {
+      "id": "Format",
+      "type": "code",
+      "displayName": "Format",
+      "description": "Formats the input value with a given format string and sends it to out.",
+      "source": {
+        "type": "custom",
+        "data": "custom://Format"
+      },
+      "editorNode": {
+        "id": "Format",
+        "displayName": "Format",
+        "description": "Formats the input value with a given format string and sends it to out.",
+        "inputs": {
+          "inp": {
+            "description": "The input"
+          },
+          "format": {
+            "description": "The format string"
+          }
+        },
+        "outputs": {
+          "out": {
+            "description": "The formatted output"
+          }
+        },
+        "editorConfig": {
+          "type": "structured"
+        },
+        "icon": "fa-solid fa-user"
+      },
+      "config": {},
+      "icon": "fa-solid fa-user"
+    },
+    "RepeatWordNTimes": {
+      "id": "RepeatWordNTimes",
+      "type": "code",
+      "displayName": "Repeat Word NTimes",
+      "description": "A component that has both inputs and outputs and a sticky input.",
+      "source": {
+        "type": "custom",
+        "data": "custom://RepeatWordNTimes"
+      },
+      "editorNode": {
+        "id": "RepeatWordNTimes",
+        "displayName": "Repeat Word NTimes",
+        "description": "A component that has both inputs and outputs and a sticky input.",
+        "inputs": {
+          "word": {
+            "description": "The input"
+          },
+          "times": {
+            "description": "The number of times to repeat the input"
+          }
+        },
+        "outputs": {
+          "out": {
+            "description": "The output"
+          }
+        },
+        "editorConfig": {
+          "type": "structured"
+        },
+        "icon": "fa-solid fa-user"
+      },
+      "config": {},
+      "icon": "fa-solid fa-user"
+    },
+    "CustomBob": {
+      "id": "CustomBob",
+      "type": "code",
+      "displayName": "Custom Bob",
+      "description": "A custom external node named Bob",
+      "source": {
+        "type": "custom",
+        "data": "custom://CustomBob"
+      },
+      "editorNode": {
+        "id": "CustomBob",
+        "displayName": "Custom Bob",
+        "description": "A custom external node named Bob",
+        "inputs": {
+          "value": {
+            "description": "Input value to process"
+          }
+        },
+        "outputs": {
+          "result": {
+            "description": "Processed result from external runtime"
+          }
+        },
+        "editorConfig": {
+          "type": "structured"
+        },
+        "icon": "fa-solid fa-user"
+      },
+      "config": {},
+      "icon": "fa-solid fa-user"
+    },
+    "InlineValue": {
+      "id": "InlineValue",
+      "type": "code",
+      "displayName": "Overridden Inline Value",
+      "description": "This overrides the standard InlineValue node",
+      "source": {
+        "type": "package",
+        "data": "@flyde/nodes"
+      },
+      "editorNode": {
+        "id": "InlineValue",
+        "displayName": "Overridden Inline Value",
+        "description": "This overrides the standard InlineValue node",
+        "inputs": {},
+        "outputs": {
+          "value": {
+            "description": "The overridden value"
+          }
+        },
+        "editorConfig": {
+          "type": "structured"
+        }
+      },
+      "config": {}
+    },
+    "TestCustomComponent": {
+      "id": "TestCustomComponent",
+      "type": "code",
+      "displayName": "Test Custom Component",
+      "description": "A test component for unit testing.",
+      "source": {
+        "type": "custom",
+        "data": "custom://TestCustomComponent"
+      },
+      "editorNode": {
+        "id": "TestCustomComponent",
+        "displayName": "Test Custom Component",
+        "description": "A test component for unit testing.",
+        "inputs": {
+          "input1": {
+            "description": "First test input"
+          },
+          "input2": {
+            "description": "Second test input"
+          }
+        },
+        "outputs": {
+          "output": {
+            "description": "Test output"
+          }
+        },
+        "editorConfig": {
+          "type": "structured"
+        },
+        "icon": "fa-solid fa-user"
+      },
+      "config": {},
+      "icon": "fa-solid fa-user"
+    },
+    "AllStickyInputsComponent": {
+      "id": "AllStickyInputsComponent",
+      "type": "code",
+      "displayName": "All Sticky Inputs Component",
+      "description": "A component with only sticky inputs to test single execution.",
+      "source": {
+        "type": "custom",
+        "data": "custom://AllStickyInputsComponent"
+      },
+      "editorNode": {
+        "id": "AllStickyInputsComponent",
+        "displayName": "All Sticky Inputs Component",
+        "description": "A component with only sticky inputs to test single execution.",
+        "inputs": {
+          "a": {
+            "description": "First sticky input"
+          },
+          "b": {
+            "description": "Second sticky input"
+          }
+        },
+        "outputs": {
+          "result": {
+            "description": "Result of operation"
+          }
+        },
+        "editorConfig": {
+          "type": "structured"
+        },
+        "icon": "fa-solid fa-user"
+      },
+      "config": {},
+      "icon": "fa-solid fa-user"
+    },
+    "CustomRunComponent": {
+      "id": "CustomRunComponent",
+      "type": "code",
+      "displayName": "Custom Run Component",
+      "description": "A component that has a custom run and shutdown handlers.",
+      "source": {
+        "type": "custom",
+        "data": "custom://CustomRunComponent"
+      },
+      "editorNode": {
+        "id": "CustomRunComponent",
+        "displayName": "Custom Run Component",
+        "description": "A component that has a custom run and shutdown handlers.",
+        "inputs": {
+          "s": {
+            "description": "Individual strings"
+          }
+        },
+        "outputs": {
+          "l": {
+            "description": "List of strings"
+          }
+        },
+        "editorConfig": {
+          "type": "structured"
+        },
+        "icon": "fa-solid fa-user"
+      },
+      "config": {},
+      "icon": "fa-solid fa-user"
+    },
+    "InvalidSendProcess": {
+      "id": "InvalidSendProcess",
+      "type": "code",
+      "displayName": "Invalid Send Process",
+      "description": "A component that tries to send a message without a corresponding output.",
+      "source": {
+        "type": "custom",
+        "data": "custom://InvalidSendProcess"
+      },
+      "editorNode": {
+        "id": "InvalidSendProcess",
+        "displayName": "Invalid Send Process",
+        "description": "A component that tries to send a message without a corresponding output.",
+        "inputs": {
+          "s": {
+            "description": "Individual strings"
+          }
+        },
+        "outputs": {},
+        "editorConfig": {
+          "type": "structured"
+        },
+        "icon": "fa-solid fa-user"
+      },
+      "config": {},
+      "icon": "fa-solid fa-user"
+    },
+    "NoProcessComponent": {
+      "id": "NoProcessComponent",
+      "type": "code",
+      "displayName": "No Process Component",
+      "description": "A component to test no inputs, outputs, and no process method.",
+      "source": {
+        "type": "custom",
+        "data": "custom://NoProcessComponent"
+      },
+      "editorNode": {
+        "id": "NoProcessComponent",
+        "displayName": "No Process Component",
+        "description": "A component to test no inputs, outputs, and no process method.",
+        "inputs": {},
+        "outputs": {},
+        "editorConfig": {
+          "type": "structured"
+        },
+        "icon": "fa-solid fa-user"
+      },
+      "config": {},
+      "icon": "fa-solid fa-user"
+    },
+    "SinkComponent": {
+      "id": "SinkComponent",
+      "type": "code",
+      "displayName": "Sink Component",
+      "description": "A component that only has inputs.",
+      "source": {
+        "type": "custom",
+        "data": "custom://SinkComponent"
+      },
+      "editorNode": {
+        "id": "SinkComponent",
+        "displayName": "Sink Component",
+        "description": "A component that only has inputs.",
+        "inputs": {
+          "word": {
+            "description": "The input"
+          },
+          "output": {
+            "description": "Object to store result in"
+          }
+        },
+        "outputs": {},
+        "editorConfig": {
+          "type": "structured"
+        },
+        "icon": "fa-solid fa-user"
+      },
+      "config": {},
+      "icon": "fa-solid fa-user"
+    },
+    "SourceComponent": {
+      "id": "SourceComponent",
+      "type": "code",
+      "displayName": "Source Component",
+      "description": "A component that only has outputs.",
+      "source": {
+        "type": "custom",
+        "data": "custom://SourceComponent"
+      },
+      "editorNode": {
+        "id": "SourceComponent",
+        "displayName": "Source Component",
+        "description": "A component that only has outputs.",
+        "inputs": {},
+        "outputs": {
+          "out": {
+            "description": "The output"
+          }
+        },
+        "editorConfig": {
+          "type": "structured"
+        },
+        "icon": "fa-solid fa-user"
+      },
+      "config": {},
+      "icon": "fa-solid fa-user"
+    }
+  },
+  "groups": [
+    {
+      "title": "Custom Runtime Nodes",
+      "nodeIds": [
+        "Capitalize",
+        "Echo",
+        "Format",
+        "RepeatWordNTimes",
+        "CustomBob",
+        "TestCustomComponent",
+        "AllStickyInputsComponent",
+        "CustomRunComponent",
+        "InvalidSendProcess",
+        "NoProcessComponent",
+        "SinkComponent",
+        "SourceComponent"
+      ]
+    },
+    {
+      "title": "Overridden Stdlib",
+      "nodeIds": [
+        "InlineValue"
+      ]
+    }
+  ]
+}

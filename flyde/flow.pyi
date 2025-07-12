@@ -23,7 +23,8 @@ class Flow:
     def factory(self, class_name: str, args: InstanceArgs):
         """Factory method to create a node from a class name and arguments.
 
-        It is used by the runtime to create nodes from the YAML definition or on the fly."""
+        It is used by the runtime to create nodes from the YAML definition or on the fly.
+        """
     def run(self) -> None:
         """Start the flow running. This is a non-blocking call as the flow runs in a separate thread."""
     def run_sync(self) -> None:
