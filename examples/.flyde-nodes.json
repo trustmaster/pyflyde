@@ -1,0 +1,274 @@
+{
+  "nodes": {
+    "LoadDataset": {
+      "id": "LoadDataset",
+      "type": "code",
+      "displayName": "Load Dataset",
+      "description": "Loads a dataset from a file into a DataFrame.",
+      "source": {
+        "type": "custom",
+        "data": "custom://mylib/dataframe.py/LoadDataset"
+      },
+      "editorNode": {
+        "id": "LoadDataset",
+        "displayName": "Load Dataset",
+        "description": "Loads a dataset from a file into a DataFrame.",
+        "inputs": {
+          "file_path": {
+            "description": "The path to the file containing the dataset"
+          }
+        },
+        "outputs": {
+          "dataframe": {
+            "description": "The loaded dataframe"
+          }
+        },
+        "editorConfig": {
+          "type": "structured"
+        },
+        "icon": "fa-solid fa-user"
+      },
+      "config": {},
+      "icon": "fa-solid fa-user"
+    },
+    "Scale": {
+      "id": "Scale",
+      "type": "code",
+      "displayName": "Scale",
+      "description": "Scales the features of a dataframe with a scikit-learn StandardScaler.",
+      "source": {
+        "type": "custom",
+        "data": "custom://mylib/dataframe.py/Scale"
+      },
+      "editorNode": {
+        "id": "Scale",
+        "displayName": "Scale",
+        "description": "Scales the features of a dataframe with a scikit-learn StandardScaler.",
+        "inputs": {
+          "dataframe": {
+            "description": "The dataframe to scale"
+          }
+        },
+        "outputs": {
+          "scaled_dataframe": {
+            "description": "The scaled dataframe"
+          }
+        },
+        "editorConfig": {
+          "type": "structured"
+        },
+        "icon": "fa-solid fa-user"
+      },
+      "config": {},
+      "icon": "fa-solid fa-user"
+    },
+    "KMeansCluster": {
+      "id": "KMeansCluster",
+      "type": "code",
+      "displayName": "KMeans Cluster",
+      "description": "Clusters the dataframe using K-means clustering.",
+      "source": {
+        "type": "custom",
+        "data": "custom://mylib/kmeans.py/KMeansCluster"
+      },
+      "editorNode": {
+        "id": "KMeansCluster",
+        "displayName": "KMeans Cluster",
+        "description": "Clusters the dataframe using K-means clustering.",
+        "inputs": {
+          "scaled_dataframe": {
+            "description": "The scaled dataframe to cluster"
+          },
+          "n_clusters": {
+            "description": "The number of clusters"
+          }
+        },
+        "outputs": {
+          "kmeans_result": {
+            "description": "K-means clustering result"
+          }
+        },
+        "editorConfig": {
+          "type": "structured"
+        },
+        "icon": "fa-solid fa-user"
+      },
+      "config": {},
+      "icon": "fa-solid fa-user"
+    },
+    "KMeansNClusters": {
+      "id": "KMeansNClusters",
+      "type": "code",
+      "displayName": "KMeans NClusters",
+      "description": "Finds the optimal number of clusters for K-means clustering using silhouette method.",
+      "source": {
+        "type": "custom",
+        "data": "custom://mylib/kmeans.py/KMeansNClusters"
+      },
+      "editorNode": {
+        "id": "KMeansNClusters",
+        "displayName": "KMeans NClusters",
+        "description": "Finds the optimal number of clusters for K-means clustering using silhouette method.",
+        "inputs": {
+          "scaled_dataframe": {
+            "description": "The scaled dataframe to cluster"
+          },
+          "max_clusters": {
+            "description": "The maximum number of clusters to consider"
+          }
+        },
+        "outputs": {
+          "n_clusters": {
+            "description": "The optimal number of clusters"
+          }
+        },
+        "editorConfig": {
+          "type": "structured"
+        },
+        "icon": "fa-solid fa-user"
+      },
+      "config": {},
+      "icon": "fa-solid fa-user"
+    },
+    "PCA2": {
+      "id": "PCA2",
+      "type": "code",
+      "displayName": "PCA2",
+      "description": "Performs PCA on a dataframe and returns the first two principal components.",
+      "source": {
+        "type": "custom",
+        "data": "custom://mylib/kmeans.py/PCA2"
+      },
+      "editorNode": {
+        "id": "PCA2",
+        "displayName": "PCA2",
+        "description": "Performs PCA on a dataframe and returns the first two principal components.",
+        "inputs": {
+          "scaled_dataframe": {
+            "description": "The scaled dataframe to reduce"
+          }
+        },
+        "outputs": {
+          "pca_components": {
+            "description": "The first two principal components"
+          }
+        },
+        "editorConfig": {
+          "type": "structured"
+        },
+        "icon": "fa-solid fa-user"
+      },
+      "config": {},
+      "icon": "fa-solid fa-user"
+    },
+    "Visualize": {
+      "id": "Visualize",
+      "type": "code",
+      "displayName": "Visualize",
+      "description": "Visualizes the clustered dataframe.",
+      "source": {
+        "type": "custom",
+        "data": "custom://mylib/kmeans.py/Visualize"
+      },
+      "editorNode": {
+        "id": "Visualize",
+        "displayName": "Visualize",
+        "description": "Visualizes the clustered dataframe.",
+        "inputs": {
+          "pca_components": {
+            "description": "The first two principal components"
+          },
+          "pca_centroids": {
+            "description": "The centroids in PCA space"
+          },
+          "kmeans_result": {
+            "description": "K-means clustering result"
+          }
+        },
+        "outputs": {},
+        "editorConfig": {
+          "type": "structured"
+        },
+        "icon": "fa-solid fa-user"
+      },
+      "config": {},
+      "icon": "fa-solid fa-user"
+    },
+    "Concat": {
+      "id": "Concat",
+      "type": "code",
+      "displayName": "Concat",
+      "description": "Concatenates two strings.",
+      "source": {
+        "type": "custom",
+        "data": "custom://mylib/components.py/Concat"
+      },
+      "editorNode": {
+        "id": "Concat",
+        "displayName": "Concat",
+        "description": "Concatenates two strings.",
+        "inputs": {
+          "a": {
+            "description": "The first string"
+          },
+          "b": {
+            "description": "The second string"
+          }
+        },
+        "outputs": {
+          "out": {
+            "description": "The concatenated string"
+          }
+        },
+        "editorConfig": {
+          "type": "structured"
+        },
+        "icon": "fa-solid fa-user"
+      },
+      "config": {},
+      "icon": "fa-solid fa-user"
+    },
+    "Print": {
+      "id": "Print",
+      "type": "code",
+      "displayName": "Print",
+      "description": "Prints the input message to the console.",
+      "source": {
+        "type": "custom",
+        "data": "custom://mylib/components.py/Print"
+      },
+      "editorNode": {
+        "id": "Print",
+        "displayName": "Print",
+        "description": "Prints the input message to the console.",
+        "inputs": {
+          "msg": {
+            "description": "The message to print"
+          }
+        },
+        "outputs": {},
+        "editorConfig": {
+          "type": "structured"
+        },
+        "icon": "fa-solid fa-user"
+      },
+      "config": {},
+      "icon": "fa-solid fa-user"
+    }
+  },
+  "groups": [
+    {
+      "title": "Custom Runtime Nodes",
+      "nodeIds": [
+        "LoadDataset",
+        "Scale",
+        "KMeansCluster",
+        "KMeansNClusters",
+        "PCA2",
+        "Visualize",
+        "Concat",
+        "Print"
+      ]
+    }
+  ]
+}
