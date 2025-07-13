@@ -27,8 +27,8 @@ node:
           value: "{{inp}}"
       type: code
       source:
-        type: file
-        data: components.flyde.ts
+        type: custom
+        data: custom://components.py/Echo
   connections:
     - from:
         insId: qxavnllf1foh9ivxvtz2hkad

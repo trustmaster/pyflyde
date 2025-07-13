@@ -42,7 +42,15 @@ pip install examples/
 
 ## Running the Hello World example
 
-Run the example flow:
+First, generate the component metadata for the examples:
+
+```bash
+pyflyde gen examples/
+```
+
+This will recursively scan all Python files in the `examples/` directory and generate a `.flyde-nodes.json` file with metadata for all PyFlyde components found.
+
+Then run the example flow:
 
 ```bash
 pyflyde examples/HelloPy.flyde
@@ -53,6 +61,12 @@ It should print "Hello Flyde!" in the console.
 ## Running a Machine Learning example - wine clustering
 
 `examples/Clustering.flyde` is a more complex example which uses Pandas and Scikit-Learn to run K-means clustering on a [wine clustering dataset from Kaggle](https://www.kaggle.com/harrywang/wine-dataset-for-clustering). It's a PyFlyde version of https://github.com/Shivangi0503/Wine_Clustering_KMeans.
+
+The component metadata should already be generated from the previous step, but if you add new components, remember to run:
+
+```bash
+pyflyde gen examples/
+```
 
 Open the `examples/Clustering.flyde` in Flyde VSCode visual editor to see how it looks like.
 

@@ -18,8 +18,8 @@ node:
           value: "{{times}}"
       type: code
       source:
-        type: file
-        data: components.flyde.ts
+        type: custom
+        data: custom://components.py/RepeatWordNTimes
     - pos:
         x: -422.4172058105469
         y: 126.0786114501953
@@ -46,8 +46,8 @@ node:
           value: "{{inp}}"
       type: code
       source:
-        type: file
-        data: components.flyde.ts
+        type: custom
+        data: custom://components.py/Capitalize
   connections:
     - from:
         insId: inl-ytsuyrje4syeb4qduymsfkl2

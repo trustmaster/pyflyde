@@ -117,28 +117,6 @@ class TestComponentWithStickyInput(unittest.TestCase):
         self.assertEqual(out_q.get(), EOF)
         self.assertEqual(in_q.qsize(), 0)
 
-    def test_to_ts(self):
-        self.maxDiff = None
-
-        def expected_typescript(name):
-            return """export const {NAME}: CodeNode = {
-  id: "{NAME}",
-  description: "A component that has both inputs and outputs and a sticky input.",
-  inputs: {
-    word: { description: "The input" },
-    times: { description: "The number of times to repeat the input" }
-  },
-  outputs: {
-    out: { description: "The output" }
-  },
-  run: () => { return; },
-};
-
-""".replace("{NAME}", name)
-
-        self.assertEqual(RepeatWordNTimes.to_ts(), expected_typescript("RepeatWordNTimes"))
-        self.assertEqual(RepeatWordNTimes.to_ts("RepeatWord"), expected_typescript("RepeatWord"))
-
     def test_from_yaml(self):
         yaml = {
             "id": "repeat",

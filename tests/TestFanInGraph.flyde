@@ -16,8 +16,8 @@ node:
           value: "{{format}}"
       type: code
       source:
-        type: file
-        data: components.flyde.ts
+        type: custom
+        data: custom://components.py/Format
     - pos:
         x: -58.16827392578125
         y: 63.02734375
@@ -30,8 +30,8 @@ node:
           value: "{{inp}}"
       type: code
       source:
-        type: file
-        data: components.flyde.ts
+        type: custom
+        data: custom://components.py/Capitalize
     - pos:
         x: -601.1567211914063
         y: 121.8353289794922

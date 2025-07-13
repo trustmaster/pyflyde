@@ -1,4 +1,5 @@
 import importlib
+import importlib.util
 import logging
 import os
 import sys
@@ -41,8 +42,8 @@ class Flow:
                 # Save the blueprint YAML for the graph to be instantiated later
                 self._graphs[node_id] = yml["node"]
                 continue
-            # Translate typescript file path to python module
-            module = module.replace("/", ".").replace(".flyde.ts", "").replace("@", "")
+            # Convert module path format
+            module = module.replace("/", ".").replace("@", "")
             logger.debug(f"Importing module {module}")
             mod = importlib.import_module(module)
             for class_name in classes:
@@ -65,11 +66,62 @@ class Flow:
         if name in self._components:
             return
 
-        # Translate typescript file path to python module
-        path = path.replace("/", ".").replace(".flyde.ts", "").replace("@", "")
-        logger.debug(f"Importing module {path}")
-        mod = importlib.import_module(path)
-        self._components[name] = getattr(mod, name)
+        # Handle custom://path/to/mod.py/ClassName format
+        if path.startswith("custom://"):
+            custom_path = path[9:]  # Remove "custom://" prefix
+            if "/" in custom_path and custom_path.count("/") >= 1:
+                # Split into module path and class name
+                parts = custom_path.rsplit("/", 1)
+                if len(parts) == 2:
+                    module_path, class_name = parts
+
+                    # Resolve the module path relative to the flow file's directory
+                    if module_path.endswith(".py"):
+                        # It's a file path, resolve it relative to the flow file directory
+                        absolute_module_path = os.path.join(self._base_path, module_path)
+                        # Convert to module name for importing
+                        spec = importlib.util.spec_from_file_location(class_name, absolute_module_path)
+                        if spec and spec.loader:
+                            mod = importlib.util.module_from_spec(spec)
+                            spec.loader.exec_module(mod)
+                            self._components[name] = getattr(mod, class_name)
+                            return
+                    else:
+                        # It's already a module path, convert file path to module path
+                        module_path = module_path.replace("/", ".").replace(".py", "")
+
+                        # Add the flow file's directory to sys.path temporarily for relative imports
+                        original_path = sys.path[:]
+                        if self._base_path not in sys.path:
+                            sys.path.insert(0, self._base_path)
+
+                        try:
+                            logger.debug(f"Importing custom module {module_path}, class {class_name}")
+                            mod = importlib.import_module(module_path)
+                            self._components[name] = getattr(mod, class_name)
+                            return
+                        finally:
+                            # Restore original sys.path
+                            sys.path[:] = original_path
+
+        # Handle @flyde/nodes package format for stdlib components
+        if path == "@flyde/nodes":
+            logger.debug(f"Loading stdlib component {name}")
+            from flyde.nodes import Conditional, GetAttribute, Http, InlineValue
+
+            stdlib_components = {
+                "InlineValue": InlineValue,
+                "Conditional": Conditional,
+                "GetAttribute": GetAttribute,
+                "Http": Http,
+            }
+            if name in stdlib_components:
+                self._components[name] = stdlib_components[name]
+                return
+
+        raise ValueError(
+            f"Invalid component source path: {path}. Only custom:// and @flyde/nodes formats are supported."
+        )
 
     def create_graph(self, name: str, args: InstanceArgs):
         if name not in self._graphs:

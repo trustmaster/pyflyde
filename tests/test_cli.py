@@ -92,7 +92,7 @@ class InlineValue(Component):
 
 class TestGenerateNodeJson(unittest.TestCase):
     def test_generate_custom_node_json(self):
-        result = generate_node_json("CustomBob", CustomBob)
+        result = generate_node_json("CustomBob", CustomBob, "test_components.py")
 
         expected = {
             "id": "CustomBob",
@@ -100,7 +100,7 @@ class TestGenerateNodeJson(unittest.TestCase):
             "displayName": "Custom Bob",
             "description": "A custom external node named Bob",
             "icon": "fa-solid fa-user",
-            "source": {"type": "custom", "data": "custom://CustomBob"},
+            "source": {"type": "custom", "data": "custom://test_components.py/CustomBob"},
             "editorNode": {
                 "id": "CustomBob",
                 "displayName": "Custom Bob",
@@ -116,7 +116,7 @@ class TestGenerateNodeJson(unittest.TestCase):
         self.assertEqual(result, expected)
 
     def test_generate_stdlib_override_json(self):
-        result = generate_node_json("InlineValue", InlineValue)
+        result = generate_node_json("InlineValue", InlineValue, "test_components.py")
 
         expected = {
             "id": "InlineValue",
@@ -142,7 +142,7 @@ class TestGenerateNodeJson(unittest.TestCase):
             inputs = {"inp": Input(description="Input")}
             outputs = {"out": Output(description="Output")}
 
-        result = generate_node_json("NodeWithoutDoc", NodeWithoutDoc)
+        result = generate_node_json("NodeWithoutDoc", NodeWithoutDoc, "test.py")
 
         self.assertEqual(result["description"], "")
         self.assertEqual(result["editorNode"]["description"], "")
@@ -151,7 +151,7 @@ class TestGenerateNodeJson(unittest.TestCase):
         class EmptyNode(Component):
             """An empty node"""
 
-        result = generate_node_json("EmptyNode", EmptyNode)
+        result = generate_node_json("EmptyNode", EmptyNode, "test.py")
 
         self.assertEqual(result["editorNode"]["inputs"], {})
         self.assertEqual(result["editorNode"]["outputs"], {})
@@ -217,8 +217,9 @@ class AnotherNode(Component):
         self.assertIn("AnotherNode", components)
 
         # Check that components are actually Component subclasses
-        for name, cls in components.items():
-            self.assertTrue(issubclass(cls, Component))
+        for name, component_info in components.items():
+            self.assertTrue(issubclass(component_info["class"], Component))
+            self.assertIn("file_path", component_info)
 
     def test_collect_components_invalid_syntax(self):
         # Create a file with invalid Python syntax
@@ -304,7 +305,7 @@ class InlineValue(Component):
         self.assertEqual(bob["id"], "CustomBob")
         self.assertEqual(bob["displayName"], "Custom Bob")
         self.assertEqual(bob["source"]["type"], "custom")
-        self.assertEqual(bob["source"]["data"], "custom://CustomBob")
+        self.assertEqual(bob["source"]["data"], "custom://components.py/CustomBob")
         self.assertIn("icon", bob)
 
         # Check InlineValue (stdlib override)
@@ -325,6 +326,11 @@ class InlineValue(Component):
 
         self.assertCountEqual(custom_group["nodeIds"], ["CustomBob", "CustomAlice"])
         self.assertCountEqual(stdlib_group["nodeIds"], ["InlineValue"])
+
+        # Check CustomAlice has correct path format
+        alice = nodes["CustomAlice"]
+        self.assertEqual(alice["source"]["type"], "custom")
+        self.assertEqual(alice["source"]["data"], "custom://components.py/CustomAlice")
 
     def test_gen_json_empty_directory(self):
         # Test with directory containing no components
@@ -379,6 +385,12 @@ class CustomNode2(Component):
         self.assertEqual(len(groups), 1)
         self.assertEqual(groups[0]["title"], "Custom Runtime Nodes")
         self.assertCountEqual(groups[0]["nodeIds"], ["CustomNode1", "CustomNode2"])
+
+        # Check that custom nodes have correct path format
+        for node_name in ["CustomNode1", "CustomNode2"]:
+            node = data["nodes"][node_name]
+            self.assertEqual(node["source"]["type"], "custom")
+            self.assertEqual(node["source"]["data"], f"custom://components.py/{node_name}")
 
         # Ensure no stdlib overrides group exists
         for group in groups:

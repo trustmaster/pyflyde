@@ -7,14 +7,12 @@ SRC_DIR = flyde
 TEST_DIR = tests
 
 # Targets
-.PHONY: ts test cover
+.PHONY: gen test cover
 
-ts:
-	@echo "Building the project..."
-	# For each *.py file in the examples/mylib directory run the ./flyde.py gen command to generate TS bindings
-	@for file in $(LIB_DIR)/*.py; do \
-		./flyde.py gen $$file; \
-	done
+gen:
+	@echo "Generating component definitions..."
+	# Generate JSON definitions for the examples/mylib directory
+	@./pyflyde gen $(LIB_DIR)/
 
 lint:
 	@echo "Running linters..."
@@ -46,7 +44,7 @@ builddist:
 	@rm -f ./dist/*
 	@$(PYTHON) -m build;
 
-release: lint test stubgen builddist
+release: lint test stubgen gen builddist
 	@echo "Releasing the project...";
 
 upload:

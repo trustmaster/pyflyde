@@ -13,8 +13,8 @@ node:
           value: "{{file_path}}"
       type: code
       source:
-        type: file
-        data: mylib/dataframe.flyde.ts
+        type: custom
+        data: custom://mylib/dataframe.py/LoadDataset
     - pos:
         x: -939.2435131835937
         y: 61.415870666503906
@@ -47,8 +47,8 @@ node:
           value: "{{dataframe}}"
       type: code
       source:
-        type: file
-        data: mylib/dataframe.flyde.ts
+        type: custom
+        data: custom://mylib/dataframe.py/Scale
     - pos:
         x: -24.11493484497072
         y: 62.353389739990234
@@ -64,8 +64,8 @@ node:
           value: "{{max_clusters}}"
       type: code
       source:
-        type: file
-        data: mylib/kmeans.flyde.ts
+        type: custom
+        data: custom://mylib/kmeans.py/KMeansNClusters
     - pos:
         x: 234.1243896484375
         y: 185.80514907836914
@@ -81,8 +81,8 @@ node:
           value: "{{n_clusters}}"
       type: code
       source:
-        type: file
-        data: mylib/kmeans.flyde.ts
+        type: custom
+        data: custom://mylib/kmeans.py/KMeansCluster
     - pos:
         x: -431.2221974563599
         y: -46.37674593925476
@@ -115,8 +115,8 @@ node:
           value: "{{scaled_dataframe}}"
       type: code
       source:
-        type: file
-        data: mylib/kmeans.flyde.ts
+        type: custom
+        data: custom://mylib/kmeans.py/PCA2
     - pos:
         x: 1010.514711303711
         y: 252.2306843566895
@@ -135,8 +135,8 @@ node:
           value: "{{kmeans_result}}"
       type: code
       source:
-        type: file
-        data: mylib/kmeans.flyde.ts
+        type: custom
+        data: custom://mylib/kmeans.py/Visualize
     - pos:
         x: 736.7720812988282
         y: 149.70720727920536
@@ -149,8 +149,8 @@ node:
           value: "{{scaled_dataframe}}"
       type: code
       source:
-        type: file
-        data: mylib/kmeans.flyde.ts
+        type: custom
+        data: custom://mylib/kmeans.py/PCA2
     - pos:
         x: 513.1246850585937
         y: 141.11043981841965

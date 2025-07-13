@@ -35,7 +35,7 @@ def is_stdlib_node(node_name: str) -> bool:
 
 
 def collect_components_from_directory(directory_path: str) -> dict:
-    """Collect all Component subclasses from .py files in a directory."""
+    """Collect all Component subclasses from .py files in a directory and its subdirectories."""
     components = {}
 
     # Convert directory path to absolute path
@@ -45,8 +45,8 @@ def collect_components_from_directory(directory_path: str) -> dict:
     if abs_dir not in sys.path:
         sys.path.insert(0, abs_dir)
 
-    # Find all .py files in the directory
-    py_files = glob.glob(os.path.join(directory_path, "*.py"))
+    # Find all .py files in the directory and subdirectories recursively
+    py_files = glob.glob(os.path.join(directory_path, "**", "*.py"), recursive=True)
 
     for py_file in py_files:
         # Skip __init__.py files
@@ -54,11 +54,14 @@ def collect_components_from_directory(directory_path: str) -> dict:
             continue
 
         try:
-            # Convert file path to module name
-            module_name = os.path.splitext(os.path.basename(py_file))[0]
+            # Get relative path from the directory
+            relative_path = os.path.relpath(py_file, directory_path)
+
+            # Convert file path to module name (handle subdirectories)
+            module_path = relative_path.replace(os.path.sep, ".").replace(".py", "")
 
             # Import the module
-            spec = importlib.util.spec_from_file_location(module_name, py_file)
+            spec = importlib.util.spec_from_file_location(module_path, py_file)
             if spec and spec.loader:
                 module = importlib.util.module_from_spec(spec)
                 spec.loader.exec_module(module)
@@ -70,9 +73,9 @@ def collect_components_from_directory(directory_path: str) -> dict:
                         name != "Component"
                         and isinstance(obj, type)
                         and issubclass(obj, Component)
-                        and obj.__module__ == module_name
+                        and obj.__module__ == module_path
                     ):
-                        components[name] = obj
+                        components[name] = {"class": obj, "file_path": relative_path}
 
         except Exception as e:
             logger.warning(f"Failed to import module from {py_file}: {e}")
@@ -80,7 +83,7 @@ def collect_components_from_directory(directory_path: str) -> dict:
     return components
 
 
-def generate_node_json(node_name: str, component_class) -> dict:
+def generate_node_json(node_name: str, component_class, file_path: str = "") -> dict:
     """Generate JSON structure for a single component."""
     # Get description from docstring
     description = (component_class.__doc__ or "").strip()
@@ -94,7 +97,7 @@ def generate_node_json(node_name: str, component_class) -> dict:
         display_name = f"Overridden {display_name}"
         description = f"This overrides the standard {node_name} node"
     else:
-        source = {"type": "custom", "data": f"custom://{node_name}"}
+        source = {"type": "custom", "data": f"custom://{file_path}/{node_name}"}
 
     # Build inputs structure
     inputs = {}
@@ -150,8 +153,10 @@ def gen_json(directory_path: str):
     custom_nodes = []
     stdlib_nodes = []
 
-    for node_name, component_class in components.items():
-        nodes[node_name] = generate_node_json(node_name, component_class)
+    for node_name, component_info in components.items():
+        component_class = component_info["class"]
+        file_path = component_info["file_path"]
+        nodes[node_name] = generate_node_json(node_name, component_class, file_path)
 
         if is_stdlib_node(node_name):
             stdlib_nodes.append(node_name)
@@ -178,30 +183,13 @@ def gen_json(directory_path: str):
     print(f"Stdlib overrides: {stdlib_nodes}")
 
 
-def gen(path: str):
-    """Generate TypeScript files for a module."""
-    print(f"Generating TypeScript files for module {path}")
-    module = py_path_to_module(path)
-    mod = importlib.import_module(module)
-    ts_file_path = path.replace(".py", ".flyde.ts")
-    typescript = 'import { CodeNode } from "@flyde/core";\n\n'
-    for name in mod.__dict__.keys():
-        c = getattr(mod, name)
-        if name != "Component" and isinstance(c, type) and issubclass(c, Component):
-            typescript += c.to_ts(name)
-
-    print(f"Writing TypeScript to {ts_file_path}")
-    with open(ts_file_path, "w") as f:
-        f.write(typescript)
-
-
 def main():
     parser = argparse.ArgumentParser(
         description="""PyFlyde CLI that runs Flyde graphs and provides other useful functions.
 
 Examples:
     flyde.py path/to/MyFlow.flyde # Runs a flow
-    flyde.py gen path/to/module.py # Generates TS files for visual editor
+    flyde.py gen path/to/directory/ # Generates .flyde-nodes.json for directory
 """,
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )
@@ -216,7 +204,7 @@ Examples:
     parser.add_argument(
         "path",
         type=str,
-        help='Path to a ".flyde" flow file to run, a Python ".py" module, or a directory to generate definitions for',
+        help='Path to a ".flyde" flow file to run, or a directory to generate .flyde-nodes.json for',
     )
 
     args = parser.parse_args()
@@ -237,10 +225,10 @@ Examples:
         # Add current folder to path when resolving modules relative to the current folder
         add_folder_to_path(".")
 
-        # Check if path is a directory or file
+        # Generate JSON for directory
         if os.path.isdir(args.path):
             gen_json(args.path)
         else:
-            gen(args.path)
+            raise ValueError(f"Path {args.path} is not a directory. Only directory generation is supported.")
     else:
         raise ValueError(f"Unknown command: {args.command}")

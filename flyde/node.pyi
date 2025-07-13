@@ -23,9 +23,11 @@ class InstanceSourceType(Enum):
     """InstanceSourceType is the source type of an instance.
 
     FILE: The instance is created from a file.
-    PACKAGE: The instance is created from a built in package."""
+    PACKAGE: The instance is created from a built in package.
+    CUSTOM: The instance is created from a custom module with path format."""
     FILE = 'file'
     PACKAGE = 'package'
+    CUSTOM = 'custom'
 
 @dataclass
 class InstanceSource:
@@ -99,9 +101,6 @@ class Component(Node):
     def run(self) -> None: ...
     def stop(self) -> None:
         """Stop the component execution."""
-    @classmethod
-    def to_ts(cls, name: str = '') -> str:
-        """Convert the node to a TypeScript definition."""
 
 class Graph(Node):
     """A visual graph node that contains other nodes."""

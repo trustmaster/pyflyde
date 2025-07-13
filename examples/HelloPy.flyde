@@ -18,8 +18,8 @@ node:
           value: Hello, Flyde!
       type: code
       source:
-        type: file
-        data: mylib/components.flyde.ts
+        type: custom
+        data: custom://mylib/components.py/Print
   connections: []
   id: Example
   inputs: {}

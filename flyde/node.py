@@ -29,10 +29,12 @@ class InstanceSourceType(Enum):
     """InstanceSourceType is the source type of an instance.
 
     FILE: The instance is created from a file.
-    PACKAGE: The instance is created from a built in package."""
+    PACKAGE: The instance is created from a built in package.
+    CUSTOM: The instance is created from a custom module with path format."""
 
     FILE = "file"
     PACKAGE = "package"
+    CUSTOM = "custom"
 
 
 @dataclass
@@ -317,41 +319,6 @@ class Component(Node):
         """Stop the component execution."""
         logger.debug(f"Stopping {self._id}")
         self._stop.set()
-
-    @classmethod
-    def to_ts(cls, name: str = "") -> str:
-        """Convert the node to a TypeScript definition."""
-
-        name = cls.__name__ if name == "" else name  # type: ignore
-
-        inputs_str = ""
-        if hasattr(cls, "inputs") and len(cls.inputs) > 0:
-            inputs_str = (
-                "\n"
-                + ",\n".join([f'    {k}: {{ description: "{v.description}" }}' for k, v in cls.inputs.items()])
-                + "\n"
-            )
-        outputs_str = ""
-        if hasattr(cls, "outputs") and len(cls.outputs) > 0:
-            outputs_str = (
-                "\n"
-                + ",\n".join([f'    {k}: {{ description: "{v.description}" }}' for k, v in cls.outputs.items()])
-                + "\n"
-            )
-
-        safe_doc = ""
-        if hasattr(cls, "__doc__") and cls.__doc__:
-            safe_doc = cls.__doc__.replace("\n", "\\n").replace("\r", "\\r").replace('"', '\\"')
-
-        return (
-            f"export const {name}: CodeNode = {{\n"
-            f'  id: "{name}",\n'
-            f'  description: "{safe_doc}",\n'
-            f"  inputs: {{{inputs_str}  }},\n"
-            f"  outputs: {{{outputs_str}  }},\n"
-            f"  run: () => {{ return; }},\n"
-            f"}};\n\n"
-        )
 
 
 class Graph(Node):
