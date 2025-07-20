@@ -78,9 +78,13 @@ class Flow:
                     # Resolve the module path relative to the flow file's directory
                     if module_path.endswith(".py"):
                         # It's a file path, resolve it relative to the flow file directory
-                        absolute_module_path = os.path.join(self._base_path, module_path)
+                        absolute_module_path = os.path.join(
+                            self._base_path, module_path
+                        )
                         # Convert to module name for importing
-                        spec = importlib.util.spec_from_file_location(class_name, absolute_module_path)
+                        spec = importlib.util.spec_from_file_location(
+                            class_name, absolute_module_path
+                        )
                         if spec and spec.loader:
                             mod = importlib.util.module_from_spec(spec)
                             spec.loader.exec_module(mod)
@@ -96,7 +100,9 @@ class Flow:
                             sys.path.insert(0, self._base_path)
 
                         try:
-                            logger.debug(f"Importing custom module {module_path}, class {class_name}")
+                            logger.debug(
+                                f"Importing custom module {module_path}, class {class_name}"
+                            )
                             mod = importlib.import_module(module_path)
                             self._components[name] = getattr(mod, class_name)
                             return
@@ -189,7 +195,7 @@ class Flow:
         ins._path = path
         ins._base_path = os.path.dirname(path)
         ins._node = Graph.from_yaml(ins.factory, yml["node"])
-        ins._node.stopped = Event()
+        ins._node._stopped = Event()
         return ins
 
     @classmethod

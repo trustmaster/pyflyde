@@ -5,6 +5,7 @@
       "type": "code",
       "displayName": "Capitalize",
       "description": "A component that capitalizes the input.",
+      "icon": "fa-solid fa-user",
       "source": {
         "type": "custom",
         "data": "custom://components.py/Capitalize"
@@ -25,17 +26,16 @@
         },
         "editorConfig": {
           "type": "structured"
-        },
-        "icon": "fa-solid fa-user"
+        }
       },
-      "config": {},
-      "icon": "fa-solid fa-user"
+      "config": {}
     },
     "Echo": {
       "id": "Echo",
       "type": "code",
       "displayName": "Echo",
       "description": "A simple component that echoes the input.",
+      "icon": "fa-solid fa-user",
       "source": {
         "type": "custom",
         "data": "custom://components.py/Echo"
@@ -56,17 +56,16 @@
         },
         "editorConfig": {
           "type": "structured"
-        },
-        "icon": "fa-solid fa-user"
+        }
       },
-      "config": {},
-      "icon": "fa-solid fa-user"
+      "config": {}
     },
     "Format": {
       "id": "Format",
       "type": "code",
       "displayName": "Format",
       "description": "Formats the input value with a given format string and sends it to out.",
+      "icon": "fa-solid fa-user",
       "source": {
         "type": "custom",
         "data": "custom://components.py/Format"
@@ -90,17 +89,16 @@
         },
         "editorConfig": {
           "type": "structured"
-        },
-        "icon": "fa-solid fa-user"
+        }
       },
-      "config": {},
-      "icon": "fa-solid fa-user"
+      "config": {}
     },
     "RepeatWordNTimes": {
       "id": "RepeatWordNTimes",
       "type": "code",
       "displayName": "Repeat Word NTimes",
       "description": "A component that has both inputs and outputs and a sticky input.",
+      "icon": "fa-solid fa-user",
       "source": {
         "type": "custom",
         "data": "custom://components.py/RepeatWordNTimes"
@@ -124,17 +122,16 @@
         },
         "editorConfig": {
           "type": "structured"
-        },
-        "icon": "fa-solid fa-user"
+        }
       },
-      "config": {},
-      "icon": "fa-solid fa-user"
+      "config": {}
     },
     "CustomBob": {
       "id": "CustomBob",
       "type": "code",
       "displayName": "Custom Bob",
       "description": "A custom external node named Bob",
+      "icon": "fa-solid fa-user",
       "source": {
         "type": "custom",
         "data": "custom://test_cli.py/CustomBob"
@@ -155,24 +152,23 @@
         },
         "editorConfig": {
           "type": "structured"
-        },
-        "icon": "fa-solid fa-user"
+        }
       },
-      "config": {},
-      "icon": "fa-solid fa-user"
+      "config": {}
     },
     "InlineValue": {
       "id": "InlineValue",
       "type": "code",
-      "displayName": "Overridden Inline Value",
+      "displayName": "Inline Value",
       "description": "This overrides the standard InlineValue node",
+      "icon": "fa-solid fa-user",
       "source": {
         "type": "package",
         "data": "@flyde/nodes"
       },
       "editorNode": {
         "id": "InlineValue",
-        "displayName": "Overridden Inline Value",
+        "displayName": "Inline Value",
         "description": "This overrides the standard InlineValue node",
         "inputs": {},
         "outputs": {
@@ -191,6 +187,7 @@
       "type": "code",
       "displayName": "Test Custom Component",
       "description": "A test component for unit testing.",
+      "icon": "fa-solid fa-user",
       "source": {
         "type": "custom",
         "data": "custom://test_cli.py/TestCustomComponent"
@@ -214,17 +211,16 @@
         },
         "editorConfig": {
           "type": "structured"
-        },
-        "icon": "fa-solid fa-user"
+        }
       },
-      "config": {},
-      "icon": "fa-solid fa-user"
+      "config": {}
     },
     "AllStickyInputsComponent": {
       "id": "AllStickyInputsComponent",
       "type": "code",
       "displayName": "All Sticky Inputs Component",
       "description": "A component with only sticky inputs to test single execution.",
+      "icon": "fa-solid fa-user",
       "source": {
         "type": "custom",
         "data": "custom://test_node.py/AllStickyInputsComponent"
@@ -248,17 +244,16 @@
         },
         "editorConfig": {
           "type": "structured"
-        },
-        "icon": "fa-solid fa-user"
+        }
       },
-      "config": {},
-      "icon": "fa-solid fa-user"
+      "config": {}
     },
     "CustomRunComponent": {
       "id": "CustomRunComponent",
       "type": "code",
       "displayName": "Custom Run Component",
       "description": "A component that has a custom run and shutdown handlers.",
+      "icon": "fa-solid fa-user",
       "source": {
         "type": "custom",
         "data": "custom://test_node.py/CustomRunComponent"
@@ -279,17 +274,16 @@
         },
         "editorConfig": {
           "type": "structured"
-        },
-        "icon": "fa-solid fa-user"
+        }
       },
-      "config": {},
-      "icon": "fa-solid fa-user"
+      "config": {}
     },
     "InvalidSendProcess": {
       "id": "InvalidSendProcess",
       "type": "code",
       "displayName": "Invalid Send Process",
       "description": "A component that tries to send a message without a corresponding output.",
+      "icon": "fa-solid fa-user",
       "source": {
         "type": "custom",
         "data": "custom://test_node.py/InvalidSendProcess"
@@ -306,17 +300,16 @@
         "outputs": {},
         "editorConfig": {
           "type": "structured"
-        },
-        "icon": "fa-solid fa-user"
+        }
       },
-      "config": {},
-      "icon": "fa-solid fa-user"
+      "config": {}
     },
     "NoProcessComponent": {
       "id": "NoProcessComponent",
       "type": "code",
       "displayName": "No Process Component",
       "description": "A component to test no inputs, outputs, and no process method.",
+      "icon": "fa-solid fa-user",
       "source": {
         "type": "custom",
         "data": "custom://test_node.py/NoProcessComponent"
@@ -329,17 +322,16 @@
         "outputs": {},
         "editorConfig": {
           "type": "structured"
-        },
-        "icon": "fa-solid fa-user"
+        }
       },
-      "config": {},
-      "icon": "fa-solid fa-user"
+      "config": {}
     },
     "SinkComponent": {
       "id": "SinkComponent",
       "type": "code",
       "displayName": "Sink Component",
       "description": "A component that only has inputs.",
+      "icon": "fa-solid fa-user",
       "source": {
         "type": "custom",
         "data": "custom://test_node.py/SinkComponent"
@@ -359,17 +351,16 @@
         "outputs": {},
         "editorConfig": {
           "type": "structured"
-        },
-        "icon": "fa-solid fa-user"
+        }
       },
-      "config": {},
-      "icon": "fa-solid fa-user"
+      "config": {}
     },
     "SourceComponent": {
       "id": "SourceComponent",
       "type": "code",
       "displayName": "Source Component",
       "description": "A component that only has outputs.",
+      "icon": "fa-solid fa-user",
       "source": {
         "type": "custom",
         "data": "custom://test_node.py/SourceComponent"
@@ -386,11 +377,120 @@
         },
         "editorConfig": {
           "type": "structured"
-        },
-        "icon": "fa-solid fa-user"
+        }
       },
-      "config": {},
-      "icon": "fa-solid fa-user"
+      "config": {}
+    },
+    "Conditional": {
+      "id": "Conditional",
+      "type": "code",
+      "displayName": "Conditional",
+      "description": "Conditional component evaluates a condition against the input and sends the result to output.",
+      "icon": "circle-question",
+      "source": {
+        "type": "package",
+        "data": "@flyde/nodes"
+      },
+      "editorNode": {
+        "id": "Conditional",
+        "displayName": "Conditional",
+        "description": "Conditional component evaluates a condition against the input and sends the result to output.",
+        "inputs": {
+          "leftOperand": {
+            "description": "Left operand of the condition"
+          },
+          "rightOperand": {
+            "description": "Right operand of the condition"
+          }
+        },
+        "outputs": {
+          "true": {
+            "description": "Output when the condition is true"
+          },
+          "false": {
+            "description": "Output when the condition is false"
+          }
+        },
+        "editorConfig": {
+          "type": "structured"
+        }
+      },
+      "config": {}
+    },
+    "GetAttribute": {
+      "id": "GetAttribute",
+      "type": "code",
+      "displayName": "Get Attribute",
+      "description": "Get an attribute from an object or dictionary.",
+      "icon": "fa-magnifying-glass",
+      "source": {
+        "type": "package",
+        "data": "@flyde/nodes"
+      },
+      "editorNode": {
+        "id": "GetAttribute",
+        "displayName": "Get Attribute",
+        "description": "Get an attribute from an object or dictionary.",
+        "inputs": {
+          "object": {
+            "description": "The object or dictionary"
+          },
+          "key": {
+            "description": "The attribute name"
+          }
+        },
+        "outputs": {
+          "value": {
+            "description": "The attribute value"
+          }
+        },
+        "editorConfig": {
+          "type": "structured"
+        }
+      },
+      "config": {}
+    },
+    "Http": {
+      "id": "Http",
+      "type": "code",
+      "displayName": "Http",
+      "description": "Http component makes HTTP requests with urllib.",
+      "icon": "globe",
+      "source": {
+        "type": "package",
+        "data": "@flyde/nodes"
+      },
+      "editorNode": {
+        "id": "Http",
+        "displayName": "Http",
+        "description": "Http component makes HTTP requests with urllib.",
+        "inputs": {
+          "url": {
+            "description": "URL to request"
+          },
+          "method": {
+            "description": "HTTP method"
+          },
+          "headers": {
+            "description": "HTTP headers"
+          },
+          "params": {
+            "description": "URL parameters"
+          },
+          "data": {
+            "description": "Request body"
+          }
+        },
+        "outputs": {
+          "data": {
+            "description": "Response data"
+          }
+        },
+        "editorConfig": {
+          "type": "structured"
+        }
+      },
+      "config": {}
     }
   },
   "groups": [
@@ -402,6 +502,7 @@
         "Format",
         "RepeatWordNTimes",
         "CustomBob",
+        "InlineValue",
         "TestCustomComponent",
         "AllStickyInputsComponent",
         "CustomRunComponent",
@@ -414,6 +515,9 @@
     {
       "title": "Overridden Stdlib",
       "nodeIds": [
+        "Conditional",
+        "GetAttribute",
+        "Http",
         "InlineValue"
       ]
     }

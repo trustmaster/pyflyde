@@ -12,6 +12,7 @@ from flyde.node import Component
 class InlineValue(Component):
     """InlineValue sends a constant value to output."""
 
+    icon = "pencil"
     outputs = {"value": Output(description="The constant value")}
 
     def __init__(self, **kwargs):
@@ -68,6 +69,7 @@ class _ConditionalConfig:
 class Conditional(Component):
     """Conditional component evaluates a condition against the input and sends the result to output."""
 
+    icon = "circle-question"
     inputs = {
         "leftOperand": Input(description="Left operand of the condition"),
         "rightOperand": Input(description="Right operand of the condition"),
@@ -82,7 +84,11 @@ class Conditional(Component):
         result = super().parse_config(config)  # type: ignore
 
         # Handle the condition special case
-        if "condition" in result and isinstance(result["condition"], dict) and "type" in result["condition"]:
+        if (
+            "condition" in result
+            and isinstance(result["condition"], dict)
+            and "type" in result["condition"]
+        ):
             result["condition"] = _ConditionConfig(**result["condition"])
 
         return result
@@ -90,10 +96,16 @@ class Conditional(Component):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self._config = _ConditionalConfig(self._config)
-        if hasattr(self._config, "left_operand") and self._config.left_operand.type != InputType.DYNAMIC:
+        if (
+            hasattr(self._config, "left_operand")
+            and self._config.left_operand.type != InputType.DYNAMIC
+        ):
             self.inputs["leftOperand"]._input_mode = InputMode.STATIC
             self.inputs["leftOperand"].value = self._config.left_operand.value
-        if hasattr(self._config, "right_operand") and self._config.right_operand.type != InputType.DYNAMIC:
+        if (
+            hasattr(self._config, "right_operand")
+            and self._config.right_operand.type != InputType.DYNAMIC
+        ):
             self.inputs["rightOperand"]._input_mode = InputMode.STATIC
             self.inputs["rightOperand"].value = self._config.right_operand.value
 
@@ -111,7 +123,9 @@ class Conditional(Component):
             m = re.match(right_operand, left_operand)
             return m is not None
         elif condition_type == _ConditionType.Exists:
-            return left_operand is not None and left_operand != "" and left_operand != []
+            return (
+                left_operand is not None and left_operand != "" and left_operand != []
+            )
         elif condition_type == _ConditionType.NotExists:
             return left_operand is None or left_operand == "" or left_operand == []
         else:
@@ -129,6 +143,7 @@ class Conditional(Component):
 class GetAttribute(Component):
     """Get an attribute from an object or dictionary."""
 
+    icon = "fa-magnifying-glass"
     inputs = {
         "object": Input(description="The object or dictionary"),
         "key": Input(description="The attribute name", type=str),
@@ -167,12 +182,21 @@ class GetAttribute(Component):
 class Http(Component):
     """Http component makes HTTP requests with urllib."""
 
+    icon = "globe"
     inputs = {
         "url": Input(description="URL to request", required=Requiredness.REQUIRED),
-        "method": Input(description="HTTP method", type=str, required=Requiredness.REQUIRED),
-        "headers": Input(description="HTTP headers", type=dict, required=Requiredness.OPTIONAL),
-        "params": Input(description="URL parameters", type=dict, required=Requiredness.OPTIONAL),
-        "data": Input(description="Request body", type=dict, required=Requiredness.OPTIONAL),
+        "method": Input(
+            description="HTTP method", type=str, required=Requiredness.REQUIRED
+        ),
+        "headers": Input(
+            description="HTTP headers", type=dict, required=Requiredness.OPTIONAL
+        ),
+        "params": Input(
+            description="URL parameters", type=dict, required=Requiredness.OPTIONAL
+        ),
+        "data": Input(
+            description="Request body", type=dict, required=Requiredness.OPTIONAL
+        ),
     }
     outputs = {
         "data": Output(description="Response data"),
@@ -198,7 +222,9 @@ class Http(Component):
                 self.inputs["url"]._input_mode = InputMode.STATIC
                 self.inputs["url"].value = self._config["url"].value
 
-        if "headers" in self._config and isinstance(self._config["headers"], InputConfig):
+        if "headers" in self._config and isinstance(
+            self._config["headers"], InputConfig
+        ):
             if self._config["headers"].type == InputType.DYNAMIC:
                 self.inputs["headers"]._input_mode = InputMode.STICKY
             else:
@@ -258,34 +284,39 @@ class Http(Component):
                 req.add_header("Content-Length", str(len(data_bytes)))
 
             with request.urlopen(req, data=data_bytes) as response:
-                content_type = response.headers.get('Content-Type', '')
+                content_type = response.headers.get("Content-Type", "")
                 response_data = response.read()
-                
+
                 # Handle text-based responses
-                if 'text/' in content_type or 'json' in content_type or 'xml' in content_type or 'application/javascript' in content_type:
+                if (
+                    "text/" in content_type
+                    or "json" in content_type
+                    or "xml" in content_type
+                    or "application/javascript" in content_type
+                ):
                     # Extract charset from content-type header if present
-                    charset = 'utf-8'  # Default charset
-                    if 'charset=' in content_type:
-                        charset_part = content_type.split('charset=')[1]
-                        if ';' in charset_part:
-                            charset = charset_part.split(';')[0].strip()
+                    charset = "utf-8"  # Default charset
+                    if "charset=" in content_type:
+                        charset_part = content_type.split("charset=")[1]
+                        if ";" in charset_part:
+                            charset = charset_part.split(";")[0].strip()
                         else:
                             charset = charset_part.strip()
-                    
+
                     try:
                         response_data = response_data.decode(charset)
                     except (UnicodeDecodeError, LookupError):
                         # Fallback to utf-8 if specified charset fails
-                        response_data = response_data.decode('utf-8', errors='replace')
-                    
+                        response_data = response_data.decode("utf-8", errors="replace")
+
                     # Try to parse JSON if the content type indicates JSON
-                    if 'json' in content_type:
+                    if "json" in content_type:
                         try:
                             response_data = json.loads(response_data)
                         except json.JSONDecodeError:
                             pass
                 # Binary data remains as bytes
-                
+
                 self.send("data", response_data)
         except error.HTTPError as e:
             raise e

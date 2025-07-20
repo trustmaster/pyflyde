@@ -7,6 +7,7 @@ import json
 import logging
 import os
 import pprint
+import re
 import sys
 
 from flyde.flow import Flow, add_folder_to_path
@@ -23,8 +24,6 @@ def py_path_to_module(py_path: str) -> str:
 
 def convert_class_name_to_display_name(class_name: str) -> str:
     """Convert a class name like 'MyCustomNode' to 'My Custom Node'."""
-    # Insert space before uppercase letters that follow lowercase letters
-    import re
 
     return re.sub(r"(?<=[a-z])(?=[A-Z])", " ", class_name)
 
@@ -85,31 +84,31 @@ def collect_components_from_directory(directory_path: str) -> dict:
 
 def generate_node_json(node_name: str, component_class, file_path: str = "") -> dict:
     """Generate JSON structure for a single component."""
-    # Get description from docstring
+    # Get node metadata
     description = (component_class.__doc__ or "").strip()
-
-    # Generate display name
     display_name = convert_class_name_to_display_name(node_name)
-
-    # Determine source
+    # Use package source for stdlib nodes, custom source for others
     if is_stdlib_node(node_name):
         source = {"type": "package", "data": "@flyde/nodes"}
-        display_name = f"Overridden {display_name}"
-        description = f"This overrides the standard {node_name} node"
     else:
         source = {"type": "custom", "data": f"custom://{file_path}/{node_name}"}
+    icon = getattr(component_class, "icon", "fa-solid fa-user")
 
     # Build inputs structure
     inputs = {}
     if hasattr(component_class, "inputs") and component_class.inputs:
         for input_name, input_obj in component_class.inputs.items():
-            inputs[input_name] = {"description": input_obj.description or f"{input_name} input"}
+            inputs[input_name] = {
+                "description": input_obj.description or f"{input_name} input"
+            }
 
     # Build outputs structure
     outputs = {}
     if hasattr(component_class, "outputs") and component_class.outputs:
         for output_name, output_obj in component_class.outputs.items():
-            outputs[output_name] = {"description": output_obj.description or f"{output_name} output"}
+            outputs[output_name] = {
+                "description": output_obj.description or f"{output_name} output"
+            }
 
     # Build the node structure
     node_data = {
@@ -117,6 +116,7 @@ def generate_node_json(node_name: str, component_class, file_path: str = "") -> 
         "type": "code",
         "displayName": display_name,
         "description": description,
+        "icon": icon,
         "source": source,
         "editorNode": {
             "id": node_name,
@@ -129,11 +129,6 @@ def generate_node_json(node_name: str, component_class, file_path: str = "") -> 
         "config": {},
     }
 
-    # Add icon for custom nodes
-    if not is_stdlib_node(node_name):
-        node_data["icon"] = "fa-solid fa-user"
-        node_data["editorNode"]["icon"] = "fa-solid fa-user"
-
     return node_data
 
 
@@ -144,8 +139,13 @@ def gen_json(directory_path: str):
     # Collect all components
     components = collect_components_from_directory(directory_path)
 
-    if not components:
-        print(f"No Component subclasses found in directory {directory_path}")
+    # Always include stdlib nodes from flyde/nodes.py
+    stdlib_dir = os.path.join(os.path.dirname(__file__), "nodes.py")
+    stdlib_components = collect_components_from_directory(os.path.dirname(stdlib_dir))
+    stdlib_node_names = [name for name in stdlib_components if is_stdlib_node(name)]
+
+    if not components and not stdlib_node_names:
+        print(f"No Component subclasses found in directory {directory_path} or stdlib")
         return
 
     # Build nodes structure
@@ -153,15 +153,20 @@ def gen_json(directory_path: str):
     custom_nodes = []
     stdlib_nodes = []
 
+    # Add user components
     for node_name, component_info in components.items():
         component_class = component_info["class"]
         file_path = component_info["file_path"]
         nodes[node_name] = generate_node_json(node_name, component_class, file_path)
+        custom_nodes.append(node_name)
 
-        if is_stdlib_node(node_name):
-            stdlib_nodes.append(node_name)
-        else:
-            custom_nodes.append(node_name)
+    # Add stdlib nodes (from flyde/nodes.py) as custom nodes, but group as stdlib overrides
+    for node_name in stdlib_node_names:
+        if node_name not in nodes:
+            component_class = stdlib_components[node_name]["class"]
+            file_path = stdlib_components[node_name]["file_path"]
+            nodes[node_name] = generate_node_json(node_name, component_class, file_path)
+        stdlib_nodes.append(node_name)
 
     # Build groups
     groups = []
@@ -178,9 +183,9 @@ def gen_json(directory_path: str):
     with open(output_file, "w") as f:
         json.dump(json_data, f, indent=2)
 
-    print(f"Generated {output_file} with {len(components)} components")
+    print(f"Generated {output_file} with {len(nodes)} components")
     print(f"Custom nodes: {custom_nodes}")
-    print(f"Stdlib overrides: {stdlib_nodes}")
+    print(f"Stdlib nodes: {stdlib_nodes}")
 
 
 def main():
@@ -229,6 +234,8 @@ Examples:
         if os.path.isdir(args.path):
             gen_json(args.path)
         else:
-            raise ValueError(f"Path {args.path} is not a directory. Only directory generation is supported.")
+            raise ValueError(
+                f"Path {args.path} is not a directory. Only directory generation is supported."
+            )
     else:
         raise ValueError(f"Unknown command: {args.command}")

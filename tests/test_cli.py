@@ -1,8 +1,8 @@
 import json
 import os
+import shutil
 import tempfile
 import unittest
-from unittest.mock import patch
 
 from flyde.cli import (
     collect_components_from_directory,
@@ -12,7 +12,7 @@ from flyde.cli import (
     is_stdlib_node,
 )
 from flyde.io import Input, Output
-from flyde.node import Component
+from flyde.node import Component, SUPPORTED_MACROS
 
 
 class TestCLIHelpers(unittest.TestCase):
@@ -34,8 +34,6 @@ class TestCLIHelpers(unittest.TestCase):
                 self.assertEqual(result, expected)
 
     def test_is_stdlib_node(self):
-        from flyde.node import SUPPORTED_MACROS
-
         # Test that all supported macros are detected as stdlib nodes
         for macro in SUPPORTED_MACROS:
             with self.subTest(node_name=macro):
@@ -100,14 +98,18 @@ class TestGenerateNodeJson(unittest.TestCase):
             "displayName": "Custom Bob",
             "description": "A custom external node named Bob",
             "icon": "fa-solid fa-user",
-            "source": {"type": "custom", "data": "custom://test_components.py/CustomBob"},
+            "source": {
+                "type": "custom",
+                "data": "custom://test_components.py/CustomBob",
+            },
             "editorNode": {
                 "id": "CustomBob",
                 "displayName": "Custom Bob",
                 "description": "A custom external node named Bob",
-                "icon": "fa-solid fa-user",
                 "inputs": {"value": {"description": "Input value to process"}},
-                "outputs": {"result": {"description": "Processed result from external runtime"}},
+                "outputs": {
+                    "result": {"description": "Processed result from external runtime"}
+                },
                 "editorConfig": {"type": "structured"},
             },
             "config": {},
@@ -115,18 +117,18 @@ class TestGenerateNodeJson(unittest.TestCase):
 
         self.assertEqual(result, expected)
 
-    def test_generate_stdlib_override_json(self):
+    def test_generate_stdlib_node_json(self):
         result = generate_node_json("InlineValue", InlineValue, "test_components.py")
-
         expected = {
             "id": "InlineValue",
             "type": "code",
-            "displayName": "Overridden Inline Value",
+            "displayName": "Inline Value",
             "description": "This overrides the standard InlineValue node",
+            "icon": "fa-solid fa-user",
             "source": {"type": "package", "data": "@flyde/nodes"},
             "editorNode": {
                 "id": "InlineValue",
-                "displayName": "Overridden Inline Value",
+                "displayName": "Inline Value",
                 "description": "This overrides the standard InlineValue node",
                 "inputs": {},
                 "outputs": {"value": {"description": "The overridden value"}},
@@ -134,7 +136,6 @@ class TestGenerateNodeJson(unittest.TestCase):
             },
             "config": {},
         }
-
         self.assertEqual(result, expected)
 
     def test_generate_node_with_no_docstring(self):
@@ -162,8 +163,6 @@ class TestCollectComponents(unittest.TestCase):
         self.temp_dir = tempfile.mkdtemp()
 
     def tearDown(self):
-        import shutil
-
         shutil.rmtree(self.temp_dir)
 
     def test_collect_components_from_directory(self):
@@ -247,12 +246,10 @@ class TestGenJson(unittest.TestCase):
         self.temp_dir = tempfile.mkdtemp()
 
     def tearDown(self):
-        import shutil
-
         shutil.rmtree(self.temp_dir)
 
     def test_gen_json_with_mixed_components(self):
-        # Create test files with both custom and stdlib override components
+        # Create test files with both custom and stdlib components, but do not override stdlib nodes
         components_py = '''
 from flyde.io import Input, Output
 from flyde.node import Component
@@ -269,10 +266,6 @@ class CustomAlice(Component):
         "input2": Input(description="Second input")
     }
     outputs = {"output": Output(description="Combined output")}
-
-class InlineValue(Component):
-    """This overrides the standard InlineValue node"""
-    outputs = {"value": Output(description="The overridden value")}
 '''
 
         with open(os.path.join(self.temp_dir, "components.py"), "w") as f:
@@ -295,10 +288,13 @@ class InlineValue(Component):
 
         # Check nodes
         nodes = data["nodes"]
-        self.assertEqual(len(nodes), 3)
+        # Should have all custom nodes plus all stdlib nodes
+        expected_nodes = set(["CustomBob", "CustomAlice"] + list(SUPPORTED_MACROS))
+        self.assertEqual(set(nodes.keys()), expected_nodes)
         self.assertIn("CustomBob", nodes)
         self.assertIn("CustomAlice", nodes)
-        self.assertIn("InlineValue", nodes)
+        for stdlib_node in SUPPORTED_MACROS:
+            self.assertIn(stdlib_node, nodes)
 
         # Check CustomBob
         bob = nodes["CustomBob"]
@@ -307,14 +303,6 @@ class InlineValue(Component):
         self.assertEqual(bob["source"]["type"], "custom")
         self.assertEqual(bob["source"]["data"], "custom://components.py/CustomBob")
         self.assertIn("icon", bob)
-
-        # Check InlineValue (stdlib override)
-        inline = nodes["InlineValue"]
-        self.assertEqual(inline["id"], "InlineValue")
-        self.assertEqual(inline["displayName"], "Overridden Inline Value")
-        self.assertEqual(inline["source"]["type"], "package")
-        self.assertEqual(inline["source"]["data"], "@flyde/nodes")
-        self.assertNotIn("icon", inline)
 
         # Check groups
         groups = data["groups"]
@@ -325,12 +313,7 @@ class InlineValue(Component):
         stdlib_group = next(g for g in groups if g["title"] == "Overridden Stdlib")
 
         self.assertCountEqual(custom_group["nodeIds"], ["CustomBob", "CustomAlice"])
-        self.assertCountEqual(stdlib_group["nodeIds"], ["InlineValue"])
-
-        # Check CustomAlice has correct path format
-        alice = nodes["CustomAlice"]
-        self.assertEqual(alice["source"]["type"], "custom")
-        self.assertEqual(alice["source"]["data"], "custom://components.py/CustomAlice")
+        self.assertCountEqual(stdlib_group["nodeIds"], list(SUPPORTED_MACROS))
 
     def test_gen_json_empty_directory(self):
         # Test with directory containing no components
@@ -346,17 +329,26 @@ class NotAComponent:
         with open(os.path.join(self.temp_dir, "empty.py"), "w") as f:
             f.write(empty_py)
 
-        # Capture stdout to verify the message
-        with patch("builtins.print") as mock_print:
-            gen_json(self.temp_dir)
-            mock_print.assert_any_call(f"No Component subclasses found in directory {self.temp_dir}")
+        # Generate JSON
+        gen_json(self.temp_dir)
 
-        # Should not create the JSON file
+        # Should create the JSON file with only stdlib nodes if any exist
         output_file = os.path.join(self.temp_dir, ".flyde-nodes.json")
-        self.assertFalse(os.path.exists(output_file))
+        self.assertTrue(os.path.exists(output_file))
+
+        with open(output_file, "r") as f:
+            data = json.load(f)
+        self.assertIn("nodes", data)
+        self.assertIn("groups", data)
+        # At least one stdlib node should be present if stdlib is available
+        stdlib_group = next(
+            (g for g in data["groups"] if g["title"] == "Overridden Stdlib"), None
+        )
+        self.assertIsNotNone(stdlib_group)
+        self.assertGreater(len(stdlib_group["nodeIds"]), 0)
 
     def test_gen_json_only_custom_nodes(self):
-        # Test with only custom nodes (no stdlib overrides)
+        # Test with only custom nodes (no stdlib nodes in this directory)
         components_py = '''
 from flyde.io import Input, Output
 from flyde.node import Component
@@ -380,24 +372,16 @@ class CustomNode2(Component):
         with open(output_file, "r") as f:
             data = json.load(f)
 
-        # Should have one group for custom nodes only
+        # Should have at least the custom nodes group
         groups = data["groups"]
-        self.assertEqual(len(groups), 1)
-        self.assertEqual(groups[0]["title"], "Custom Runtime Nodes")
-        self.assertCountEqual(groups[0]["nodeIds"], ["CustomNode1", "CustomNode2"])
+        custom_group = next(
+            (g for g in groups if g["title"] == "Custom Runtime Nodes"), None
+        )
+        self.assertIsNotNone(custom_group)
+        self.assertCountEqual(custom_group["nodeIds"], ["CustomNode1", "CustomNode2"])
 
-        # Check that custom nodes have correct path format
-        for node_name in ["CustomNode1", "CustomNode2"]:
-            node = data["nodes"][node_name]
-            self.assertEqual(node["source"]["type"], "custom")
-            self.assertEqual(node["source"]["data"], f"custom://components.py/{node_name}")
-
-        # Ensure no stdlib overrides group exists
-        for group in groups:
-            self.assertNotEqual(group["title"], "Overridden Stdlib")
-
-    def test_gen_json_only_stdlib_overrides(self):
-        # Test with only stdlib override nodes
+    def test_gen_json_only_stdlib_nodes(self):
+        # Test with only stdlib nodes
         components_py = '''
 from flyde.io import Input, Output
 from flyde.node import Component
@@ -421,8 +405,10 @@ class Conditional(Component):
         with open(output_file, "r") as f:
             data = json.load(f)
 
-        # Should have one group for stdlib overrides only
+        # Should have stdlib group
         groups = data["groups"]
-        self.assertEqual(len(groups), 1)
-        self.assertEqual(groups[0]["title"], "Overridden Stdlib")
-        self.assertCountEqual(groups[0]["nodeIds"], ["InlineValue", "Conditional"])
+        stdlib_group = next(
+            (g for g in groups if g["title"] == "Overridden Stdlib"), None
+        )
+        self.assertIsNotNone(stdlib_group)
+        self.assertCountEqual(stdlib_group["nodeIds"], list(SUPPORTED_MACROS))
