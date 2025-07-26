@@ -11,8 +11,6 @@ from flyde.io import EOF, Connection, GraphPort, Input, InputConfig, InputMode, 
 
 logger = logging.getLogger(__name__)
 
-SUPPORTED_MACROS = ["InlineValue", "Conditional", "GetAttribute", "Http"]
-
 
 class InstanceType(Enum):
     """InstanceType is the type of an instance.

@@ -1,3 +1,4 @@
+import inspect
 import json
 import re
 from dataclasses import dataclass
@@ -7,6 +8,27 @@ from urllib import error, parse, request
 
 from flyde.io import Input, InputConfig, InputMode, InputType, Output, Requiredness
 from flyde.node import Component
+
+
+def list_nodes():
+    """Dynamically discover all Component classes defined in this module.
+
+    Returns:
+        list: List of class names that inherit from Component
+    """
+    current_module = inspect.getmodule(inspect.currentframe())
+    component_classes = []
+
+    for name, obj in inspect.getmembers(current_module):
+        if (
+            inspect.isclass(obj)
+            and issubclass(obj, Component)
+            and obj != Component
+            and obj.__module__ == current_module.__name__
+        ):
+            component_classes.append(name)
+
+    return sorted(component_classes)
 
 
 class InlineValue(Component):
@@ -84,11 +106,7 @@ class Conditional(Component):
         result = super().parse_config(config)  # type: ignore
 
         # Handle the condition special case
-        if (
-            "condition" in result
-            and isinstance(result["condition"], dict)
-            and "type" in result["condition"]
-        ):
+        if "condition" in result and isinstance(result["condition"], dict) and "type" in result["condition"]:
             result["condition"] = _ConditionConfig(**result["condition"])
 
         return result
@@ -96,16 +114,10 @@ class Conditional(Component):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self._config = _ConditionalConfig(self._config)
-        if (
-            hasattr(self._config, "left_operand")
-            and self._config.left_operand.type != InputType.DYNAMIC
-        ):
+        if hasattr(self._config, "left_operand") and self._config.left_operand.type != InputType.DYNAMIC:
             self.inputs["leftOperand"]._input_mode = InputMode.STATIC
             self.inputs["leftOperand"].value = self._config.left_operand.value
-        if (
-            hasattr(self._config, "right_operand")
-            and self._config.right_operand.type != InputType.DYNAMIC
-        ):
+        if hasattr(self._config, "right_operand") and self._config.right_operand.type != InputType.DYNAMIC:
             self.inputs["rightOperand"]._input_mode = InputMode.STATIC
             self.inputs["rightOperand"].value = self._config.right_operand.value
 
@@ -123,9 +135,7 @@ class Conditional(Component):
             m = re.match(right_operand, left_operand)
             return m is not None
         elif condition_type == _ConditionType.Exists:
-            return (
-                left_operand is not None and left_operand != "" and left_operand != []
-            )
+            return left_operand is not None and left_operand != "" and left_operand != []
         elif condition_type == _ConditionType.NotExists:
             return left_operand is None or left_operand == "" or left_operand == []
         else:
@@ -185,18 +195,10 @@ class Http(Component):
     icon = "globe"
     inputs = {
         "url": Input(description="URL to request", required=Requiredness.REQUIRED),
-        "method": Input(
-            description="HTTP method", type=str, required=Requiredness.REQUIRED
-        ),
-        "headers": Input(
-            description="HTTP headers", type=dict, required=Requiredness.OPTIONAL
-        ),
-        "params": Input(
-            description="URL parameters", type=dict, required=Requiredness.OPTIONAL
-        ),
-        "data": Input(
-            description="Request body", type=dict, required=Requiredness.OPTIONAL
-        ),
+        "method": Input(description="HTTP method", type=str, required=Requiredness.REQUIRED),
+        "headers": Input(description="HTTP headers", type=dict, required=Requiredness.OPTIONAL),
+        "params": Input(description="URL parameters", type=dict, required=Requiredness.OPTIONAL),
+        "data": Input(description="Request body", type=dict, required=Requiredness.OPTIONAL),
     }
     outputs = {
         "data": Output(description="Response data"),
@@ -222,9 +224,7 @@ class Http(Component):
                 self.inputs["url"]._input_mode = InputMode.STATIC
                 self.inputs["url"].value = self._config["url"].value
 
-        if "headers" in self._config and isinstance(
-            self._config["headers"], InputConfig
-        ):
+        if "headers" in self._config and isinstance(self._config["headers"], InputConfig):
             if self._config["headers"].type == InputType.DYNAMIC:
                 self.inputs["headers"]._input_mode = InputMode.STICKY
             else:

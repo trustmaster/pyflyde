@@ -14,7 +14,8 @@ from typing import Any, TypedDict, Union
 import yaml
 
 from flyde.flow import Flow, add_folder_to_path
-from flyde.node import SUPPORTED_MACROS, Component
+from flyde.node import Component
+from flyde.nodes import list_nodes
 
 log_level = getattr(logging, os.getenv("LOG_LEVEL", "INFO").upper(), logging.INFO)
 logging.basicConfig(level=log_level)
@@ -53,7 +54,7 @@ def convert_class_name_to_display_name(class_name: str) -> str:
 
 def is_stdlib_node(node_name: str) -> bool:
     """Check if a node name matches a stdlib node."""
-    return node_name in SUPPORTED_MACROS
+    return node_name in list_nodes()
 
 
 def collect_components_from_directory(directory_path: str) -> dict:

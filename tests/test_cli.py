@@ -14,7 +14,8 @@ from flyde.cli import (
     is_stdlib_node,
 )
 from flyde.io import Input, Output
-from flyde.node import SUPPORTED_MACROS, Component
+from flyde.node import Component
+from flyde.nodes import list_nodes
 
 
 class TestCLIHelpers(unittest.TestCase):
@@ -37,7 +38,7 @@ class TestCLIHelpers(unittest.TestCase):
 
     def test_is_stdlib_node(self):
         # Test that all supported macros are detected as stdlib nodes
-        for macro in SUPPORTED_MACROS:
+        for macro in list_nodes():
             with self.subTest(node_name=macro):
                 result = is_stdlib_node(macro)
                 self.assertTrue(result)
@@ -440,11 +441,11 @@ class CustomAlice(Component):
         # Check nodes
         nodes = data["nodes"]
         # Should have all custom nodes plus all stdlib nodes
-        expected_nodes = set(["CustomBob", "CustomAlice"] + list(SUPPORTED_MACROS))
+        expected_nodes = set(["CustomBob", "CustomAlice"] + list_nodes())
         self.assertEqual(set(nodes.keys()), expected_nodes)
         self.assertIn("CustomBob", nodes)
         self.assertIn("CustomAlice", nodes)
-        for stdlib_node in SUPPORTED_MACROS:
+        for stdlib_node in list_nodes():
             self.assertIn(stdlib_node, nodes)
 
         # Check CustomBob
@@ -468,7 +469,7 @@ class CustomAlice(Component):
         if custom_group is None or stdlib_group is None:
             return
         self.assertCountEqual(custom_group["nodeIds"], ["CustomBob", "CustomAlice"])
-        self.assertCountEqual(stdlib_group["nodeIds"], list(SUPPORTED_MACROS))
+        self.assertCountEqual(stdlib_group["nodeIds"], list_nodes())
 
     def test_gen_json_with_flyde_files(self):
         # Create test files with both .py components and copy an existing .flyde file
@@ -507,7 +508,7 @@ class CustomNode(Component):
 
         # Check nodes - should have both Python and .flyde nodes
         nodes = data["nodes"]
-        expected_custom_nodes = set(["CustomNode", "TestFlow"] + list(SUPPORTED_MACROS))
+        expected_custom_nodes = set(["CustomNode", "TestFlow"] + list_nodes())
         self.assertEqual(set(nodes.keys()), expected_custom_nodes)
 
         # Check CustomNode (Python)
@@ -548,7 +549,7 @@ class CustomNode(Component):
 
         # Should have .flyde nodes and stdlib nodes
         nodes = data["nodes"]
-        expected_nodes = set(["Flow1", "Flow2"] + list(SUPPORTED_MACROS))
+        expected_nodes = set(["Flow1", "Flow2"] + list_nodes())
         self.assertEqual(set(nodes.keys()), expected_nodes)
 
         # Check that .flyde nodes are in the custom group
@@ -655,4 +656,4 @@ class Conditional(Component):
         self.assertIsNotNone(stdlib_group)
         if stdlib_group is None:
             return
-        self.assertCountEqual(stdlib_group["nodeIds"], list(SUPPORTED_MACROS))
+        self.assertCountEqual(stdlib_group["nodeIds"], list_nodes())
