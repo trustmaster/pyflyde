@@ -145,9 +145,7 @@ class TestCustomLoadFlow(unittest.TestCase):
             display_name="Test",
             stopped=None,
             config={},
-            source=InstanceSource(
-                type=InstanceSourceType.CUSTOM, data="custom://tests/components.py/"
-            ),
+            source=InstanceSource(type=InstanceSourceType.CUSTOM, data="custom://tests/components.py/"),
         )
         with self.assertRaises(Exception):
             flow.create_component("Echo", args)
@@ -172,9 +170,7 @@ class TestCustomLoadFlow(unittest.TestCase):
             display_name="Test",
             stopped=None,
             config={},
-            source=InstanceSource(
-                type=InstanceSourceType.CUSTOM, data="custom://tests/components.py/Echo"
-            ),
+            source=InstanceSource(type=InstanceSourceType.CUSTOM, data="custom://tests/components.py/Echo"),
         )
         component = flow.create_component("Echo", args)
         self.assertIsNotNone(component)

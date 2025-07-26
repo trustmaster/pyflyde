@@ -12,9 +12,7 @@ class LoadDataset(Component):
     """Loads a dataset from a file into a DataFrame."""
 
     inputs = {
-        "file_path": Input(
-            description="The path to the file containing the dataset", type=str
-        ),
+        "file_path": Input(description="The path to the file containing the dataset", type=str),
     }
     outputs = {
         "dataframe": Output(description="The loaded dataframe", type=pd.DataFrame),
@@ -32,14 +30,10 @@ class Scale(Component):
         "dataframe": Input(description="The dataframe to scale", type=pd.DataFrame),
     }
     outputs = {
-        "scaled_dataframe": Output(
-            description="The scaled dataframe", type=pd.DataFrame
-        ),
+        "scaled_dataframe": Output(description="The scaled dataframe", type=pd.DataFrame),
     }
 
     def process(self, dataframe: pd.DataFrame) -> dict[str, pd.DataFrame]:
         scaler = StandardScaler()
-        scaled_dataframe = pd.DataFrame(
-            scaler.fit_transform(dataframe), columns=dataframe.columns
-        )
+        scaled_dataframe = pd.DataFrame(scaler.fit_transform(dataframe), columns=dataframe.columns)
         return {"scaled_dataframe": scaled_dataframe}

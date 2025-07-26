@@ -16,21 +16,15 @@ class PCA2(Component):
     """Performs PCA on a dataframe and returns the first two principal components."""
 
     inputs = {
-        "scaled_dataframe": Input(
-            description="The scaled dataframe to reduce", type=pd.DataFrame
-        ),
+        "scaled_dataframe": Input(description="The scaled dataframe to reduce", type=pd.DataFrame),
     }
     outputs = {
-        "pca_components": Output(
-            description="The first two principal components", type=pd.DataFrame
-        ),
+        "pca_components": Output(description="The first two principal components", type=pd.DataFrame),
     }
 
     def process(self, scaled_dataframe: pd.DataFrame) -> dict[str, pd.DataFrame]:
         pca = PCA(n_components=2)
-        pca_components = pd.DataFrame(
-            pca.fit_transform(scaled_dataframe), columns=["PC1", "PC2"]
-        )
+        pca_components = pd.DataFrame(pca.fit_transform(scaled_dataframe), columns=["PC1", "PC2"])
         return {
             "pca_components": pca_components,
         }
@@ -40,9 +34,7 @@ class KMeansNClusters(Component):
     """Finds the optimal number of clusters for K-means clustering using silhouette method."""
 
     inputs = {
-        "scaled_dataframe": Input(
-            description="The scaled dataframe to cluster", type=pd.DataFrame
-        ),
+        "scaled_dataframe": Input(description="The scaled dataframe to cluster", type=pd.DataFrame),
         "max_clusters": Input(
             description="The maximum number of clusters to consider",
             type=int,
@@ -53,9 +45,7 @@ class KMeansNClusters(Component):
         "n_clusters": Output(description="The optimal number of clusters", type=int),
     }
 
-    def process(
-        self, scaled_dataframe: pd.DataFrame, max_clusters: int
-    ) -> dict[str, int]:
+    def process(self, scaled_dataframe: pd.DataFrame, max_clusters: int) -> dict[str, int]:
         best_score = -1
         best_n_clusters = 0
 
@@ -90,27 +80,17 @@ class KMeansCluster(Component):
     """Clusters the dataframe using K-means clustering."""
 
     inputs = {
-        "scaled_dataframe": Input(
-            description="The scaled dataframe to cluster", type=pd.DataFrame
-        ),
-        "n_clusters": Input(
-            description="The number of clusters", type=int, mode=InputMode.STICKY
-        ),
+        "scaled_dataframe": Input(description="The scaled dataframe to cluster", type=pd.DataFrame),
+        "n_clusters": Input(description="The number of clusters", type=int, mode=InputMode.STICKY),
     }
     outputs = {
-        "kmeans_result": Output(
-            description="K-means clustering result", type=KMeansResult
-        ),
+        "kmeans_result": Output(description="K-means clustering result", type=KMeansResult),
     }
 
-    def process(
-        self, scaled_dataframe: pd.DataFrame, n_clusters: int
-    ) -> dict[str, KMeansResult]:
+    def process(self, scaled_dataframe: pd.DataFrame, n_clusters: int) -> dict[str, KMeansResult]:
         kmeans = KMeans(n_clusters=n_clusters)
         labels = kmeans.fit_predict(scaled_dataframe)
-        centroids = pd.DataFrame(
-            kmeans.cluster_centers_, columns=scaled_dataframe.columns
-        )
+        centroids = pd.DataFrame(kmeans.cluster_centers_, columns=scaled_dataframe.columns)
         clustered_dataframe = scaled_dataframe.copy()
         clustered_dataframe["cluster"] = labels
 
@@ -128,15 +108,9 @@ class Visualize(Component):
     """Visualizes the clustered dataframe."""
 
     inputs = {
-        "pca_components": Input(
-            description="The first two principal components", type=pd.DataFrame
-        ),
-        "pca_centroids": Input(
-            description="The centroids in PCA space", type=pd.DataFrame
-        ),
-        "kmeans_result": Input(
-            description="K-means clustering result", type=KMeansResult
-        ),
+        "pca_components": Input(description="The first two principal components", type=pd.DataFrame),
+        "pca_centroids": Input(description="The centroids in PCA space", type=pd.DataFrame),
+        "kmeans_result": Input(description="K-means clustering result", type=KMeansResult),
     }
 
     def plot(self):
@@ -153,7 +127,11 @@ class Visualize(Component):
         y = pca_components.iloc[:, 1].values
 
         plt.scatter(
-            x, y, c=kmeans_result.cluster_labels, alpha=0.5, s=200  # type: ignore
+            x,
+            y,
+            c=kmeans_result.cluster_labels,
+            alpha=0.5,
+            s=200,  # type: ignore
         )  # plot different colors per cluster
         plt.title("Wine clusters")
         plt.xlabel("PCA 1")

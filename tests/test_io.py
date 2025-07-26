@@ -283,7 +283,11 @@ class TestInput(unittest.TestCase):
             {
                 "name": "dynamic input config",
                 "config": InputConfig(type=InputType.DYNAMIC, value=None),
-                "expected": {"value": None, "input_mode": InputMode.QUEUE, "type": None},
+                "expected": {
+                    "value": None,
+                    "input_mode": InputMode.QUEUE,
+                    "type": None,
+                },
             },
             {
                 "name": "number input config",
@@ -293,23 +297,39 @@ class TestInput(unittest.TestCase):
             {
                 "name": "boolean input config",
                 "config": InputConfig(type=InputType.BOOLEAN, value=True),
-                "expected": {"value": True, "input_mode": InputMode.STICKY, "type": bool},
+                "expected": {
+                    "value": True,
+                    "input_mode": InputMode.STICKY,
+                    "type": bool,
+                },
             },
             {
                 "name": "json input config",
                 "config": InputConfig(type=InputType.JSON, value={"key": "value"}),
-                "expected": {"value": {"key": "value"}, "input_mode": InputMode.STICKY, "type": dict},
+                "expected": {
+                    "value": {"key": "value"},
+                    "input_mode": InputMode.STICKY,
+                    "type": dict,
+                },
             },
             {
                 "name": "string input config",
                 "config": InputConfig(type=InputType.STRING, value="test"),
-                "expected": {"value": "test", "input_mode": InputMode.STICKY, "type": str},
+                "expected": {
+                    "value": "test",
+                    "input_mode": InputMode.STICKY,
+                    "type": str,
+                },
             },
             {
                 "name": "input config with preset type",
                 "config": InputConfig(type=InputType.NUMBER, value=42),
                 "preset_type": float,
-                "expected": {"value": 42, "input_mode": InputMode.STICKY, "type": float},
+                "expected": {
+                    "value": 42,
+                    "input_mode": InputMode.STICKY,
+                    "type": float,
+                },
             },
         ]
 

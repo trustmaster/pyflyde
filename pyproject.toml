@@ -43,9 +43,8 @@ flyde = ["py.typed"]
 dev = [
     "setuptools",
     "build",
-    "black",
     "coverage",
-    "flake8",
+    "ruff",
     "mypy",
     "twine",
     "mkdocs",

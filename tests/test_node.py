@@ -167,7 +167,10 @@ class TestComponentWithStickyInput(unittest.TestCase):
         self.assertEqual(node.to_dict(), expected)
 
     def test_parse_config_with_type_only(self):
-        config = {"times": {"type": "number"}, "word": {"type": "string", "value": "default"}}
+        config = {
+            "times": {"type": "number"},
+            "word": {"type": "string", "value": "default"},
+        }
 
         node = RepeatWordNTimes(id="repeat", display_name="Repeat", config=config)
 

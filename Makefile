@@ -2,6 +2,7 @@
 
 # Variables
 PYTHON = /usr/bin/env python3
+EXAMPLE_DIR = examples
 LIB_DIR = examples/mylib
 SRC_DIR = flyde
 TEST_DIR = tests
@@ -11,13 +12,14 @@ TEST_DIR = tests
 
 gen:
 	@echo "Generating component definitions..."
-	# Generate JSON definitions for the examples/mylib directory
-	@./pyflyde gen $(LIB_DIR)/
+	# Generate JSON definitions for the examples and tests directory
+	@./pyflyde gen $(EXAMPLE_DIR)/
+	@./pyflyde gen $(TEST_DIR)/
 
 lint:
 	@echo "Running linters..."
-	@black $(LIB_DIR) $(TEST_DIR);
-	@flake8 $(LIB_DIR) $(TEST_DIR);
+	@ruff check $(SRC_DIR) $(LIB_DIR) $(TEST_DIR);
+	@ruff format $(SRC_DIR) $(LIB_DIR) $(TEST_DIR);
 
 test:
 	@echo "Running tests..."
