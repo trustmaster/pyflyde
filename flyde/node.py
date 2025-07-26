@@ -1,19 +1,72 @@
 import logging
 from abc import ABC, abstractmethod
 from copy import deepcopy
+from dataclasses import dataclass
+from enum import Enum
 from threading import Event, Lock, Thread
-from typing import Any, Callable
+from typing import Any, Callable, Optional
 from uuid import uuid4
 
-from flyde.io import GraphPort, InputMode, Input, Output, EOF, Requiredness, is_EOF, Connection
+from flyde.io import EOF, Connection, GraphPort, Input, InputConfig, InputMode, InputType, Output, Requiredness, is_EOF
 
 logger = logging.getLogger(__name__)
 
-SUPPORTED_MACROS = ["InlineValue", "Conditional", "GetAttribute"]
+
+class InstanceType(Enum):
+    """InstanceType is the type of an instance.
+
+    VISUAL: The instance is a visual node.
+    CODE: The instance is a code node.
+    """
+
+    VISUAL = "visual"
+    CODE = "code"
+
+
+class InstanceSourceType(Enum):
+    """InstanceSourceType is the source type of an instance.
+
+    FILE: The instance is created from a file.
+    PACKAGE: The instance is created from a built in package.
+    CUSTOM: The instance is created from a custom module with path format."""
+
+    FILE = "file"
+    PACKAGE = "package"
+    CUSTOM = "custom"
+
+
+@dataclass
+class InstanceSource:
+    """Source configuration of an instance."""
+
+    type: InstanceSourceType
+    data: str
+
+
+@dataclass
+class InstanceArgs:
+    """Arguments to pass to the instance factory."""
+
+    id: str
+    display_name: str
+    stopped: Optional[Event]
+    config: dict[str, Any]
+    type: InstanceType = InstanceType.CODE
+    source: Optional[InstanceSource] = None
+
+    def to_dict(self) -> dict:
+        """Convert the instance arguments to a dictionary."""
+        return {
+            "id": self.id,
+            "display_name": self.display_name,
+            "stopped": self.stopped,
+            "config": self.config,
+        }
+
 
 # InstanceFactory is a function that creates a new instance of a node.
 # It can create instances dynamically based on the node ID.
-InstanceFactory = Callable[[str, dict], Any]
+InstanceFactory = Callable[[str, InstanceArgs], Any]
 
 
 class Node(ABC):
@@ -22,7 +75,7 @@ class Node(ABC):
     Attributes:
         id (str): A unique identifier for the node.
         node_type (str): The node type identifier.
-        input_config (dict): A dictionary of input pin configurations.
+        config (dict): A dictionary of input pin configurations.
         display_name (str): A human-readable name for the node.
         inputs (dict[str, Input]): Node input map.
         outputs (dict[str, Output]): Node output map.
@@ -36,17 +89,18 @@ class Node(ABC):
         /,
         id: str,
         node_type: str = "",
-        input_config: dict[str, InputMode] = {},
         display_name: str = "",
         inputs: dict[str, Input] = {},
         outputs: dict[str, Output] = {},
         stopped: Event = Event(),
+        config: dict[str, InputConfig] = {},
     ):
         node_type = node_type if node_type else self.__class__.__name__
         self._node_type = node_type
         self._id = id if id else create_instance_id(node_type)
-        self._input_config = input_config
         self._display_name = display_name if display_name else node_type
+        self._config_raw = config or {}
+        self._config = self.parse_config(self._config_raw)
 
         if len(inputs) > 0:
             self.inputs = inputs
@@ -58,6 +112,8 @@ class Node(ABC):
 
         for k, v in self.inputs.items():
             v.id = f"{self._id}.{k}"
+            if k in self._config:
+                v.apply_config(self._config[k])
 
         if len(outputs) > 0:
             self.outputs = outputs
@@ -71,6 +127,20 @@ class Node(ABC):
             vv.id = f"{self._id}.{k}"
 
         self._stopped = stopped
+
+    def parse_config(self, config: dict[str, Any]) -> dict[str, Any]:
+        """Parse the raw config into a typed config dictionary."""
+        result = {}
+        for key, value in config.items():
+            if isinstance(value, dict) and "type" in value and value["type"] in [item.value for item in InputType]:
+                config_value = value.get("value", None)
+                result[key] = InputConfig(
+                    type=InputType(value["type"]),
+                    value=config_value,
+                )
+            else:
+                result[key] = value
+        return result
 
     @abstractmethod
     def run(self):
@@ -121,22 +191,29 @@ class Node(ABC):
         node_class_name = yml.get("nodeId", "VisualNode")
         if node_class_name == "VisualNode":
             return Graph.from_yaml(create, yml)
-        args = {
-            "id": yml["id"],
-            "input_config": yml.get("inputConfig", {}),
-            "display_name": yml.get("displayName", ""),
-            "stopped": yml.get("stopped", None),  # It's a hacky way to pass the stopped event to the constructor
-        }
-        # If macro parameters are present, pass them to the constructor
-        if "macroData" in yml:
-            args["macro_data"] = yml["macroData"]
+
+        config = yml.get("config", {})
+
+        source = InstanceSource(
+            type=InstanceSourceType(yml.get("source", {}).get("type", "file").lower()),
+            data=yml.get("source", {}).get("data", ""),
+        )
+
+        args = InstanceArgs(
+            id=yml["id"],
+            display_name=yml.get("displayName", ""),
+            stopped=yml.get("stopped", None),  # It's a hacky way to pass the stopped event to the constructor
+            config=config,
+            type=InstanceType(yml.get("type", "code").lower()),
+            source=source,
+        )
         return create(node_class_name, args)
 
     def to_dict(self) -> dict:
         return {
             "id": self._id,
             "nodeId": self._node_type,
-            "inputConfig": self._input_config,
+            "config": self._config,
             "displayName": self._display_name,
         }
 
@@ -156,18 +233,28 @@ class Component(Node):
 
     def run(self):
         if not hasattr(self, "process"):
-            raise NotImplementedError(
-                "Component does not have neither run() nor process() method. No code to run."
-            )
+            raise NotImplementedError("Component does not have neither run() nor process() method. No code to run.")
 
         def worker():
             logger.debug(f"Running {self._id} worker")
+
+            # Check if all inputs are sticky or static (not queue)
+            # If so, we only run the loop once
+            all_sticky_or_static = True
+            for inp in self.inputs.values():
+                if inp._input_mode == InputMode.QUEUE:
+                    all_sticky_or_static = False
+                    break
+
+            run_once = len(self.inputs) > 0 and all_sticky_or_static
+
             while not self._stop.is_set():
                 logger.debug(f"Waiting for inputs on {self._id}")
                 inputs = {}
                 queue_count = 0
                 queue_closed_count = 0
                 skip_iteration = False
+
                 for key, inp in self.inputs.items():
                     is_queue = inp._input_mode == InputMode.QUEUE
                     value = inp.get()
@@ -198,9 +285,7 @@ class Component(Node):
 
                 logger.debug(f"Processing {self._id} with inputs: {inputs}")
                 res = self.process(**inputs)  # type: ignore
-                if isinstance(res, dict) or (
-                    isinstance(res, tuple) and hasattr(res, "_fields")
-                ):
+                if isinstance(res, dict) or (isinstance(res, tuple) and hasattr(res, "_fields")):
                     # Send values to the outputs named as keys
                     for k, v in res.items():  # type: ignore
                         if k not in self.outputs:
@@ -217,6 +302,11 @@ class Component(Node):
                         if self.outputs[k].connected:
                             self.outputs[k].send(v)
 
+                # If all inputs are sticky/static, exit after the first iteration
+                if run_once:
+                    logger.debug(f"All inputs are sticky or static for {self._id}, stopping after first execution")
+                    break
+
             self.finish()
 
         logger.debug(f"Starting {self._id} thread")
@@ -228,55 +318,6 @@ class Component(Node):
         logger.debug(f"Stopping {self._id}")
         self._stop.set()
 
-    @classmethod
-    def to_ts(cls, name: str = "") -> str:
-        """Convert the node to a TypeScript definition."""
-
-        name = cls.__name__ if name == "" else name  # type: ignore
-
-        inputs_str = ""
-        if hasattr(cls, "inputs") and len(cls.inputs) > 0:
-            inputs_str = (
-                "\n"
-                + ",\n".join(
-                    [
-                        f'    {k}: {{ description: "{v.description}" }}'
-                        for k, v in cls.inputs.items()
-                    ]
-                )
-                + "\n"
-            )
-        outputs_str = ""
-        if hasattr(cls, "outputs") and len(cls.outputs) > 0:
-            outputs_str = (
-                "\n"
-                + ",\n".join(
-                    [
-                        f'    {k}: {{ description: "{v.description}" }}'
-                        for k, v in cls.outputs.items()
-                    ]
-                )
-                + "\n"
-            )
-
-        safe_doc = ""
-        if hasattr(cls, "__doc__") and cls.__doc__:
-            safe_doc = (
-                cls.__doc__.replace("\n", "\\n")
-                .replace("\r", "\\r")
-                .replace('"', '\\"')
-            )
-
-        return (
-            f"export const {name}: CodeNode = {{\n"
-            f'  id: "{name}",\n'
-            f'  description: "{safe_doc}",\n'
-            f"  inputs: {{{inputs_str}  }},\n"
-            f"  outputs: {{{outputs_str}  }},\n"
-            f"  run: () => {{ return; }},\n"
-            f"}};\n\n"
-        )
-
 
 class Graph(Node):
     """A visual graph node that contains other nodes."""
@@ -286,7 +327,7 @@ class Graph(Node):
         /,
         id: str = "",
         node_type: str = "",
-        input_config: dict[str, InputMode] = {},
+        config: dict[str, InputConfig] = {},
         display_name: str = "",
         instances: dict[str, Node] = {},
         instances_stopped: dict[str, Event] = {},
@@ -298,7 +339,7 @@ class Graph(Node):
         super().__init__(
             id=id,
             node_type=node_type,
-            input_config=input_config,
+            config=config,
             display_name=display_name,
             stopped=stopped,
         )
@@ -321,13 +362,13 @@ class Graph(Node):
                 if from_pin not in self.inputs:
                     raise ValueError(f"Input {from_pin} not found in graph {self._id}")
             else:
-                self._check_pin('out', from_id, from_pin)
+                self._check_pin("out", from_id, from_pin)
 
             if to_id == "__this":
                 if to_pin not in self.outputs:
                     raise ValueError(f"Output {to_pin} not found in graph {self._id}")
             else:
-                self._check_pin('in', to_id, to_pin)
+                self._check_pin("in", to_id, to_pin)
 
             if from_id != "__this" and to_id != "__this":
                 # Simple case: connect two instances inside the graph
@@ -362,9 +403,7 @@ class Graph(Node):
     def run(self):
         """Run the graph."""
         for instance in self._instances.values():
-            logger.debug(
-                f"Running instance {instance._id} of type {instance._node_type}"
-            )
+            logger.debug(f"Running instance {instance._id} of type {instance._node_type}")
             instance.run()
 
         def worker():
@@ -420,7 +459,7 @@ class Graph(Node):
         # Load metadata
         node_type = yml.get("nodeId", __name__)
         id = yml["id"] if "id" in yml else create_instance_id(node_type)
-        input_config = yml.get("inputConfig", {})
+        config = {k: InputConfig(**v) for k, v in yml.get("config", {}).items()}
         display_name = yml.get("displayName", node_type)
 
         # Load instances and macros
@@ -428,11 +467,6 @@ class Graph(Node):
         instances_stopped = {}
         for ins in yml.get("instances", []):
             ins_id = ins["id"]
-            if "macroId" in ins:
-                # Only InlineValue macros are supported for now
-                if ins["macroId"] not in SUPPORTED_MACROS:
-                    raise ValueError(f'Unsupported macro: {ins["macroId"]}')
-                ins["nodeId"] = ins["macroId"]
             stopped = Event()
             ins["stopped"] = stopped
             logger.debug(f"Creating instance {ins_id}")
@@ -441,9 +475,7 @@ class Graph(Node):
             logger.debug(f"Loaded instance {ins_id}")
 
         # Load connections and graph inputs/outputs
-        connections = [
-            Connection.from_yaml(conn) for conn in yml.get("connections", [])
-        ]
+        connections = [Connection.from_yaml(conn) for conn in yml.get("connections", [])]
         inputs = {}
         for k, v in yml.get("inputs", {}).items():
             if "mode" in v:
@@ -462,7 +494,7 @@ class Graph(Node):
         return cls(
             id=id,
             node_type=node_type,
-            input_config=input_config,
+            config=config,
             display_name=display_name,
             instances=instances,
             instances_stopped=instances_stopped,
@@ -477,7 +509,7 @@ class Graph(Node):
         return {
             "id": self._id,
             "nodeId": self._node_type,
-            "inputConfig": self._input_config,
+            "config": self._config,
             "displayName": self._display_name,
             "inputs": self.inputs,
             "outputs": self.outputs,

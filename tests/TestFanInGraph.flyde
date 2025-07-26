@@ -1,11 +1,4 @@
-imports:
-  "@flyde/stdlib":
-    - InlineValue
-  components.flyde.ts:
-    - Format
-    - Capitalize
-  Repeat3Times.flyde:
-    - Repeat3Times
+imports: {}
 node:
   instances:
     - pos:
@@ -14,32 +7,58 @@ node:
       id: Format-4s04bag
       inputConfig: {}
       nodeId: Format
+      config:
+        inp:
+          type: dynamic
+          value: "{{inp}}"
+        format:
+          type: dynamic
+          value: "{{format}}"
+      type: code
+      source:
+        type: custom
+        data: custom://components.py/Format
     - pos:
-        x: -44.16827392578125
+        x: -58.16827392578125
         y: 63.02734375
       id: Capitalize-ch04buf
       inputConfig: {}
       nodeId: Capitalize
+      config:
+        inp:
+          type: dynamic
+          value: "{{inp}}"
+      type: code
+      source:
+        type: custom
+        data: custom://components.py/Capitalize
     - pos:
-        x: -328.1567211914063
-        y: -90.1646710205078
+        x: -601.1567211914063
+        y: 121.8353289794922
       id: xzi4aah4ewf1iw7q4a3jz9oj
       inputConfig: {}
-      nodeId: InlineValue__xzi4aah4ewf1iw7q4a3jz9oj
-      macroId: InlineValue
-      macroData:
+      nodeId: InlineValue
+      config:
         type:
           type: string
           value: string
         value:
           type: string
           value: Hello, {inp}!
+      type: code
+      source:
+        type: package
+        data: "@flyde/nodes"
     - pos:
-        x: -185.60189453125
-        y: 240.50311500933114
+        x: 187.39810546875
+        y: 119.50311500933117
       id: Repeat3Times-ou04byd
       inputConfig: {}
       nodeId: Repeat3Times
+      type: visual
+      source:
+        type: file
+        data: Repeat3Times.flyde
   connections:
     - from:
         insId: __this
@@ -83,7 +102,7 @@ node:
       to:
         insId: __this
         pinId: out
-  id: Example
+  id: TestFanInGraph
   inputs:
     str:
       mode: required
@@ -92,12 +111,12 @@ node:
       delayed: false
   inputsPosition:
     str:
-      x: -119.99874877929688
-      y: -99.46359436035156
+      x: -593.9987487792969
+      y: -21.463594360351564
   outputsPosition:
     result:
       x: -23.264428942324532
       y: 237.25953921502617
     out:
-      x: -120.79533203125001
-      y: 390.6666717529297
+      x: 396.20466796874996
+      y: 119.66667175292969

@@ -1,12 +1,15 @@
 import unittest
 from queue import Queue
+
 from flyde.io import (
-    Input,
-    InputMode,
-    Output,
     EOF,
     Connection,
     ConnectionNode,
+    Input,
+    InputConfig,
+    InputMode,
+    InputType,
+    Output,
     Requiredness,
 )
 
@@ -274,6 +277,57 @@ class TestInput(unittest.TestCase):
         # Decrement ref count to 0
         input.dec_ref_count()
         self.assertEqual(input.ref_count, 0)
+
+    def test_apply_config(self):
+        test_cases = [
+            {
+                "name": "dynamic input config",
+                "config": InputConfig(type=InputType.DYNAMIC, value=None),
+                "expected": {"value": None, "input_mode": InputMode.QUEUE, "type": None},
+            },
+            {
+                "name": "number input config",
+                "config": InputConfig(type=InputType.NUMBER, value=42),
+                "expected": {"value": 42, "input_mode": InputMode.STICKY, "type": int},
+            },
+            {
+                "name": "boolean input config",
+                "config": InputConfig(type=InputType.BOOLEAN, value=True),
+                "expected": {"value": True, "input_mode": InputMode.STICKY, "type": bool},
+            },
+            {
+                "name": "json input config",
+                "config": InputConfig(type=InputType.JSON, value={"key": "value"}),
+                "expected": {"value": {"key": "value"}, "input_mode": InputMode.STICKY, "type": dict},
+            },
+            {
+                "name": "string input config",
+                "config": InputConfig(type=InputType.STRING, value="test"),
+                "expected": {"value": "test", "input_mode": InputMode.STICKY, "type": str},
+            },
+            {
+                "name": "input config with preset type",
+                "config": InputConfig(type=InputType.NUMBER, value=42),
+                "preset_type": float,
+                "expected": {"value": 42, "input_mode": InputMode.STICKY, "type": float},
+            },
+        ]
+
+        for test_case in test_cases:
+            with self.subTest(case=test_case["name"]):
+                # Create new input instance for each test
+                if "preset_type" in test_case:
+                    input_inst = Input(type=test_case["preset_type"])
+                else:
+                    input_inst = Input()
+
+                # Apply the config
+                input_inst.apply_config(test_case["config"])
+
+                # Check all expected values
+                self.assertEqual(input_inst._value, test_case["expected"]["value"])
+                self.assertEqual(input_inst._input_mode, test_case["expected"]["input_mode"])
+                self.assertEqual(input_inst.type, test_case["expected"]["type"])
 
 
 class TestOutput(unittest.TestCase):

@@ -1,9 +1,19 @@
 import unittest
 from queue import Queue
 from types import SimpleNamespace
+from unittest.mock import patch, MagicMock
+from urllib import error
+from http import client
 
-from flyde.io import EOF
-from flyde.stdlib import InlineValue, Conditional, GetAttribute
+from flyde.io import EOF, InputConfig, InputType
+from flyde.nodes import (
+    Conditional,
+    GetAttribute,
+    Http,
+    InlineValue,
+    _ConditionConfig,
+    _ConditionType,
+)
 
 
 class TestInlineValue(unittest.TestCase):
@@ -13,7 +23,10 @@ class TestInlineValue(unittest.TestCase):
             "outputs": {"value": "Hello"},
         }
         out_q = Queue()
-        node = InlineValue(macro_data={"value": "Hello"}, id="test_inline_value")
+        node = InlineValue(
+            id="test_inline_value",
+            config={"value": InputConfig(type=InputType.STRING, value="Hello")},
+        )
         node.outputs["value"].connect(out_q)
         node.run()
         self.assertEqual(test_case["outputs"]["value"], out_q.get())
@@ -27,8 +40,8 @@ class TestInlineValue(unittest.TestCase):
         }
         out_q = Queue()
         node = InlineValue(
-            macro_data={"value": {"type": "string", "value": "Hello"}},
             id="test_inline_value",
+            config={"value": InputConfig(type=InputType.STRING, value="Hello")},
         )
         node.outputs["value"].connect(out_q)
         node.run()
@@ -42,17 +55,14 @@ class TestConditional(unittest.TestCase):
         test_cases = [
             {
                 "name": "equal static string",
-                "yml": {
-                    "leftOperand": {
-                        "type": "static",
-                        "value": "Apple",
-                    },
-                    "rightOperand": {
-                        "type": "dynamic",
-                    },
-                    "condition": {
-                        "type": "EQUAL",
-                    },
+                "config": {
+                    "leftOperand": InputConfig(type=InputType.STRING, value="Apple"),
+                    "rightOperand": InputConfig(
+                        type=InputType.DYNAMIC,
+                    ),
+                    "condition": _ConditionConfig(
+                        type=_ConditionType.Equal,
+                    ),
                 },
                 "inputs": {
                     "leftOperand": [],
@@ -66,16 +76,16 @@ class TestConditional(unittest.TestCase):
             },
             {
                 "name": "not equal dynamic string",
-                "yml": {
-                    "leftOperand": {
-                        "type": "dynamic",
-                    },
-                    "rightOperand": {
-                        "type": "dynamic",
-                    },
-                    "condition": {
-                        "type": "NOT_EQUAL",
-                    },
+                "config": {
+                    "leftOperand": InputConfig(
+                        type=InputType.DYNAMIC,
+                    ),
+                    "rightOperand": InputConfig(
+                        type=InputType.DYNAMIC,
+                    ),
+                    "condition": _ConditionConfig(
+                        type=_ConditionType.NotEqual,
+                    ),
                 },
                 "inputs": {
                     "leftOperand": ["Apple", "Banana", "apple", "Grape", EOF],
@@ -88,17 +98,14 @@ class TestConditional(unittest.TestCase):
             },
             {
                 "name": "contains static string",
-                "yml": {
-                    "leftOperand": {
-                        "type": "dynamic",
-                    },
-                    "rightOperand": {
-                        "type": "static",
-                        "value": "Apple",
-                    },
-                    "condition": {
-                        "type": "CONTAINS",
-                    },
+                "config": {
+                    "leftOperand": InputConfig(
+                        type=InputType.DYNAMIC,
+                    ),
+                    "rightOperand": InputConfig(type=InputType.STRING, value="Apple"),
+                    "condition": _ConditionConfig(
+                        type=_ConditionType.Contains,
+                    ),
                 },
                 "inputs": {
                     "leftOperand": [
@@ -117,17 +124,14 @@ class TestConditional(unittest.TestCase):
             },
             {
                 "name": "not contains static string",
-                "yml": {
-                    "leftOperand": {
-                        "type": "dynamic",
-                    },
-                    "rightOperand": {
-                        "type": "static",
-                        "value": "Apple",
-                    },
-                    "condition": {
-                        "type": "NOT_CONTAINS",
-                    },
+                "config": {
+                    "leftOperand": InputConfig(
+                        type=InputType.DYNAMIC,
+                    ),
+                    "rightOperand": InputConfig(type=InputType.STRING, value="Apple"),
+                    "condition": _ConditionConfig(
+                        type=_ConditionType.NotContains,
+                    ),
                 },
                 "inputs": {
                     "leftOperand": [
@@ -146,17 +150,14 @@ class TestConditional(unittest.TestCase):
             },
             {
                 "name": "regex matches static",
-                "yml": {
-                    "leftOperand": {
-                        "type": "dynamic",
-                    },
-                    "rightOperand": {
-                        "type": "static",
-                        "value": "^[A-Z]",
-                    },
-                    "condition": {
-                        "type": "REGEX_MATCHES",
-                    },
+                "config": {
+                    "leftOperand": InputConfig(
+                        type=InputType.DYNAMIC,
+                    ),
+                    "rightOperand": InputConfig(type=InputType.STRING, value="^[A-Z]"),
+                    "condition": _ConditionConfig(
+                        type=_ConditionType.RegexMatches,
+                    ),
                 },
                 "inputs": {
                     "leftOperand": [
@@ -176,17 +177,16 @@ class TestConditional(unittest.TestCase):
             },
             {
                 "name": "exists",
-                "yml": {
-                    "leftOperand": {
-                        "type": "dynamic",
-                    },
-                    "rightOperand": {
-                        "type": "static",
-                        "value": "this is not important",
-                    },
-                    "condition": {
-                        "type": "EXISTS",
-                    },
+                "config": {
+                    "leftOperand": InputConfig(
+                        type=InputType.DYNAMIC,
+                    ),
+                    "rightOperand": InputConfig(
+                        type=InputType.STRING, value="this is not important"
+                    ),
+                    "condition": _ConditionConfig(
+                        type=_ConditionType.Exists,
+                    ),
                 },
                 "inputs": {
                     "leftOperand": ["Apple", "", " ", "  ", "banana", EOF],
@@ -199,17 +199,16 @@ class TestConditional(unittest.TestCase):
             },
             {
                 "name": "does not exist",
-                "yml": {
-                    "leftOperand": {
-                        "type": "dynamic",
-                    },
-                    "rightOperand": {
-                        "type": "static",
-                        "value": "this is not important",
-                    },
-                    "condition": {
-                        "type": "NOT_EXISTS",
-                    },
+                "config": {
+                    "leftOperand": InputConfig(
+                        type=InputType.DYNAMIC,
+                    ),
+                    "rightOperand": InputConfig(
+                        type=InputType.STRING, value="this is not important"
+                    ),
+                    "condition": _ConditionConfig(
+                        type=_ConditionType.NotExists,
+                    ),
                 },
                 "inputs": {
                     "leftOperand": ["Apple", "", " ", "  ", "banana", EOF],
@@ -222,16 +221,16 @@ class TestConditional(unittest.TestCase):
             },
             {
                 "name": "unsupported condition type",
-                "yml": {
-                    "leftOperand": {
-                        "type": "dynamic",
-                    },
-                    "rightOperand": {
-                        "type": "dynamic",
-                    },
+                "config": {
+                    "leftOperand": InputConfig(
+                        type=InputType.DYNAMIC,
+                    ),
+                    "rightOperand": InputConfig(
+                        type=InputType.DYNAMIC,
+                    ),
                     "condition": {
-                        "type": "UNSUPPORTED",
-                    },
+                        "type": "UNSUPPORTED"
+                    },  # Will cause a ValueError in parse_config
                 },
                 "inputs": {
                     "leftOperand": ["Apple", "Banana", "apple", EOF],
@@ -251,10 +250,12 @@ class TestConditional(unittest.TestCase):
 
             if "raises" in test_case and test_case["raises"] is not None:
                 with self.assertRaises(test_case["raises"]):
-                    node = Conditional(test_case["yml"], id="test_conditional")
+                    node = Conditional(
+                        id="test_conditional", config=test_case["config"]
+                    )
                 continue
 
-            node = Conditional(test_case["yml"], id="test_conditional")
+            node = Conditional(id="test_conditional", config=test_case["config"])
             left_q = node.inputs["leftOperand"].queue
             right_q = node.inputs["rightOperand"].queue
             node.outputs["true"].connect(true_q)
@@ -288,9 +289,11 @@ class TestGetAttribute(unittest.TestCase):
         test_cases = [
             {
                 "name": "static attribute from a dict",
-                "key": {
-                    "type": "static",
-                    "value": "name",
+                "config": {
+                    "key": InputConfig(
+                        type=InputType.STRING,
+                        value="name",
+                    ),
                 },
                 "inputs": {
                     "object": [
@@ -305,9 +308,11 @@ class TestGetAttribute(unittest.TestCase):
             },
             {
                 "name": "sticky attribute from an object",
-                "key": {
-                    "type": "sticky",
-                    "value": "name",
+                "config": {
+                    "key": InputConfig(
+                        type=InputType.STRING,
+                        value="name",
+                    ),
                 },
                 "inputs": {
                     "object": [
@@ -316,13 +321,18 @@ class TestGetAttribute(unittest.TestCase):
                         SimpleNamespace(nananan="Charlie"),
                         EOF,
                     ],
-                    "key": ["name"],
+                    "key": ["name", EOF],
                 },
                 "outputs": ["Alice", "Bob", None, EOF],
             },
             {
                 "name": "dynamic attribute from a dict",
-                "key": {},
+                "config": {
+                    "key": InputConfig(
+                        type=InputType.DYNAMIC,
+                        value=None,
+                    ),
+                },
                 "inputs": {
                     "object": [
                         {"name": "Alice"},
@@ -335,10 +345,12 @@ class TestGetAttribute(unittest.TestCase):
                 "outputs": ["Alice", "Bob", "Charlie", EOF],
             },
             {
-                "name": "sticky attribute and non-object",
-                "key": {
-                    "type": "sticky",
-                    "value": "name",
+                "name": "static attribute and non-object",
+                "config": {
+                    "key": InputConfig(
+                        type=InputType.STRING,
+                        value="name",
+                    ),
                 },
                 "inputs": {
                     "object": [
@@ -347,15 +359,17 @@ class TestGetAttribute(unittest.TestCase):
                         123,
                         EOF,
                     ],
-                    "key": ["name"],
+                    "key": ["name", EOF],
                 },
                 "outputs": ["Alice", None, None, EOF],
             },
             {
                 "name": "nested attribute with dot key notation",
-                "key": {
-                    "type": "static",
-                    "value": "address.city",
+                "config": {
+                    "key": InputConfig(
+                        type=InputType.STRING,
+                        value="address.city",
+                    ),
                 },
                 "inputs": {
                     "object": [
@@ -370,9 +384,11 @@ class TestGetAttribute(unittest.TestCase):
             },
             {
                 "name": "nested 3 levels deep",
-                "key": {
-                    "type": "static",
-                    "value": "address.city.zip",
+                "config": {
+                    "key": InputConfig(
+                        type=InputType.STRING,
+                        value="address.city.zip",
+                    ),
                 },
                 "inputs": {
                     "object": [
@@ -390,9 +406,9 @@ class TestGetAttribute(unittest.TestCase):
         for test_case in test_cases:
             attr_q = Queue()
             out_q = Queue()
-            node = GetAttribute(
-                macro_data={"key": test_case["key"]}, id="test_get_attribute"
-            )
+            config = test_case["config"]
+
+            node = GetAttribute(id="test_get_attribute", config=config)
             obj_q = node.inputs["object"].queue
             if len(test_case["inputs"]["key"]) > 0:
                 attr_q = node.inputs["key"].queue
@@ -405,3 +421,260 @@ class TestGetAttribute(unittest.TestCase):
                 ):
                     attr_q.put(test_case["inputs"]["key"][i])
                 self.assertEqual(test_case["outputs"][i], out_q.get())
+
+            node.stopped.wait()
+            self.assertTrue(node.stopped.is_set())
+
+
+class TestHttp(unittest.TestCase):
+    @patch("urllib.request.urlopen")
+    def test_http_get(self, mock_urlopen):
+        mock_response = MagicMock()
+        mock_response.status = 200
+        mock_response.headers = {"Content-Type": "application/json"}
+        mock_response.read.return_value = b'{"message": "Hello, World!"}'
+        mock_response.__enter__.return_value = mock_response
+        mock_urlopen.return_value = mock_response
+
+        test_case = {
+            "name": "simple GET request",
+            "config": {
+                "method": InputConfig(type=InputType.STRING, value="GET"),
+                "url": InputConfig(
+                    type=InputType.STRING, value="https://example.com/api"
+                ),
+                "headers": InputConfig(
+                    type=InputType.JSON, value={"User-Agent": "PyFlyde Test"}
+                ),
+                "params": InputConfig(type=InputType.JSON, value={"q": "test"}),
+            },
+        }
+
+        data_q = Queue()
+
+        node = Http(id="test_http", config=test_case["config"])
+        node.outputs["data"].connect(data_q)
+
+        node.process(
+            url="https://example.com/api",
+            method="GET",
+            headers={"User-Agent": "PyFlyde Test"},
+            params={"q": "test"},
+        )
+
+        self.assertEqual({"message": "Hello, World!"}, data_q.get_nowait())
+
+        # Verify the mock was called with the expected arguments
+        mock_urlopen.assert_called_once()
+        args, _ = mock_urlopen.call_args
+        self.assertTrue("https://example.com/api?q=test" in str(args[0].full_url))
+        self.assertEqual("GET", args[0].method)
+
+        # Check that the User-Agent header was set
+        user_agent = None
+        for key, value in args[0].headers.items():
+            if key.lower() == "user-agent":
+                user_agent = value
+                break
+        self.assertEqual("PyFlyde Test", user_agent)
+
+    @patch("urllib.request.urlopen")
+    def test_http_html_response(self, mock_urlopen):
+        mock_response = MagicMock()
+        mock_response.status = 200
+        mock_response.headers = {"Content-Type": "text/html; charset=utf-8"}
+        mock_response.read.return_value = (
+            b"<!DOCTYPE html><html><body><h1>Test Page</h1></body></html>"
+        )
+        mock_response.__enter__.return_value = mock_response
+        mock_urlopen.return_value = mock_response
+
+        data_q = Queue()
+
+        node = Http(
+            id="test_http",
+            config={
+                "method": InputConfig(type=InputType.STRING, value="GET"),
+                "url": InputConfig(type=InputType.STRING, value="https://example.com"),
+            },
+        )
+        node.outputs["data"].connect(data_q)
+
+        node.process(url="https://example.com", method="GET")
+
+        self.assertEqual(
+            "<!DOCTYPE html><html><body><h1>Test Page</h1></body></html>",
+            data_q.get_nowait(),
+        )
+
+        mock_urlopen.assert_called_once()
+        args, _ = mock_urlopen.call_args
+        self.assertEqual("https://example.com", str(args[0].full_url))
+        self.assertEqual("GET", args[0].method)
+
+    @patch("urllib.request.urlopen")
+    def test_http_binary_response(self, mock_urlopen):
+        mock_response = MagicMock()
+        mock_response.status = 200
+        mock_response.headers = {"Content-Type": "application/octet-stream"}
+        binary_data = (
+            b"\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR\x00\x00"  # Start of a PNG file
+        )
+        mock_response.read.return_value = binary_data
+        mock_response.__enter__.return_value = mock_response
+        mock_urlopen.return_value = mock_response
+
+        data_q = Queue()
+
+        node = Http(
+            id="test_http",
+            config={
+                "method": InputConfig(type=InputType.STRING, value="GET"),
+                "url": InputConfig(
+                    type=InputType.STRING, value="https://example.com/image.png"
+                ),
+            },
+        )
+        node.outputs["data"].connect(data_q)
+
+        node.process(url="https://example.com/image.png", method="GET")
+
+        # Binary data should be returned as is
+        self.assertEqual(binary_data, data_q.get_nowait())
+
+        mock_urlopen.assert_called_once()
+        args, _ = mock_urlopen.call_args
+        self.assertEqual("https://example.com/image.png", str(args[0].full_url))
+        self.assertEqual("GET", args[0].method)
+
+    @patch("urllib.request.urlopen")
+    def test_http_non_utf8_encoding(self, mock_urlopen):
+        mock_response = MagicMock()
+        mock_response.status = 200
+        mock_response.headers = {"Content-Type": "text/html; charset=ISO-8859-1"}
+        # Latin-1 encoded text with special characters
+        latin1_data = b"Espa\xf1ol Fran\xe7ais Portugu\xeas"
+        mock_response.read.return_value = latin1_data
+        mock_response.__enter__.return_value = mock_response
+        mock_urlopen.return_value = mock_response
+
+        data_q = Queue()
+
+        node = Http(
+            id="test_http",
+            config={
+                "method": InputConfig(type=InputType.STRING, value="GET"),
+                "url": InputConfig(
+                    type=InputType.STRING, value="https://example.com/latin1.html"
+                ),
+            },
+        )
+        node.outputs["data"].connect(data_q)
+
+        node.process(url="https://example.com/latin1.html", method="GET")
+
+        # Should be properly decoded using ISO-8859-1 charset
+        self.assertEqual("Español Français Português", data_q.get_nowait())
+
+        mock_urlopen.assert_called_once()
+        args, _ = mock_urlopen.call_args
+        self.assertEqual("https://example.com/latin1.html", str(args[0].full_url))
+        self.assertEqual("GET", args[0].method)
+
+    @patch("urllib.request.urlopen")
+    def test_http_post(self, mock_urlopen):
+        mock_response = MagicMock()
+        mock_response.status = 201
+        mock_response.headers = {"Content-Type": "application/json"}
+        mock_response.read.return_value = b'{"id": 1, "success": true}'
+        mock_response.__enter__.return_value = mock_response
+        mock_urlopen.return_value = mock_response
+
+        test_case = {
+            "name": "POST request with data",
+            "config": {
+                "method": InputConfig(type=InputType.STRING, value="POST"),
+                "url": InputConfig(
+                    type=InputType.STRING, value="https://example.com/api/users"
+                ),
+                "headers": InputConfig(
+                    type=InputType.JSON, value={"User-Agent": "PyFlyde Test"}
+                ),
+                "data": InputConfig(
+                    type=InputType.JSON,
+                    value={"name": "Test User", "email": "test@example.com"},
+                ),
+            },
+        }
+
+        data_q = Queue()
+
+        node = Http(id="test_http", config=test_case["config"])
+        node.outputs["data"].connect(data_q)
+
+        node.process(
+            url="https://example.com/api/users",
+            method="POST",
+            headers={"User-Agent": "PyFlyde Test"},
+            data={"name": "Test User", "email": "test@example.com"},
+        )
+
+        self.assertEqual({"id": 1, "success": True}, data_q.get_nowait())
+
+        # Verify the mock was called with the expected arguments
+        mock_urlopen.assert_called_once()
+        args, kwargs = mock_urlopen.call_args
+        self.assertEqual("https://example.com/api/users", str(args[0].full_url))
+        self.assertEqual("POST", args[0].method)
+
+        # Check that the User-Agent header was set
+        user_agent = None
+        for key, value in args[0].headers.items():
+            if key.lower() == "user-agent":
+                user_agent = value
+                break
+        self.assertEqual("PyFlyde Test", user_agent)
+
+        self.assertEqual(
+            b'{"name": "Test User", "email": "test@example.com"}', kwargs["data"]
+        )
+
+    @patch("urllib.request.urlopen")
+    def test_http_error(self, mock_urlopen):
+        # Create a mock headers object for HTTPError
+        headers = client.HTTPMessage()
+        headers.add_header("Content-Type", "text/plain")
+
+        mock_urlopen.side_effect = error.HTTPError(
+            url="https://example.com/api/error",
+            code=404,
+            msg="Not Found",
+            hdrs=headers,
+            fp=None,
+        )
+
+        test_case = {
+            "name": "HTTP error handling",
+            "config": {
+                "method": InputConfig(type=InputType.STRING, value="GET"),
+                "url": InputConfig(
+                    type=InputType.STRING, value="https://example.com/api/error"
+                ),
+            },
+        }
+
+        data_q = Queue()
+
+        node = Http(id="test_http", config=test_case["config"])
+        node.outputs["data"].connect(data_q)
+
+        with self.assertRaises(error.HTTPError) as context:
+            node.process(url="https://example.com/api/error", method="GET")
+
+        self.assertEqual(404, context.exception.code)
+        self.assertEqual("Not Found", context.exception.msg)
+
+        # Verify the mock was called
+        mock_urlopen.assert_called_once()
+        args, _ = mock_urlopen.call_args
+        self.assertEqual("https://example.com/api/error", str(args[0].full_url))

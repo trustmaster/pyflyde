@@ -1,7 +1,8 @@
-from queue import Queue
 import unittest
-from flyde.io import EOF
+from queue import Queue
+
 from flyde.flow import Flow
+from flyde.io import EOF
 
 
 class TestIsolatedFlow(unittest.TestCase):
@@ -102,6 +103,81 @@ class TestFanInFlow(unittest.TestCase):
 
         flow.stopped.wait()
         self.assertTrue(flow.stopped.is_set())
+
+
+class TestCustomLoadFlow(unittest.TestCase):
+    def test_custom_component_loading(self):
+        """Test loading components using custom:// source format."""
+        test_case = {
+            "inputs": ["hello", "world", EOF],
+            "outputs": ["HELLO", "WORLD", EOF],
+        }
+        flow = Flow.from_file("tests/TestCustomLoad.flyde")
+
+        in_q = flow.node.inputs["input"].queue
+        out_q = Queue()
+        flow.node.outputs["output"].connect(out_q)
+
+        flow.run()
+
+        for inp, expected_out in zip(test_case["inputs"], test_case["outputs"]):
+            in_q.put(inp)
+            if expected_out == EOF:
+                actual_out = out_q.get()
+                self.assertEqual(EOF, actual_out)
+            else:
+                actual_out = out_q.get()
+                self.assertEqual(expected_out, actual_out)
+
+        flow.stopped.wait()
+        self.assertTrue(flow.stopped.is_set())
+
+    def test_custom_component_loading_edge_cases(self):
+        """Test edge cases in custom component loading."""
+        from flyde.flow import Flow
+        from flyde.node import InstanceArgs, InstanceSource, InstanceSourceType
+
+        flow = Flow({})
+
+        # Test malformed custom path (no class name)
+        args = InstanceArgs(
+            id="test",
+            display_name="Test",
+            stopped=None,
+            config={},
+            source=InstanceSource(
+                type=InstanceSourceType.CUSTOM, data="custom://tests/components.py/"
+            ),
+        )
+        with self.assertRaises(Exception):
+            flow.create_component("Echo", args)
+
+        # Test invalid module path
+        args = InstanceArgs(
+            id="test",
+            display_name="Test",
+            stopped=None,
+            config={},
+            source=InstanceSource(
+                type=InstanceSourceType.CUSTOM,
+                data="custom://tests/nonexistent.py/Echo",
+            ),
+        )
+        with self.assertRaises(Exception):
+            flow.create_component("Echo", args)
+
+        # Test valid custom path
+        args = InstanceArgs(
+            id="test",
+            display_name="Test",
+            stopped=None,
+            config={},
+            source=InstanceSource(
+                type=InstanceSourceType.CUSTOM, data="custom://tests/components.py/Echo"
+            ),
+        )
+        component = flow.create_component("Echo", args)
+        self.assertIsNotNone(component)
 
     def test_with_graph(self):
         test_case = {

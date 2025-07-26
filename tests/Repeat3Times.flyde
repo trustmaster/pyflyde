@@ -1,37 +1,53 @@
-imports:
-  "@flyde/stdlib":
-    - InlineValue
-  components.flyde.ts:
-    - RepeatWordNTimes
-    - Capitalize
+imports: {}
 node:
   instances:
     - pos:
         x: -105.91999999999999
-        y: 47.08
+        y: 49.08
       id: RepeatWordNTimes-h30493h
       inputConfig:
         times:
           mode: sticky
       nodeId: RepeatWordNTimes
+      config:
+        word:
+          type: dynamic
+          value: "{{word}}"
+        times:
+          type: dynamic
+          value: "{{times}}"
+      type: code
+      source:
+        type: custom
+        data: custom://components.py/RepeatWordNTimes
     - pos:
-        x: 13.582794189453125
-        y: -132.9213885498047
+        x: -422.4172058105469
+        y: 126.0786114501953
       id: inl-ytsuyrje4syeb4qduymsfkl2
       inputConfig: {}
-      visibleInputs: []
-      nodeId: InlineValue__inl-ytsuyrje4syeb4qduymsfkl2
-      macroId: InlineValue
-      macroData:
+      nodeId: InlineValue
+      config:
         value:
           type: number
           value: 3
+      type: code
+      source:
+        type: package
+        data: "@flyde/nodes"
     - pos:
-        x: -68.75665283203125
-        y: 194.59005737304688
+        x: 109.24334716796875
+        y: 55.590057373046875
       id: Capitalize-790499u
       inputConfig: {}
       nodeId: Capitalize
+      config:
+        inp:
+          type: dynamic
+          value: "{{inp}}"
+      type: code
+      source:
+        type: custom
+        data: custom://components.py/Capitalize
   connections:
     - from:
         insId: inl-ytsuyrje4syeb4qduymsfkl2
@@ -66,13 +82,13 @@ node:
       delayed: false
   inputsPosition:
     word:
-      x: -92.08137329101562
-      y: -227.9133740234375
+      x: -351.0813732910156
+      y: 52.08662597656249
   outputsPosition:
     result:
       x: -23.264428942324532
       y: 237.25953921502617
     word3x:
-      x: -40.05281249999999
-      y: 369.2831286621094
-  description: For each input string, sends a string with the same conent repeated 3 times
+      x: 345.94718750000004
+      y: 57.28312866210939
+  description: For each input string, sends a string with the same content repeated 3 times

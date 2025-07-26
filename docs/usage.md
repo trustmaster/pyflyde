@@ -14,16 +14,24 @@ You can omit the `run` command because it is the default one. The following comm
 pyflyde examples/HelloWorld.flyde
 ```
 
-## Generating TS definitions for Flyde visual editor
+## Generating component definitions for Flyde visual editor
 
-Flyde visual editor is written for TypeScript runtime and is not aware of your Python nodes. To make your local nodes appear in the Flyde editor, you need to generate `.flyde.ts` files for them.
+To make your Python nodes appear in the Flyde visual editor, you need to generate `flyde-nodes.json` metadata files for them.
 
-For example:
+Generate JSON definitions for a directory:
 
 ```bash
-pyflyde gen mypackage/supermodule.py
+pyflyde gen mypackage/
 ```
 
-will generate `mypackage/supermodule.flyde.ts` TypeScript defintions for Flyde using the contents of your `mypackage.submodule` module.
+This will recursively scan all `.py` files in the directory and its subdirectories, then generate a `flyde-nodes.json` file in the specified directory containing metadata for all PyFlyde components found. The paths in the generated JSON file are relative to the directory containing the `flyde-nodes.json` file, making the component library portable.
 
-You should run `pyflyde gen` every time your create new modules containing PyFlyde nodes or whenever you update node signature (name, description, inputs, outputs, etc.).
+For example, if you have components in:
+- `mypackage/components.py`
+- `mypackage/utils/helpers.py`
+
+The generated `flyde-nodes.json` will reference them as:
+- `custom://components.py/ComponentName`
+- `custom://utils/helpers.py/HelperComponentName`
+
+You should run `pyflyde gen` every time you create new modules containing PyFlyde nodes or whenever you update node signatures (name, description, inputs, outputs, etc.).

@@ -1,0 +1,631 @@
+{
+  "nodes": {
+    "Capitalize": {
+      "id": "Capitalize",
+      "type": "code",
+      "displayName": "Capitalize",
+      "description": "A component that capitalizes the input.",
+      "icon": "fa-brands fa-python",
+      "source": {
+        "type": "custom",
+        "data": "custom://components.py/Capitalize"
+      },
+      "editorNode": {
+        "id": "Capitalize",
+        "displayName": "Capitalize",
+        "description": "A component that capitalizes the input.",
+        "inputs": {
+          "inp": {
+            "description": "The input"
+          }
+        },
+        "outputs": {
+          "out": {
+            "description": "The output"
+          }
+        },
+        "editorConfig": {
+          "type": "structured"
+        }
+      },
+      "config": {}
+    },
+    "Echo": {
+      "id": "Echo",
+      "type": "code",
+      "displayName": "Echo",
+      "description": "A simple component that echoes the input.",
+      "icon": "fa-brands fa-python",
+      "source": {
+        "type": "custom",
+        "data": "custom://components.py/Echo"
+      },
+      "editorNode": {
+        "id": "Echo",
+        "displayName": "Echo",
+        "description": "A simple component that echoes the input.",
+        "inputs": {
+          "inp": {
+            "description": "The input"
+          }
+        },
+        "outputs": {
+          "out": {
+            "description": "The output"
+          }
+        },
+        "editorConfig": {
+          "type": "structured"
+        }
+      },
+      "config": {}
+    },
+    "Format": {
+      "id": "Format",
+      "type": "code",
+      "displayName": "Format",
+      "description": "Formats the input value with a given format string and sends it to out.",
+      "icon": "fa-brands fa-python",
+      "source": {
+        "type": "custom",
+        "data": "custom://components.py/Format"
+      },
+      "editorNode": {
+        "id": "Format",
+        "displayName": "Format",
+        "description": "Formats the input value with a given format string and sends it to out.",
+        "inputs": {
+          "inp": {
+            "description": "The input"
+          },
+          "format": {
+            "description": "The format string"
+          }
+        },
+        "outputs": {
+          "out": {
+            "description": "The formatted output"
+          }
+        },
+        "editorConfig": {
+          "type": "structured"
+        }
+      },
+      "config": {}
+    },
+    "RepeatWordNTimes": {
+      "id": "RepeatWordNTimes",
+      "type": "code",
+      "displayName": "Repeat Word NTimes",
+      "description": "A component that has both inputs and outputs and a sticky input.",
+      "icon": "fa-brands fa-python",
+      "source": {
+        "type": "custom",
+        "data": "custom://components.py/RepeatWordNTimes"
+      },
+      "editorNode": {
+        "id": "RepeatWordNTimes",
+        "displayName": "Repeat Word NTimes",
+        "description": "A component that has both inputs and outputs and a sticky input.",
+        "inputs": {
+          "word": {
+            "description": "The input"
+          },
+          "times": {
+            "description": "The number of times to repeat the input"
+          }
+        },
+        "outputs": {
+          "out": {
+            "description": "The output"
+          }
+        },
+        "editorConfig": {
+          "type": "structured"
+        }
+      },
+      "config": {}
+    },
+    "CustomBob": {
+      "id": "CustomBob",
+      "type": "code",
+      "displayName": "Custom Bob",
+      "description": "A custom external node named Bob",
+      "icon": "fa-brands fa-python",
+      "source": {
+        "type": "custom",
+        "data": "custom://test_cli.py/CustomBob"
+      },
+      "editorNode": {
+        "id": "CustomBob",
+        "displayName": "Custom Bob",
+        "description": "A custom external node named Bob",
+        "inputs": {
+          "value": {
+            "description": "Input value to process"
+          }
+        },
+        "outputs": {
+          "result": {
+            "description": "Processed result from external runtime"
+          }
+        },
+        "editorConfig": {
+          "type": "structured"
+        }
+      },
+      "config": {}
+    },
+    "InlineValue": "@flyde/nodes",
+    "TestCustomComponent": {
+      "id": "TestCustomComponent",
+      "type": "code",
+      "displayName": "Test Custom Component",
+      "description": "A test component for unit testing.",
+      "icon": "fa-brands fa-python",
+      "source": {
+        "type": "custom",
+        "data": "custom://test_cli.py/TestCustomComponent"
+      },
+      "editorNode": {
+        "id": "TestCustomComponent",
+        "displayName": "Test Custom Component",
+        "description": "A test component for unit testing.",
+        "inputs": {
+          "input1": {
+            "description": "First test input"
+          },
+          "input2": {
+            "description": "Second test input"
+          }
+        },
+        "outputs": {
+          "output": {
+            "description": "Test output"
+          }
+        },
+        "editorConfig": {
+          "type": "structured"
+        }
+      },
+      "config": {}
+    },
+    "AllStickyInputsComponent": {
+      "id": "AllStickyInputsComponent",
+      "type": "code",
+      "displayName": "All Sticky Inputs Component",
+      "description": "A component with only sticky inputs to test single execution.",
+      "icon": "fa-brands fa-python",
+      "source": {
+        "type": "custom",
+        "data": "custom://test_node.py/AllStickyInputsComponent"
+      },
+      "editorNode": {
+        "id": "AllStickyInputsComponent",
+        "displayName": "All Sticky Inputs Component",
+        "description": "A component with only sticky inputs to test single execution.",
+        "inputs": {
+          "a": {
+            "description": "First sticky input"
+          },
+          "b": {
+            "description": "Second sticky input"
+          }
+        },
+        "outputs": {
+          "result": {
+            "description": "Result of operation"
+          }
+        },
+        "editorConfig": {
+          "type": "structured"
+        }
+      },
+      "config": {}
+    },
+    "CustomRunComponent": {
+      "id": "CustomRunComponent",
+      "type": "code",
+      "displayName": "Custom Run Component",
+      "description": "A component that has a custom run and shutdown handlers.",
+      "icon": "fa-brands fa-python",
+      "source": {
+        "type": "custom",
+        "data": "custom://test_node.py/CustomRunComponent"
+      },
+      "editorNode": {
+        "id": "CustomRunComponent",
+        "displayName": "Custom Run Component",
+        "description": "A component that has a custom run and shutdown handlers.",
+        "inputs": {
+          "s": {
+            "description": "Individual strings"
+          }
+        },
+        "outputs": {
+          "l": {
+            "description": "List of strings"
+          }
+        },
+        "editorConfig": {
+          "type": "structured"
+        }
+      },
+      "config": {}
+    },
+    "InvalidSendProcess": {
+      "id": "InvalidSendProcess",
+      "type": "code",
+      "displayName": "Invalid Send Process",
+      "description": "A component that tries to send a message without a corresponding output.",
+      "icon": "fa-brands fa-python",
+      "source": {
+        "type": "custom",
+        "data": "custom://test_node.py/InvalidSendProcess"
+      },
+      "editorNode": {
+        "id": "InvalidSendProcess",
+        "displayName": "Invalid Send Process",
+        "description": "A component that tries to send a message without a corresponding output.",
+        "inputs": {
+          "s": {
+            "description": "Individual strings"
+          }
+        },
+        "outputs": {},
+        "editorConfig": {
+          "type": "structured"
+        }
+      },
+      "config": {}
+    },
+    "NoProcessComponent": {
+      "id": "NoProcessComponent",
+      "type": "code",
+      "displayName": "No Process Component",
+      "description": "A component to test no inputs, outputs, and no process method.",
+      "icon": "fa-brands fa-python",
+      "source": {
+        "type": "custom",
+        "data": "custom://test_node.py/NoProcessComponent"
+      },
+      "editorNode": {
+        "id": "NoProcessComponent",
+        "displayName": "No Process Component",
+        "description": "A component to test no inputs, outputs, and no process method.",
+        "inputs": {},
+        "outputs": {},
+        "editorConfig": {
+          "type": "structured"
+        }
+      },
+      "config": {}
+    },
+    "SinkComponent": {
+      "id": "SinkComponent",
+      "type": "code",
+      "displayName": "Sink Component",
+      "description": "A component that only has inputs.",
+      "icon": "fa-brands fa-python",
+      "source": {
+        "type": "custom",
+        "data": "custom://test_node.py/SinkComponent"
+      },
+      "editorNode": {
+        "id": "SinkComponent",
+        "displayName": "Sink Component",
+        "description": "A component that only has inputs.",
+        "inputs": {
+          "word": {
+            "description": "The input"
+          },
+          "output": {
+            "description": "Object to store result in"
+          }
+        },
+        "outputs": {},
+        "editorConfig": {
+          "type": "structured"
+        }
+      },
+      "config": {}
+    },
+    "SourceComponent": {
+      "id": "SourceComponent",
+      "type": "code",
+      "displayName": "Source Component",
+      "description": "A component that only has outputs.",
+      "icon": "fa-brands fa-python",
+      "source": {
+        "type": "custom",
+        "data": "custom://test_node.py/SourceComponent"
+      },
+      "editorNode": {
+        "id": "SourceComponent",
+        "displayName": "Source Component",
+        "description": "A component that only has outputs.",
+        "inputs": {},
+        "outputs": {
+          "out": {
+            "description": "The output"
+          }
+        },
+        "editorConfig": {
+          "type": "structured"
+        }
+      },
+      "config": {}
+    },
+    "TestStdlib": {
+      "id": "TestStdlib",
+      "type": "visual",
+      "displayName": "Test Stdlib",
+      "description": "",
+      "icon": "fa-diagram-project",
+      "source": {
+        "type": "file",
+        "data": "TestStdlib.flyde"
+      },
+      "editorNode": {
+        "id": "TestStdlib",
+        "displayName": "Test Stdlib",
+        "description": "",
+        "inputs": {},
+        "outputs": {
+          "response": {
+            "description": "response output"
+          }
+        },
+        "editorConfig": {
+          "type": "structured"
+        }
+      },
+      "config": {}
+    },
+    "Repeat3Times": {
+      "id": "Repeat3Times",
+      "type": "visual",
+      "displayName": "Repeat3Times",
+      "description": "For each input string, sends a string with the same content repeated 3 times",
+      "icon": "fa-diagram-project",
+      "source": {
+        "type": "file",
+        "data": "Repeat3Times.flyde"
+      },
+      "editorNode": {
+        "id": "Repeat3Times",
+        "displayName": "Repeat3Times",
+        "description": "For each input string, sends a string with the same content repeated 3 times",
+        "inputs": {
+          "word": {
+            "description": "word input (required)"
+          }
+        },
+        "outputs": {
+          "word3x": {
+            "description": "word3x output"
+          }
+        },
+        "editorConfig": {
+          "type": "structured"
+        }
+      },
+      "config": {}
+    },
+    "TestNestedFlow": {
+      "id": "TestNestedFlow",
+      "type": "visual",
+      "displayName": "Test Nested Flow",
+      "description": "Repeats input 3xN times",
+      "icon": "fa-diagram-project",
+      "source": {
+        "type": "file",
+        "data": "TestNestedFlow.flyde"
+      },
+      "editorNode": {
+        "id": "TestNestedFlow",
+        "displayName": "Test Nested Flow",
+        "description": "Repeats input 3xN times",
+        "inputs": {
+          "inp": {
+            "description": "inp input (required)"
+          },
+          "n": {
+            "description": "n input (required)"
+          }
+        },
+        "outputs": {
+          "out": {
+            "description": "out output"
+          }
+        },
+        "editorConfig": {
+          "type": "structured"
+        }
+      },
+      "config": {}
+    },
+    "TestFanInGraph": {
+      "id": "TestFanInGraph",
+      "type": "visual",
+      "displayName": "Test Fan In Graph",
+      "description": "",
+      "icon": "fa-diagram-project",
+      "source": {
+        "type": "file",
+        "data": "TestFanInGraph.flyde"
+      },
+      "editorNode": {
+        "id": "TestFanInGraph",
+        "displayName": "Test Fan In Graph",
+        "description": "",
+        "inputs": {
+          "str": {
+            "description": "str input (required)"
+          }
+        },
+        "outputs": {
+          "out": {
+            "description": "out output"
+          }
+        },
+        "editorConfig": {
+          "type": "structured"
+        }
+      },
+      "config": {}
+    },
+    "TestFanIn": {
+      "id": "TestFanIn",
+      "type": "visual",
+      "displayName": "Test Fan In",
+      "description": "",
+      "icon": "fa-diagram-project",
+      "source": {
+        "type": "file",
+        "data": "TestFanIn.flyde"
+      },
+      "editorNode": {
+        "id": "TestFanIn",
+        "displayName": "Test Fan In",
+        "description": "",
+        "inputs": {
+          "str": {
+            "description": "str input (required)"
+          }
+        },
+        "outputs": {
+          "out": {
+            "description": "out output"
+          }
+        },
+        "editorConfig": {
+          "type": "structured"
+        }
+      },
+      "config": {}
+    },
+    "TestIsolatedFlow": {
+      "id": "TestIsolatedFlow",
+      "type": "visual",
+      "displayName": "Test Isolated Flow",
+      "description": "",
+      "icon": "fa-diagram-project",
+      "source": {
+        "type": "file",
+        "data": "TestIsolatedFlow.flyde"
+      },
+      "editorNode": {
+        "id": "TestIsolatedFlow",
+        "displayName": "Test Isolated Flow",
+        "description": "",
+        "inputs": {},
+        "outputs": {},
+        "editorConfig": {
+          "type": "structured"
+        }
+      },
+      "config": {}
+    },
+    "TestCustomLoad": {
+      "id": "TestCustomLoad",
+      "type": "visual",
+      "displayName": "Test Custom Load",
+      "description": "Test flow that loads custom components using custom:// source format",
+      "icon": "fa-diagram-project",
+      "source": {
+        "type": "file",
+        "data": "TestCustomLoad.flyde"
+      },
+      "editorNode": {
+        "id": "TestCustomLoad",
+        "displayName": "Test Custom Load",
+        "description": "Test flow that loads custom components using custom:// source format",
+        "inputs": {
+          "input": {
+            "description": "input input (required)"
+          }
+        },
+        "outputs": {
+          "output": {
+            "description": "output output"
+          }
+        },
+        "editorConfig": {
+          "type": "structured"
+        }
+      },
+      "config": {}
+    },
+    "TestInOutFlow": {
+      "id": "TestInOutFlow",
+      "type": "visual",
+      "displayName": "Test In Out Flow",
+      "description": "",
+      "icon": "fa-diagram-project",
+      "source": {
+        "type": "file",
+        "data": "TestInOutFlow.flyde"
+      },
+      "editorNode": {
+        "id": "TestInOutFlow",
+        "displayName": "Test In Out Flow",
+        "description": "",
+        "inputs": {
+          "inMsg": {
+            "description": "inMsg input (required)"
+          }
+        },
+        "outputs": {
+          "outMsg": {
+            "description": "outMsg output"
+          }
+        },
+        "editorConfig": {
+          "type": "structured"
+        }
+      },
+      "config": {}
+    },
+    "Conditional": "@flyde/nodes",
+    "GetAttribute": "@flyde/nodes",
+    "Http": "@flyde/nodes"
+  },
+  "groups": [
+    {
+      "title": "Your PyFlyde Nodes",
+      "nodeIds": [
+        "Capitalize",
+        "Echo",
+        "Format",
+        "RepeatWordNTimes",
+        "CustomBob",
+        "InlineValue",
+        "TestCustomComponent",
+        "AllStickyInputsComponent",
+        "CustomRunComponent",
+        "InvalidSendProcess",
+        "NoProcessComponent",
+        "SinkComponent",
+        "SourceComponent",
+        "TestStdlib",
+        "Repeat3Times",
+        "TestNestedFlow",
+        "TestFanInGraph",
+        "TestFanIn",
+        "TestIsolatedFlow",
+        "TestCustomLoad",
+        "TestInOutFlow"
+      ]
+    },
+    {
+      "title": "PyFlyde Standard Nodes",
+      "nodeIds": [
+        "Conditional",
+        "GetAttribute",
+        "Http",
+        "InlineValue"
+      ]
+    }
+  ]
+}

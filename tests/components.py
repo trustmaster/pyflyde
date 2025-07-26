@@ -7,9 +7,7 @@ class Format(Component):
 
     inputs = {
         "inp": Input(description="The input"),
-        "format": Input(
-            description="The format string", type=str, mode=InputMode.STICKY
-        ),
+        "format": Input(description="The format string", type=str, mode=InputMode.STICKY),
     }
     outputs = {
         "out": Output(description="The formatted output", type=str),

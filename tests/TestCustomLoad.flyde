@@ -1,0 +1,66 @@
+imports: {}
+node:
+  instances:
+    - pos:
+        x: -200
+        y: 50
+      id: custom-echo-test
+      inputConfig: {}
+      nodeId: Echo
+      config:
+        inp:
+          type: dynamic
+          value: "{{inp}}"
+      type: code
+      source:
+        type: custom
+        data: custom://components.py/Echo
+    - pos:
+        x: 50
+        y: 50
+      id: custom-capitalize-test
+      inputConfig: {}
+      nodeId: Capitalize
+      config:
+        inp:
+          type: dynamic
+          value: "{{inp}}"
+      type: code
+      source:
+        type: custom
+        data: custom://components.py/Capitalize
+  connections:
+    - from:
+        insId: __this
+        pinId: input
+      to:
+        insId: custom-echo-test
+        pinId: inp
+    - from:
+        insId: custom-echo-test
+        pinId: out
+      to:
+        insId: custom-capitalize-test
+        pinId: inp
+    - from:
+        insId: custom-capitalize-test
+        pinId: out
+      to:
+        insId: __this
+        pinId: output
+  id: TestCustomLoad
+  inputs:
+    input:
+      mode: required
+  outputs:
+    output:
+      delayed: false
+  inputsPosition:
+    input:
+      x: -350
+      y: 50
+  outputsPosition:
+    output:
+      x: 200
+      y: 50
+  description: Test flow that loads custom components using custom:// source format

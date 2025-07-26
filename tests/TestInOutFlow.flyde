@@ -1,26 +1,27 @@
-imports:
-  "@flyde/stdlib":
-    - Conditional
-    - InlineValue
-  components.flyde.ts:
-    - Echo
-    - Format
+imports: {}
 node:
   instances:
     - pos:
-        x: -79.91999999999999
-        y: 47.5
+        x: 244.08
+        y: -87.5
       id: Echo-h3049mb
       inputConfig: {}
       nodeId: Echo
+      config:
+        inp:
+          type: dynamic
+          value: "{{inp}}"
+      type: code
+      source:
+        type: custom
+        data: custom://components.py/Echo
     - pos:
         x: -17.077154541015602
         y: -87.20937501999856
       id: ppsa1z6ja2w6yyo0sig7hvww
       inputConfig: {}
-      nodeId: Conditional__ppsa1z6ja2w6yyo0sig7hvww
-      macroId: Conditional
-      macroData:
+      nodeId: Conditional
+      config:
         leftOperand:
           type: dynamic
           value: "{{value}}"
@@ -29,20 +30,34 @@ node:
           type: string
         condition:
           type: EXISTS
+      type: code
+      source:
+        type: package
+        data: "@flyde/nodes"
     - pos:
-        x: 96.42891601562502
-        y: 48.46386716750146
+        x: 241.42891601562496
+        y: 13.463867167501462
       id: Format-ve0397r
       inputConfig: {}
       nodeId: Format
+      config:
+        inp:
+          type: dynamic
+          value: "{{inp}}"
+        format:
+          type: dynamic
+          value: "{{format}}"
+      type: code
+      source:
+        type: custom
+        data: custom://components.py/Format
     - pos:
-        x: 227.21648071289064
-        y: -86.37317262742044
+        x: -32.78351928710936
+        y: 33.626827372579555
       id: apqbu37rhnui31o8qaud8ek8
       inputConfig: {}
-      nodeId: InlineValue__apqbu37rhnui31o8qaud8ek8
-      macroId: InlineValue
-      macroData:
+      nodeId: InlineValue
+      config:
         type:
           type: string
           value: string
@@ -52,6 +67,10 @@ node:
         label:
           type: string
           value: '"ERR: msg is empty"'
+      type: code
+      source:
+        type: package
+        data: "@flyde/nodes"
   connections:
     - from:
         insId: Echo-h3049mb
@@ -89,7 +108,7 @@ node:
       to:
         insId: Format-ve0397r
         pinId: format
-  id: Example
+  id: TestInOutFlow
   inputs:
     inMsg:
       mode: required
@@ -98,12 +117,12 @@ node:
       delayed: false
   inputsPosition:
     inMsg:
-      x: 35.251495361328125
-      y: -151.84883300781252
+      x: -184.74850463867188
+      y: -75.84883300781252
   outputsPosition:
     result:
       x: -23.264428942324532
       y: 237.25953921502617
     outMsg:
-      x: -70.891923828125
-      y: 220.63164794921875
+      x: 631.1080761718749
+      y: -93.36835205078125

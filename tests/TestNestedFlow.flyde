@@ -1,24 +1,20 @@
-imports:
-  "@flyde/stdlib": []
-  Repeat3Times.flyde:
-    - Repeat3Times
-  components.flyde.ts:
-    - Echo
-    - RepeatWordNTimes
+imports: {}
 node:
   instances:
     - pos:
-        x: -234.30030517578126
-        y: -38.32338623046875
-      id: Repeat3Times-u6049uf
-      inputConfig: {}
-      nodeId: Repeat3Times
-    - pos:
-        x: -196.171416015625
-        y: 107.68781005859375
+        x: -465.54763671875
+        y: 195.6628924560547
       id: Echo-co1498h
       inputConfig: {}
       nodeId: Echo
+      config:
+        inp:
+          type: dynamic
+          value: "{{inp}}"
+      type: code
+      source:
+        type: custom
+        data: custom://components.py/Echo
     - pos:
         x: -195.52671508789064
         y: 269.8743734741211
@@ -27,19 +23,28 @@ node:
         times:
           mode: sticky
       nodeId: RepeatWordNTimes
+      config:
+        word:
+          type: dynamic
+          value: "{{word}}"
+        times:
+          type: dynamic
+          value: "{{times}}"
+      type: code
+      source:
+        type: custom
+        data: custom://components.py/RepeatWordNTimes
+    - pos:
+        x: -674.5008868408204
+        y: 195.91538436889653
+      id: Repeat3Times-dfk3brg0
+      inputConfig: {}
+      nodeId: Repeat3Times
+      type: visual
+      source:
+        type: file
+        data: Repeat3Times.flyde
   connections:
-    - from:
-        insId: __this
-        pinId: inp
-      to:
-        insId: Repeat3Times-u6049uf
-        pinId: word
-    - from:
-        insId: Repeat3Times-u6049uf
-        pinId: word3x
-      to:
-        insId: Echo-co1498h
-        pinId: inp
     - from:
         insId: Echo-co1498h
         pinId: out
@@ -58,6 +63,18 @@ node:
       to:
         insId: RepeatWordNTimes-pp249oy
         pinId: times
+    - from:
+        insId: Repeat3Times-dfk3brg0
+        pinId: word3x
+      to:
+        insId: Echo-co1498h
+        pinId: inp
+    - from:
+        insId: __this
+        pinId: inp
+      to:
+        insId: Repeat3Times-dfk3brg0
+        pinId: word
   id: TestNestedFlow
   inputs:
     inp:
@@ -69,19 +86,19 @@ node:
       delayed: false
   inputsPosition:
     inp:
-      x: -172.50668701171875
-      y: -161.04999633789063
+      x: -854.638095703125
+      y: 195.21616271972655
     x:
       x: 37.526656494140624
       y: -159.08574951171875
     n:
-      x: 37.526656494140624
-      y: -159.08574951171875
+      x: -448.31001342773436
+      y: 288.3494387817383
   outputsPosition:
     result:
       x: -23.264428942324532
       y: 237.25953921502617
     out:
-      x: -110.85763549804688
-      y: 444.78157318115234
+      x: 20.572113037109375
+      y: 280.7653988647461
   description: Repeats input 3xN times
