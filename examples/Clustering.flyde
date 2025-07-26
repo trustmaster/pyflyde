@@ -2,42 +2,22 @@ imports: {}
 node:
   instances:
     - pos:
-        x: -621.6927661132812
-        y: 60.473060607910156
+        x: -575.9162768554687
+        y: 63.37334442138672
       id: LoadDataset-1a039uk
       inputConfig: {}
       nodeId: LoadDataset
       config:
         file_path:
-          type: dynamic
-          value: "{{file_path}}"
+          type: string
+          value: examples/datasets/wine-clustering.csv
       type: code
       source:
         type: custom
         data: custom://mylib/dataframe.py/LoadDataset
     - pos:
-        x: -878.3972607421874
-        y: 58.98426055908203
-      id: mc4t4fqqezd1gns4fb7ckxmc
-      inputConfig: {}
-      nodeId: InlineValue
-      config:
-        type:
-          type: string
-          value: string
-        value:
-          type: string
-          value: examples/datasets/wine-clustering.csv
-        label:
-          type: string
-          value: wine-clustering.csv
-      type: code
-      source:
-        type: package
-        data: "@flyde/nodes"
-    - pos:
-        x: -361.93745239257817
-        y: 61.669410705566406
+        x: -314.72321899414067
+        y: 63.53064727783203
       id: Scale-dz139az
       inputConfig: {}
       nodeId: Scale
@@ -51,9 +31,12 @@ node:
         data: custom://mylib/dataframe.py/Scale
     - pos:
         x: -25.86572830200197
-        y: 43.094966888427734
+        y: 44.094966888427734
       id: KMeansNClusters-5m2390u
       inputConfig: {}
+      visibleInputs:
+        - max_clusters
+        - scaled_dataframe
       nodeId: KMeansNClusters
       config:
         scaled_dataframe:
@@ -67,10 +50,13 @@ node:
         type: custom
         data: custom://mylib/kmeans.py/KMeansNClusters
     - pos:
-        x: 234.1243896484375
-        y: 185.80514907836914
+        x: 228.10110473632812
+        y: 248.88135147094727
       id: KMeansCluster-ql339i4
       inputConfig: {}
+      visibleInputs:
+        - n_clusters
+        - scaled_dataframe
       nodeId: KMeansCluster
       config:
         scaled_dataframe:
@@ -84,8 +70,8 @@ node:
         type: custom
         data: custom://mylib/kmeans.py/KMeansCluster
     - pos:
-        x: -364.1277150344849
-        y: -49.644354581832886
+        x: -313.0567921829224
+        y: -35.33806490898132
       id: yquy5xqil6xp9tmb42ktmosp
       inputConfig: {}
       nodeId: InlineValue
@@ -104,8 +90,8 @@ node:
         type: package
         data: "@flyde/nodes"
     - pos:
-        x: 234.12208740234377
-        y: 410.2254124450684
+        x: 229.83021728515627
+        y: 401.5109577941895
       id: PCA2-mz439jk
       inputConfig: {}
       nodeId: PCA2
@@ -118,10 +104,14 @@ node:
         type: custom
         data: custom://mylib/kmeans.py/PCA2
     - pos:
-        x: 1010.514711303711
-        y: 252.2306843566895
+        x: 980.4632281494141
+        y: 243.6586628723145
       id: Visualize-yz539m4
       inputConfig: {}
+      visibleInputs:
+        - pca_centroids
+        - kmeans_result
+        - pca_components
       nodeId: Visualize
       config:
         pca_components:
@@ -138,8 +128,8 @@ node:
         type: custom
         data: custom://mylib/kmeans.py/Visualize
     - pos:
-        x: 736.7720812988282
-        y: 149.70720727920536
+        x: 715.7433795166016
+        y: 142.11989648818974
       id: PCA2-e5639ct
       inputConfig: {}
       nodeId: PCA2
@@ -159,7 +149,8 @@ node:
       nodeId: GetAttribute
       config:
         key:
-          type: dynamic
+          type: string
+          value: centroids
         object:
           type: dynamic
           value: "{{object}}"
@@ -167,33 +158,7 @@ node:
       source:
         type: package
         data: "@flyde/nodes"
-    - pos:
-        x: 234.12473022460927
-        y: 310.8023236303703
-      id: xb5xo767x6u0ubdvvegi0e53
-      inputConfig: {}
-      nodeId: InlineValue
-      config:
-        type:
-          type: string
-          value: string
-        value:
-          type: string
-          value: centroids
-        label:
-          type: string
-          value: '"centroids"'
-      type: code
-      source:
-        type: package
-        data: "@flyde/nodes"
   connections:
-    - from:
-        insId: mc4t4fqqezd1gns4fb7ckxmc
-        pinId: value
-      to:
-        insId: LoadDataset-1a039uk
-        pinId: file_path
     - from:
         insId: LoadDataset-1a039uk
         pinId: dataframe
@@ -230,12 +195,6 @@ node:
       to:
         insId: PCA2-e5639ct
         pinId: scaled_dataframe
-    - from:
-        insId: xb5xo767x6u0ubdvvegi0e53
-        pinId: value
-      to:
-        insId: nmt2k6i80qpwu9fyuckbqefw
-        pinId: key
     - from:
         insId: Scale-dz139az
         pinId: scaled_dataframe
