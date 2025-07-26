@@ -181,6 +181,14 @@ class TestComponentWithStickyInput(unittest.TestCase):
         self.assertEqual(node._config["word"].type, InputType.STRING)
         self.assertEqual(node._config["word"].value, "default")
 
+    def test_parse_config_with_editor_default(self):
+        config = {"foo": {"type": "string", "value": "{{foo}}"}}
+        node = RepeatWordNTimes(id="repeat", display_name="Repeat", config=config)
+        self.assertIn("foo", node._config)
+        self.assertIsInstance(node._config["foo"], InputConfig)
+        self.assertEqual(node._config["foo"].type, InputType.STRING)
+        self.assertIsNone(node._config["foo"].value)
+
 
 class AllStickyInputsComponent(Component):
     """A component with only sticky inputs to test single execution."""

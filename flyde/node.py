@@ -134,6 +134,10 @@ class Node(ABC):
         for key, value in config.items():
             if isinstance(value, dict) and "type" in value and value["type"] in [item.value for item in InputType]:
                 config_value = value.get("value", None)
+                # If config_value is `{{key}}`, reset it to None, as this is the editor default for dynamic inputs
+                if config_value == f"{{{{{key}}}}}":
+                    config_value = None
+
                 result[key] = InputConfig(
                     type=InputType(value["type"]),
                     value=config_value,
