@@ -10,7 +10,7 @@ from flyde.io import Input, InputConfig, InputMode, InputType, Output, Requiredn
 from flyde.node import Component
 
 
-def list_nodes():
+def list_nodes() -> list[str]:
     """Dynamically discover all Component classes defined in this module.
 
     Returns:
@@ -18,6 +18,8 @@ def list_nodes():
     """
     current_module = inspect.getmodule(inspect.currentframe())
     component_classes = []
+    if current_module is None:
+        return component_classes
 
     for name, obj in inspect.getmembers(current_module):
         if (
@@ -113,7 +115,8 @@ class Conditional(Component):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self._config = _ConditionalConfig(self._config)
+        # Hack to parse a static config into conditional config
+        self._config = _ConditionalConfig(self._config)  # type: ignore
         if hasattr(self._config, "left_operand") and self._config.left_operand.type != InputType.DYNAMIC:
             self.inputs["leftOperand"]._input_mode = InputMode.STATIC
             self.inputs["leftOperand"].value = self._config.left_operand.value
