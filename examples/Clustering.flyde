@@ -2,8 +2,8 @@ imports: {}
 node:
   instances:
     - pos:
-        x: -688.3592700195312
-        y: 60.69355010986328
+        x: -621.6927661132812
+        y: 60.473060607910156
       id: LoadDataset-1a039uk
       inputConfig: {}
       nodeId: LoadDataset
@@ -16,8 +16,8 @@ node:
         type: custom
         data: custom://mylib/dataframe.py/LoadDataset
     - pos:
-        x: -939.2435131835937
-        y: 61.415870666503906
+        x: -878.3972607421874
+        y: 58.98426055908203
       id: mc4t4fqqezd1gns4fb7ckxmc
       inputConfig: {}
       nodeId: InlineValue
@@ -36,8 +36,8 @@ node:
         type: package
         data: "@flyde/nodes"
     - pos:
-        x: -436.9881726074219
-        y: 60.95093536376953
+        x: -361.93745239257817
+        y: 61.669410705566406
       id: Scale-dz139az
       inputConfig: {}
       nodeId: Scale
@@ -50,8 +50,8 @@ node:
         type: custom
         data: custom://mylib/dataframe.py/Scale
     - pos:
-        x: -24.11493484497072
-        y: 62.353389739990234
+        x: -25.86572830200197
+        y: 43.094966888427734
       id: KMeansNClusters-5m2390u
       inputConfig: {}
       nodeId: KMeansNClusters
@@ -84,8 +84,8 @@ node:
         type: custom
         data: custom://mylib/kmeans.py/KMeansCluster
     - pos:
-        x: -431.2221974563599
-        y: -46.37674593925476
+        x: -364.1277150344849
+        y: -49.644354581832886
       id: yquy5xqil6xp9tmb42ktmosp
       inputConfig: {}
       nodeId: InlineValue

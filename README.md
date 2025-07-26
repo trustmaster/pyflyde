@@ -5,7 +5,7 @@
 
 Python runtime for [Flyde](https://github.com/flydelabs/flyde) with Data Engineering emphasis.
 
-![Example graph running K-means clustering with Pandas and Scikit-learn](https://github.com/trustmaster/pyflyde/blob/main/clustering_example.png?raw=true)
+![Example graph running K-means clustering with Pandas and Scikit-learn](https://github.com/trustmaster/pyflyde/blob/main/clustering_example.webp?raw=true)
 
 Links:
 
