@@ -356,6 +356,237 @@
       },
       "config": {}
     },
+    "TestStdlib": {
+      "id": "TestStdlib",
+      "type": "visual",
+      "displayName": "Test Stdlib",
+      "description": "",
+      "icon": "fa-diagram-project",
+      "source": {
+        "type": "file",
+        "data": "TestStdlib.flyde"
+      },
+      "editorNode": {
+        "id": "TestStdlib",
+        "displayName": "Test Stdlib",
+        "description": "",
+        "inputs": {},
+        "outputs": {
+          "response": {
+            "description": "response output"
+          }
+        },
+        "editorConfig": {
+          "type": "structured"
+        }
+      },
+      "config": {}
+    },
+    "Repeat3Times": {
+      "id": "Repeat3Times",
+      "type": "visual",
+      "displayName": "Repeat3Times",
+      "description": "For each input string, sends a string with the same content repeated 3 times",
+      "icon": "fa-diagram-project",
+      "source": {
+        "type": "file",
+        "data": "Repeat3Times.flyde"
+      },
+      "editorNode": {
+        "id": "Repeat3Times",
+        "displayName": "Repeat3Times",
+        "description": "For each input string, sends a string with the same content repeated 3 times",
+        "inputs": {
+          "word": {
+            "description": "word input (required)"
+          }
+        },
+        "outputs": {
+          "word3x": {
+            "description": "word3x output"
+          }
+        },
+        "editorConfig": {
+          "type": "structured"
+        }
+      },
+      "config": {}
+    },
+    "TestNestedFlow": {
+      "id": "TestNestedFlow",
+      "type": "visual",
+      "displayName": "Test Nested Flow",
+      "description": "Repeats input 3xN times",
+      "icon": "fa-diagram-project",
+      "source": {
+        "type": "file",
+        "data": "TestNestedFlow.flyde"
+      },
+      "editorNode": {
+        "id": "TestNestedFlow",
+        "displayName": "Test Nested Flow",
+        "description": "Repeats input 3xN times",
+        "inputs": {
+          "inp": {
+            "description": "inp input (required)"
+          },
+          "n": {
+            "description": "n input (required)"
+          }
+        },
+        "outputs": {
+          "out": {
+            "description": "out output"
+          }
+        },
+        "editorConfig": {
+          "type": "structured"
+        }
+      },
+      "config": {}
+    },
+    "TestFanInGraph": {
+      "id": "TestFanInGraph",
+      "type": "visual",
+      "displayName": "Test Fan In Graph",
+      "description": "",
+      "icon": "fa-diagram-project",
+      "source": {
+        "type": "file",
+        "data": "TestFanInGraph.flyde"
+      },
+      "editorNode": {
+        "id": "TestFanInGraph",
+        "displayName": "Test Fan In Graph",
+        "description": "",
+        "inputs": {
+          "str": {
+            "description": "str input (required)"
+          }
+        },
+        "outputs": {
+          "out": {
+            "description": "out output"
+          }
+        },
+        "editorConfig": {
+          "type": "structured"
+        }
+      },
+      "config": {}
+    },
+    "TestFanIn": {
+      "id": "TestFanIn",
+      "type": "visual",
+      "displayName": "Test Fan In",
+      "description": "",
+      "icon": "fa-diagram-project",
+      "source": {
+        "type": "file",
+        "data": "TestFanIn.flyde"
+      },
+      "editorNode": {
+        "id": "TestFanIn",
+        "displayName": "Test Fan In",
+        "description": "",
+        "inputs": {
+          "str": {
+            "description": "str input (required)"
+          }
+        },
+        "outputs": {
+          "out": {
+            "description": "out output"
+          }
+        },
+        "editorConfig": {
+          "type": "structured"
+        }
+      },
+      "config": {}
+    },
+    "TestIsolatedFlow": {
+      "id": "TestIsolatedFlow",
+      "type": "visual",
+      "displayName": "Test Isolated Flow",
+      "description": "",
+      "icon": "fa-diagram-project",
+      "source": {
+        "type": "file",
+        "data": "TestIsolatedFlow.flyde"
+      },
+      "editorNode": {
+        "id": "TestIsolatedFlow",
+        "displayName": "Test Isolated Flow",
+        "description": "",
+        "inputs": {},
+        "outputs": {},
+        "editorConfig": {
+          "type": "structured"
+        }
+      },
+      "config": {}
+    },
+    "TestCustomLoad": {
+      "id": "TestCustomLoad",
+      "type": "visual",
+      "displayName": "Test Custom Load",
+      "description": "Test flow that loads custom components using custom:// source format",
+      "icon": "fa-diagram-project",
+      "source": {
+        "type": "file",
+        "data": "TestCustomLoad.flyde"
+      },
+      "editorNode": {
+        "id": "TestCustomLoad",
+        "displayName": "Test Custom Load",
+        "description": "Test flow that loads custom components using custom:// source format",
+        "inputs": {
+          "input": {
+            "description": "input input (required)"
+          }
+        },
+        "outputs": {
+          "output": {
+            "description": "output output"
+          }
+        },
+        "editorConfig": {
+          "type": "structured"
+        }
+      },
+      "config": {}
+    },
+    "TestInOutFlow": {
+      "id": "TestInOutFlow",
+      "type": "visual",
+      "displayName": "Test In Out Flow",
+      "description": "",
+      "icon": "fa-diagram-project",
+      "source": {
+        "type": "file",
+        "data": "TestInOutFlow.flyde"
+      },
+      "editorNode": {
+        "id": "TestInOutFlow",
+        "displayName": "Test In Out Flow",
+        "description": "",
+        "inputs": {
+          "inMsg": {
+            "description": "inMsg input (required)"
+          }
+        },
+        "outputs": {
+          "outMsg": {
+            "description": "outMsg output"
+          }
+        },
+        "editorConfig": {
+          "type": "structured"
+        }
+      },
+      "config": {}
+    },
     "Conditional": "@flyde/nodes",
     "GetAttribute": "@flyde/nodes",
     "Http": "@flyde/nodes"
@@ -376,7 +607,15 @@
         "InvalidSendProcess",
         "NoProcessComponent",
         "SinkComponent",
-        "SourceComponent"
+        "SourceComponent",
+        "TestStdlib",
+        "Repeat3Times",
+        "TestNestedFlow",
+        "TestFanInGraph",
+        "TestFanIn",
+        "TestIsolatedFlow",
+        "TestCustomLoad",
+        "TestInOutFlow"
       ]
     },
     {

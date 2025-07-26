@@ -102,7 +102,7 @@ node:
       to:
         insId: __this
         pinId: out
-  id: Example
+  id: TestFanInGraph
   inputs:
     str:
       mode: required

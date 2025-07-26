@@ -10,6 +10,8 @@ import pprint
 import re
 import sys
 
+import yaml
+
 from flyde.flow import Flow, add_folder_to_path
 from flyde.node import SUPPORTED_MACROS, Component
 
@@ -74,12 +76,97 @@ def collect_components_from_directory(directory_path: str) -> dict:
                         and issubclass(obj, Component)
                         and obj.__module__ == module_path
                     ):
-                        components[name] = {"class": obj, "file_path": relative_path}
+                        components[name] = {"class": obj, "file_path": relative_path, "type": "python"}
 
         except Exception as e:
             logger.warning(f"Failed to import module from {py_file}: {e}")
 
     return components
+
+
+def collect_flyde_nodes_from_directory(directory_path: str) -> dict:
+    """Collect all .flyde files from a directory and its subdirectories."""
+    flyde_nodes = {}
+
+    # Find all .flyde files in the directory and subdirectories recursively
+    flyde_files = glob.glob(os.path.join(directory_path, "**", "*.flyde"), recursive=True)
+
+    for flyde_file in flyde_files:
+        try:
+            # Get relative path from the directory
+            relative_path = os.path.relpath(flyde_file, directory_path)
+
+            # Load the YAML content
+            with open(flyde_file, "r") as f:
+                flyde_data = yaml.safe_load(f)
+
+            # Extract node information
+            node_data = flyde_data.get("node", {})
+            node_id = os.path.splitext(os.path.basename(flyde_file))[0]
+            description = node_data.get("description", flyde_data.get("description", ""))
+
+            # Extract inputs and outputs
+            inputs = node_data.get("inputs", {})
+            outputs = node_data.get("outputs", {})
+
+            flyde_nodes[node_id] = {
+                "file_path": relative_path,
+                "description": description,
+                "inputs": inputs,
+                "outputs": outputs,
+                "type": "flyde",
+            }
+
+        except Exception as e:
+            logger.warning(f"Failed to parse .flyde file {flyde_file}: {e}")
+
+    return flyde_nodes
+
+
+def generate_flyde_node_json(node_name: str, flyde_info: dict) -> dict:
+    """Generate JSON structure for a .flyde file node."""
+    file_path = flyde_info["file_path"]
+    description = flyde_info["description"]
+    inputs = flyde_info["inputs"]
+    outputs = flyde_info["outputs"]
+
+    display_name = convert_class_name_to_display_name(node_name)
+
+    # Build inputs structure
+    editor_inputs = {}
+    for input_name, input_data in inputs.items():
+        mode = input_data.get("mode", "required")
+        input_description = f"{input_name} input"
+        if mode == "required":
+            input_description += " (required)"
+        editor_inputs[input_name] = {"description": input_description}
+
+    # Build outputs structure
+    editor_outputs = {}
+    for output_name, output_data in outputs.items():
+        output_description = f"{output_name} output"
+        editor_outputs[output_name] = {"description": output_description}
+
+    # Build the node structure
+    node_data = {
+        "id": node_name,
+        "type": "visual",
+        "displayName": display_name,
+        "description": description,
+        "icon": "fa-diagram-project",
+        "source": {"type": "file", "data": file_path},
+        "editorNode": {
+            "id": node_name,
+            "displayName": display_name,
+            "description": description,
+            "inputs": editor_inputs,
+            "outputs": editor_outputs,
+            "editorConfig": {"type": "structured"},
+        },
+        "config": {},
+    }
+
+    return node_data
 
 
 def generate_node_json(node_name: str, component_class, file_path: str = "") -> dict[str, object] | str:
@@ -135,13 +222,16 @@ def gen_json(directory_path: str):
     # Collect all components
     components = collect_components_from_directory(directory_path)
 
+    # Collect all .flyde nodes
+    flyde_nodes = collect_flyde_nodes_from_directory(directory_path)
+
     # Always include stdlib nodes from flyde/nodes.py
     stdlib_dir = os.path.join(os.path.dirname(__file__), "nodes.py")
     stdlib_components = collect_components_from_directory(os.path.dirname(stdlib_dir))
     stdlib_node_names = [name for name in stdlib_components if is_stdlib_node(name)]
 
-    if not components and not stdlib_node_names:
-        print(f"No Component subclasses found in directory {directory_path} or stdlib")
+    if not components and not flyde_nodes and not stdlib_node_names:
+        print(f"No Component subclasses or .flyde files found in directory {directory_path} or stdlib")
         return
 
     # Build nodes structure
@@ -154,6 +244,11 @@ def gen_json(directory_path: str):
         component_class = component_info["class"]
         file_path = component_info["file_path"]
         nodes[node_name] = generate_node_json(node_name, component_class, file_path)
+        custom_nodes.append(node_name)
+
+    # Add .flyde nodes
+    for node_name, flyde_info in flyde_nodes.items():
+        nodes[node_name] = generate_flyde_node_json(node_name, flyde_info)
         custom_nodes.append(node_name)
 
     # Add stdlib nodes (from flyde/nodes.py) as custom nodes, but group as stdlib overrides

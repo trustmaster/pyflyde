@@ -36,7 +36,7 @@ node:
       to:
         insId: __this
         pinId: response
-  id: Example
+  id: TestStdlib
   inputs: {}
   outputs:
     response:

@@ -247,6 +247,50 @@
       },
       "config": {}
     },
+    "Clustering": {
+      "id": "Clustering",
+      "type": "visual",
+      "displayName": "Clustering",
+      "description": "",
+      "icon": "fa-diagram-project",
+      "source": {
+        "type": "file",
+        "data": "Clustering.flyde"
+      },
+      "editorNode": {
+        "id": "Clustering",
+        "displayName": "Clustering",
+        "description": "",
+        "inputs": {},
+        "outputs": {},
+        "editorConfig": {
+          "type": "structured"
+        }
+      },
+      "config": {}
+    },
+    "HelloPy": {
+      "id": "HelloPy",
+      "type": "visual",
+      "displayName": "Hello Py",
+      "description": "",
+      "icon": "fa-diagram-project",
+      "source": {
+        "type": "file",
+        "data": "HelloPy.flyde"
+      },
+      "editorNode": {
+        "id": "HelloPy",
+        "displayName": "Hello Py",
+        "description": "",
+        "inputs": {},
+        "outputs": {},
+        "editorConfig": {
+          "type": "structured"
+        }
+      },
+      "config": {}
+    },
     "Conditional": "@flyde/nodes",
     "GetAttribute": "@flyde/nodes",
     "Http": "@flyde/nodes",
@@ -263,7 +307,9 @@
         "PCA2",
         "Visualize",
         "Concat",
-        "Print"
+        "Print",
+        "Clustering",
+        "HelloPy"
       ]
     },
     {

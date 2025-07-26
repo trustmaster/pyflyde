@@ -36,7 +36,7 @@ node:
       to:
         insId: Echo-x8049tw
         pinId: inp
-  id: Example
+  id: TestIsolatedFlow
   inputs: {}
   outputs: {}
   inputsPosition: {}

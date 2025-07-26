@@ -108,7 +108,7 @@ node:
       to:
         insId: Format-ve0397r
         pinId: format
-  id: Example
+  id: TestInOutFlow
   inputs:
     inMsg:
       mode: required
