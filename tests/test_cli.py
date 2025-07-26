@@ -94,6 +94,7 @@ class TestGenerateNodeJson(unittest.TestCase):
     def test_generate_custom_node_json(self):
         result = generate_node_json("CustomBob", CustomBob, "test_components.py")
 
+        assert isinstance(result, dict)
         expected = {
             "id": "CustomBob",
             "type": "code",
@@ -129,6 +130,7 @@ class TestGenerateNodeJson(unittest.TestCase):
 
         result = generate_node_json("NodeWithoutDoc", NodeWithoutDoc, "test.py")
 
+        assert isinstance(result, dict)
         self.assertEqual(result["description"], "")
         self.assertEqual(result["editorNode"]["description"], "")
 
@@ -138,6 +140,7 @@ class TestGenerateNodeJson(unittest.TestCase):
 
         result = generate_node_json("EmptyNode", EmptyNode, "test.py")
 
+        assert isinstance(result, dict)
         self.assertEqual(result["editorNode"]["inputs"], {})
         self.assertEqual(result["editorNode"]["outputs"], {})
 

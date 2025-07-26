@@ -36,6 +36,9 @@ pyflyde = "flyde.cli:main"
 # package-dir = { "" = "flyde" }
 packages = ["flyde"]
 
+[tool.setuptools.package-data]
+flyde = ["py.typed"]
+
 [project.optional-dependencies]
 dev = [
     "setuptools",

@@ -9,7 +9,7 @@ import os
 import pprint
 import re
 import sys
-from typing import Union
+from typing import Any, TypedDict, Union
 
 import yaml
 
@@ -19,6 +19,26 @@ from flyde.node import SUPPORTED_MACROS, Component
 log_level = getattr(logging, os.getenv("LOG_LEVEL", "INFO").upper(), logging.INFO)
 logging.basicConfig(level=log_level)
 logger = logging.getLogger(__name__)
+
+
+class EditorNodeDict(TypedDict):
+    id: str
+    displayName: str
+    description: str
+    inputs: dict[str, dict[str, str]]
+    outputs: dict[str, dict[str, str]]
+    editorConfig: dict[str, str]
+
+
+class NodeDict(TypedDict):
+    id: str
+    type: str
+    displayName: str
+    description: str
+    icon: str
+    source: dict[str, str]
+    editorNode: EditorNodeDict
+    config: dict[str, Any]
 
 
 def py_path_to_module(py_path: str) -> str:
@@ -170,7 +190,7 @@ def generate_flyde_node_json(node_name: str, flyde_info: dict) -> dict:
     return node_data
 
 
-def generate_node_json(node_name: str, component_class, file_path: str = "") -> Union[dict, str]:
+def generate_node_json(node_name: str, component_class, file_path: str = "") -> Union[dict[str, Any], str]:
     """Generate JSON structure for a single component."""
     # Get node metadata
     description = (component_class.__doc__ or "").strip()

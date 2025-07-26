@@ -19,11 +19,6 @@ lint:
 	@black $(LIB_DIR) $(TEST_DIR);
 	@flake8 $(LIB_DIR) $(TEST_DIR);
 
-stubgen:
-	@echo "Generating type stubs..."
-	@rm -f $(SRC_DIR)/*.pyi;
-	@stubgen $(SRC_DIR) --include-docstrings --include-private -o .;
-
 test:
 	@echo "Running tests..."
 	@$(PYTHON) -m unittest discover -s $(TEST_DIR) -p "test_$(if $(mod),$(mod),*).py";
@@ -44,7 +39,7 @@ builddist:
 	@rm -f ./dist/*
 	@$(PYTHON) -m build;
 
-release: lint test stubgen gen builddist
+release: lint test gen builddist
 	@echo "Releasing the project...";
 
 upload:
