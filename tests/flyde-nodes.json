@@ -5,7 +5,7 @@
       "type": "code",
       "displayName": "Capitalize",
       "description": "A component that capitalizes the input.",
-      "icon": "fa-solid fa-user",
+      "icon": "fa-brands fa-python",
       "source": {
         "type": "custom",
         "data": "custom://components.py/Capitalize"
@@ -35,7 +35,7 @@
       "type": "code",
       "displayName": "Echo",
       "description": "A simple component that echoes the input.",
-      "icon": "fa-solid fa-user",
+      "icon": "fa-brands fa-python",
       "source": {
         "type": "custom",
         "data": "custom://components.py/Echo"
@@ -65,7 +65,7 @@
       "type": "code",
       "displayName": "Format",
       "description": "Formats the input value with a given format string and sends it to out.",
-      "icon": "fa-solid fa-user",
+      "icon": "fa-brands fa-python",
       "source": {
         "type": "custom",
         "data": "custom://components.py/Format"
@@ -98,7 +98,7 @@
       "type": "code",
       "displayName": "Repeat Word NTimes",
       "description": "A component that has both inputs and outputs and a sticky input.",
-      "icon": "fa-solid fa-user",
+      "icon": "fa-brands fa-python",
       "source": {
         "type": "custom",
         "data": "custom://components.py/RepeatWordNTimes"
@@ -131,7 +131,7 @@
       "type": "code",
       "displayName": "Custom Bob",
       "description": "A custom external node named Bob",
-      "icon": "fa-solid fa-user",
+      "icon": "fa-brands fa-python",
       "source": {
         "type": "custom",
         "data": "custom://test_cli.py/CustomBob"
@@ -156,38 +156,13 @@
       },
       "config": {}
     },
-    "InlineValue": {
-      "id": "InlineValue",
-      "type": "code",
-      "displayName": "Inline Value",
-      "description": "This overrides the standard InlineValue node",
-      "icon": "fa-solid fa-user",
-      "source": {
-        "type": "package",
-        "data": "@flyde/nodes"
-      },
-      "editorNode": {
-        "id": "InlineValue",
-        "displayName": "Inline Value",
-        "description": "This overrides the standard InlineValue node",
-        "inputs": {},
-        "outputs": {
-          "value": {
-            "description": "The overridden value"
-          }
-        },
-        "editorConfig": {
-          "type": "structured"
-        }
-      },
-      "config": {}
-    },
+    "InlineValue": "@flyde/nodes",
     "TestCustomComponent": {
       "id": "TestCustomComponent",
       "type": "code",
       "displayName": "Test Custom Component",
       "description": "A test component for unit testing.",
-      "icon": "fa-solid fa-user",
+      "icon": "fa-brands fa-python",
       "source": {
         "type": "custom",
         "data": "custom://test_cli.py/TestCustomComponent"
@@ -220,7 +195,7 @@
       "type": "code",
       "displayName": "All Sticky Inputs Component",
       "description": "A component with only sticky inputs to test single execution.",
-      "icon": "fa-solid fa-user",
+      "icon": "fa-brands fa-python",
       "source": {
         "type": "custom",
         "data": "custom://test_node.py/AllStickyInputsComponent"
@@ -253,7 +228,7 @@
       "type": "code",
       "displayName": "Custom Run Component",
       "description": "A component that has a custom run and shutdown handlers.",
-      "icon": "fa-solid fa-user",
+      "icon": "fa-brands fa-python",
       "source": {
         "type": "custom",
         "data": "custom://test_node.py/CustomRunComponent"
@@ -283,7 +258,7 @@
       "type": "code",
       "displayName": "Invalid Send Process",
       "description": "A component that tries to send a message without a corresponding output.",
-      "icon": "fa-solid fa-user",
+      "icon": "fa-brands fa-python",
       "source": {
         "type": "custom",
         "data": "custom://test_node.py/InvalidSendProcess"
@@ -309,7 +284,7 @@
       "type": "code",
       "displayName": "No Process Component",
       "description": "A component to test no inputs, outputs, and no process method.",
-      "icon": "fa-solid fa-user",
+      "icon": "fa-brands fa-python",
       "source": {
         "type": "custom",
         "data": "custom://test_node.py/NoProcessComponent"
@@ -331,7 +306,7 @@
       "type": "code",
       "displayName": "Sink Component",
       "description": "A component that only has inputs.",
-      "icon": "fa-solid fa-user",
+      "icon": "fa-brands fa-python",
       "source": {
         "type": "custom",
         "data": "custom://test_node.py/SinkComponent"
@@ -360,7 +335,7 @@
       "type": "code",
       "displayName": "Source Component",
       "description": "A component that only has outputs.",
-      "icon": "fa-solid fa-user",
+      "icon": "fa-brands fa-python",
       "source": {
         "type": "custom",
         "data": "custom://test_node.py/SourceComponent"
@@ -381,121 +356,13 @@
       },
       "config": {}
     },
-    "Conditional": {
-      "id": "Conditional",
-      "type": "code",
-      "displayName": "Conditional",
-      "description": "Conditional component evaluates a condition against the input and sends the result to output.",
-      "icon": "circle-question",
-      "source": {
-        "type": "package",
-        "data": "@flyde/nodes"
-      },
-      "editorNode": {
-        "id": "Conditional",
-        "displayName": "Conditional",
-        "description": "Conditional component evaluates a condition against the input and sends the result to output.",
-        "inputs": {
-          "leftOperand": {
-            "description": "Left operand of the condition"
-          },
-          "rightOperand": {
-            "description": "Right operand of the condition"
-          }
-        },
-        "outputs": {
-          "true": {
-            "description": "Output when the condition is true"
-          },
-          "false": {
-            "description": "Output when the condition is false"
-          }
-        },
-        "editorConfig": {
-          "type": "structured"
-        }
-      },
-      "config": {}
-    },
-    "GetAttribute": {
-      "id": "GetAttribute",
-      "type": "code",
-      "displayName": "Get Attribute",
-      "description": "Get an attribute from an object or dictionary.",
-      "icon": "fa-magnifying-glass",
-      "source": {
-        "type": "package",
-        "data": "@flyde/nodes"
-      },
-      "editorNode": {
-        "id": "GetAttribute",
-        "displayName": "Get Attribute",
-        "description": "Get an attribute from an object or dictionary.",
-        "inputs": {
-          "object": {
-            "description": "The object or dictionary"
-          },
-          "key": {
-            "description": "The attribute name"
-          }
-        },
-        "outputs": {
-          "value": {
-            "description": "The attribute value"
-          }
-        },
-        "editorConfig": {
-          "type": "structured"
-        }
-      },
-      "config": {}
-    },
-    "Http": {
-      "id": "Http",
-      "type": "code",
-      "displayName": "Http",
-      "description": "Http component makes HTTP requests with urllib.",
-      "icon": "globe",
-      "source": {
-        "type": "package",
-        "data": "@flyde/nodes"
-      },
-      "editorNode": {
-        "id": "Http",
-        "displayName": "Http",
-        "description": "Http component makes HTTP requests with urllib.",
-        "inputs": {
-          "url": {
-            "description": "URL to request"
-          },
-          "method": {
-            "description": "HTTP method"
-          },
-          "headers": {
-            "description": "HTTP headers"
-          },
-          "params": {
-            "description": "URL parameters"
-          },
-          "data": {
-            "description": "Request body"
-          }
-        },
-        "outputs": {
-          "data": {
-            "description": "Response data"
-          }
-        },
-        "editorConfig": {
-          "type": "structured"
-        }
-      },
-      "config": {}
-    }
+    "Conditional": "@flyde/nodes",
+    "GetAttribute": "@flyde/nodes",
+    "Http": "@flyde/nodes"
   },
   "groups": [
     {
-      "title": "Custom Runtime Nodes",
+      "title": "Your PyFlyde Nodes",
       "nodeIds": [
         "Capitalize",
         "Echo",
@@ -513,7 +380,7 @@
       ]
     },
     {
-      "title": "Overridden Stdlib",
+      "title": "PyFlyde Standard Nodes",
       "nodeIds": [
         "Conditional",
         "GetAttribute",

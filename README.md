@@ -61,13 +61,13 @@ Install Flyde VSCode extension from the [marketplace](https://marketplace.visual
 
 You can browse the component library in the panel on the right. To see your local components click the "View all" button. They will appear under the "Current project". Note that PyFlyde doesn't implement all of the Flyde's stdlib components, only a few essential ones.
 
-Whenever you change your component library classes or their interfaces, use `pyflyde gen` command to generate `.flyde-nodes.json` definitions, e.g.:
+Whenever you change your component library classes or their interfaces, use `pyflyde gen` command to generate `flyde-nodes.json` definitions, e.g.:
 
 ```bash
 pyflyde gen examples/
 ```
 
-This will recursively scan all Python files in the directory and its subdirectories to find PyFlyde components and generate a `.flyde-nodes.json` file with relative paths. Flyde editor needs `.flyde-nodes.json` files in order to "see" your components.
+This will recursively scan all Python files in the directory and its subdirectories to find PyFlyde components and generate a `flyde-nodes.json` file with relative paths. Flyde editor needs `flyde-nodes.json` files in order to "see" your components.
 
 ### Running a Machine Learning example and creating your first project
 

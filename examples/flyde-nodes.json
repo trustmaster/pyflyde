@@ -5,7 +5,7 @@
       "type": "code",
       "displayName": "Load Dataset",
       "description": "Loads a dataset from a file into a DataFrame.",
-      "icon": "fa-solid fa-user",
+      "icon": "fa-brands fa-python",
       "source": {
         "type": "custom",
         "data": "custom://mylib/dataframe.py/LoadDataset"
@@ -35,7 +35,7 @@
       "type": "code",
       "displayName": "Scale",
       "description": "Scales the features of a dataframe with a scikit-learn StandardScaler.",
-      "icon": "fa-solid fa-user",
+      "icon": "fa-brands fa-python",
       "source": {
         "type": "custom",
         "data": "custom://mylib/dataframe.py/Scale"
@@ -65,7 +65,7 @@
       "type": "code",
       "displayName": "KMeans Cluster",
       "description": "Clusters the dataframe using K-means clustering.",
-      "icon": "fa-solid fa-user",
+      "icon": "fa-brands fa-python",
       "source": {
         "type": "custom",
         "data": "custom://mylib/kmeans.py/KMeansCluster"
@@ -98,7 +98,7 @@
       "type": "code",
       "displayName": "KMeans NClusters",
       "description": "Finds the optimal number of clusters for K-means clustering using silhouette method.",
-      "icon": "fa-solid fa-user",
+      "icon": "fa-brands fa-python",
       "source": {
         "type": "custom",
         "data": "custom://mylib/kmeans.py/KMeansNClusters"
@@ -131,7 +131,7 @@
       "type": "code",
       "displayName": "PCA2",
       "description": "Performs PCA on a dataframe and returns the first two principal components.",
-      "icon": "fa-solid fa-user",
+      "icon": "fa-brands fa-python",
       "source": {
         "type": "custom",
         "data": "custom://mylib/kmeans.py/PCA2"
@@ -161,7 +161,7 @@
       "type": "code",
       "displayName": "Visualize",
       "description": "Visualizes the clustered dataframe.",
-      "icon": "fa-solid fa-user",
+      "icon": "fa-brands fa-python",
       "source": {
         "type": "custom",
         "data": "custom://mylib/kmeans.py/Visualize"
@@ -193,7 +193,7 @@
       "type": "code",
       "displayName": "Concat",
       "description": "Concatenates two strings.",
-      "icon": "fa-solid fa-user",
+      "icon": "fa-brands fa-python",
       "source": {
         "type": "custom",
         "data": "custom://mylib/components.py/Concat"
@@ -226,7 +226,7 @@
       "type": "code",
       "displayName": "Print",
       "description": "Prints the input message to the console.",
-      "icon": "fa-solid fa-user",
+      "icon": "fa-brands fa-python",
       "source": {
         "type": "custom",
         "data": "custom://mylib/components.py/Print"
@@ -247,147 +247,14 @@
       },
       "config": {}
     },
-    "Conditional": {
-      "id": "Conditional",
-      "type": "code",
-      "displayName": "Conditional",
-      "description": "Conditional component evaluates a condition against the input and sends the result to output.",
-      "icon": "circle-question",
-      "source": {
-        "type": "package",
-        "data": "@flyde/nodes"
-      },
-      "editorNode": {
-        "id": "Conditional",
-        "displayName": "Conditional",
-        "description": "Conditional component evaluates a condition against the input and sends the result to output.",
-        "inputs": {
-          "leftOperand": {
-            "description": "Left operand of the condition"
-          },
-          "rightOperand": {
-            "description": "Right operand of the condition"
-          }
-        },
-        "outputs": {
-          "true": {
-            "description": "Output when the condition is true"
-          },
-          "false": {
-            "description": "Output when the condition is false"
-          }
-        },
-        "editorConfig": {
-          "type": "structured"
-        }
-      },
-      "config": {}
-    },
-    "GetAttribute": {
-      "id": "GetAttribute",
-      "type": "code",
-      "displayName": "Get Attribute",
-      "description": "Get an attribute from an object or dictionary.",
-      "icon": "fa-magnifying-glass",
-      "source": {
-        "type": "package",
-        "data": "@flyde/nodes"
-      },
-      "editorNode": {
-        "id": "GetAttribute",
-        "displayName": "Get Attribute",
-        "description": "Get an attribute from an object or dictionary.",
-        "inputs": {
-          "object": {
-            "description": "The object or dictionary"
-          },
-          "key": {
-            "description": "The attribute name"
-          }
-        },
-        "outputs": {
-          "value": {
-            "description": "The attribute value"
-          }
-        },
-        "editorConfig": {
-          "type": "structured"
-        }
-      },
-      "config": {}
-    },
-    "Http": {
-      "id": "Http",
-      "type": "code",
-      "displayName": "Http",
-      "description": "Http component makes HTTP requests with urllib.",
-      "icon": "globe",
-      "source": {
-        "type": "package",
-        "data": "@flyde/nodes"
-      },
-      "editorNode": {
-        "id": "Http",
-        "displayName": "Http",
-        "description": "Http component makes HTTP requests with urllib.",
-        "inputs": {
-          "url": {
-            "description": "URL to request"
-          },
-          "method": {
-            "description": "HTTP method"
-          },
-          "headers": {
-            "description": "HTTP headers"
-          },
-          "params": {
-            "description": "URL parameters"
-          },
-          "data": {
-            "description": "Request body"
-          }
-        },
-        "outputs": {
-          "data": {
-            "description": "Response data"
-          }
-        },
-        "editorConfig": {
-          "type": "structured"
-        }
-      },
-      "config": {}
-    },
-    "InlineValue": {
-      "id": "InlineValue",
-      "type": "code",
-      "displayName": "Inline Value",
-      "description": "InlineValue sends a constant value to output.",
-      "icon": "pencil",
-      "source": {
-        "type": "package",
-        "data": "@flyde/nodes"
-      },
-      "editorNode": {
-        "id": "InlineValue",
-        "displayName": "Inline Value",
-        "description": "InlineValue sends a constant value to output.",
-        "inputs": {},
-        "outputs": {
-          "value": {
-            "description": "The constant value"
-          }
-        },
-        "editorConfig": {
-          "type": "structured"
-        }
-      },
-      "config": {}
-    }
+    "Conditional": "@flyde/nodes",
+    "GetAttribute": "@flyde/nodes",
+    "Http": "@flyde/nodes",
+    "InlineValue": "@flyde/nodes"
   },
   "groups": [
     {
-      "title": "Custom Runtime Nodes",
+      "title": "Your PyFlyde Nodes",
       "nodeIds": [
         "LoadDataset",
         "Scale",
@@ -400,7 +267,7 @@
       ]
     },
     {
-      "title": "Overridden Stdlib",
+      "title": "PyFlyde Standard Nodes",
       "nodeIds": [
         "Conditional",
         "GetAttribute",

@@ -12,7 +12,7 @@ from flyde.cli import (
     is_stdlib_node,
 )
 from flyde.io import Input, Output
-from flyde.node import Component, SUPPORTED_MACROS
+from flyde.node import SUPPORTED_MACROS, Component
 
 
 class TestCLIHelpers(unittest.TestCase):
@@ -97,7 +97,7 @@ class TestGenerateNodeJson(unittest.TestCase):
             "type": "code",
             "displayName": "Custom Bob",
             "description": "A custom external node named Bob",
-            "icon": "fa-solid fa-user",
+            "icon": "fa-brands fa-python",
             "source": {
                 "type": "custom",
                 "data": "custom://test_components.py/CustomBob",
@@ -107,9 +107,7 @@ class TestGenerateNodeJson(unittest.TestCase):
                 "displayName": "Custom Bob",
                 "description": "A custom external node named Bob",
                 "inputs": {"value": {"description": "Input value to process"}},
-                "outputs": {
-                    "result": {"description": "Processed result from external runtime"}
-                },
+                "outputs": {"result": {"description": "Processed result from external runtime"}},
                 "editorConfig": {"type": "structured"},
             },
             "config": {},
@@ -119,23 +117,7 @@ class TestGenerateNodeJson(unittest.TestCase):
 
     def test_generate_stdlib_node_json(self):
         result = generate_node_json("InlineValue", InlineValue, "test_components.py")
-        expected = {
-            "id": "InlineValue",
-            "type": "code",
-            "displayName": "Inline Value",
-            "description": "This overrides the standard InlineValue node",
-            "icon": "fa-solid fa-user",
-            "source": {"type": "package", "data": "@flyde/nodes"},
-            "editorNode": {
-                "id": "InlineValue",
-                "displayName": "Inline Value",
-                "description": "This overrides the standard InlineValue node",
-                "inputs": {},
-                "outputs": {"value": {"description": "The overridden value"}},
-                "editorConfig": {"type": "structured"},
-            },
-            "config": {},
-        }
+        expected = "@flyde/nodes"
         self.assertEqual(result, expected)
 
     def test_generate_node_with_no_docstring(self):
@@ -275,7 +257,7 @@ class CustomAlice(Component):
         gen_json(self.temp_dir)
 
         # Check that the file was created
-        output_file = os.path.join(self.temp_dir, ".flyde-nodes.json")
+        output_file = os.path.join(self.temp_dir, "flyde-nodes.json")
         self.assertTrue(os.path.exists(output_file))
 
         # Load and verify the JSON content
@@ -309,9 +291,13 @@ class CustomAlice(Component):
         self.assertEqual(len(groups), 2)
 
         # Find groups by title
-        custom_group = next(g for g in groups if g["title"] == "Custom Runtime Nodes")
-        stdlib_group = next(g for g in groups if g["title"] == "Overridden Stdlib")
+        custom_group = next((g for g in groups if g["title"] == "Your PyFlyde Nodes"), None)
+        stdlib_group = next((g for g in groups if g["title"] == "PyFlyde Standard Nodes"), None)
 
+        self.assertIsNotNone(custom_group)
+        self.assertIsNotNone(stdlib_group)
+        if custom_group is None or stdlib_group is None:
+            return
         self.assertCountEqual(custom_group["nodeIds"], ["CustomBob", "CustomAlice"])
         self.assertCountEqual(stdlib_group["nodeIds"], list(SUPPORTED_MACROS))
 
@@ -333,7 +319,7 @@ class NotAComponent:
         gen_json(self.temp_dir)
 
         # Should create the JSON file with only stdlib nodes if any exist
-        output_file = os.path.join(self.temp_dir, ".flyde-nodes.json")
+        output_file = os.path.join(self.temp_dir, "flyde-nodes.json")
         self.assertTrue(os.path.exists(output_file))
 
         with open(output_file, "r") as f:
@@ -341,10 +327,10 @@ class NotAComponent:
         self.assertIn("nodes", data)
         self.assertIn("groups", data)
         # At least one stdlib node should be present if stdlib is available
-        stdlib_group = next(
-            (g for g in data["groups"] if g["title"] == "Overridden Stdlib"), None
-        )
+        stdlib_group = next((g for g in data["groups"] if g["title"] == "PyFlyde Standard Nodes"), None)
         self.assertIsNotNone(stdlib_group)
+        if stdlib_group is None:
+            return
         self.assertGreater(len(stdlib_group["nodeIds"]), 0)
 
     def test_gen_json_only_custom_nodes(self):
@@ -368,16 +354,16 @@ class CustomNode2(Component):
 
         gen_json(self.temp_dir)
 
-        output_file = os.path.join(self.temp_dir, ".flyde-nodes.json")
+        output_file = os.path.join(self.temp_dir, "flyde-nodes.json")
         with open(output_file, "r") as f:
             data = json.load(f)
 
         # Should have at least the custom nodes group
         groups = data["groups"]
-        custom_group = next(
-            (g for g in groups if g["title"] == "Custom Runtime Nodes"), None
-        )
+        custom_group = next((g for g in groups if g["title"] == "Your PyFlyde Nodes"), None)
         self.assertIsNotNone(custom_group)
+        if custom_group is None:
+            return
         self.assertCountEqual(custom_group["nodeIds"], ["CustomNode1", "CustomNode2"])
 
     def test_gen_json_only_stdlib_nodes(self):
@@ -401,14 +387,14 @@ class Conditional(Component):
 
         gen_json(self.temp_dir)
 
-        output_file = os.path.join(self.temp_dir, ".flyde-nodes.json")
+        output_file = os.path.join(self.temp_dir, "flyde-nodes.json")
         with open(output_file, "r") as f:
             data = json.load(f)
 
         # Should have stdlib group
         groups = data["groups"]
-        stdlib_group = next(
-            (g for g in groups if g["title"] == "Overridden Stdlib"), None
-        )
+        stdlib_group = next((g for g in groups if g["title"] == "PyFlyde Standard Nodes"), None)
         self.assertIsNotNone(stdlib_group)
+        if stdlib_group is None:
+            return
         self.assertCountEqual(stdlib_group["nodeIds"], list(SUPPORTED_MACROS))

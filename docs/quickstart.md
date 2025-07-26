@@ -37,7 +37,7 @@ where = ["mylib"]                # With this line
 Install the dependencies:
 
 ```bash
-pip install examples/ 
+pip install examples/
 ```
 
 ## Running the Hello World example
@@ -48,7 +48,7 @@ First, generate the component metadata for the examples:
 pyflyde gen examples/
 ```
 
-This will recursively scan all Python files in the `examples/` directory and generate a `.flyde-nodes.json` file with metadata for all PyFlyde components found.
+This will recursively scan all Python files in the `examples/` directory and generate a `flyde-nodes.json` file with metadata for all PyFlyde components found.
 
 Then run the example flow:
 

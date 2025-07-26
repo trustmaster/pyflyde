@@ -82,33 +82,29 @@ def collect_components_from_directory(directory_path: str) -> dict:
     return components
 
 
-def generate_node_json(node_name: str, component_class, file_path: str = "") -> dict:
+def generate_node_json(node_name: str, component_class, file_path: str = "") -> dict[str, object] | str:
     """Generate JSON structure for a single component."""
     # Get node metadata
     description = (component_class.__doc__ or "").strip()
     display_name = convert_class_name_to_display_name(node_name)
     # Use package source for stdlib nodes, custom source for others
     if is_stdlib_node(node_name):
-        source = {"type": "package", "data": "@flyde/nodes"}
+        return "@flyde/nodes"
     else:
         source = {"type": "custom", "data": f"custom://{file_path}/{node_name}"}
-    icon = getattr(component_class, "icon", "fa-solid fa-user")
+    icon = getattr(component_class, "icon", "fa-brands fa-python")
 
     # Build inputs structure
     inputs = {}
     if hasattr(component_class, "inputs") and component_class.inputs:
         for input_name, input_obj in component_class.inputs.items():
-            inputs[input_name] = {
-                "description": input_obj.description or f"{input_name} input"
-            }
+            inputs[input_name] = {"description": input_obj.description or f"{input_name} input"}
 
     # Build outputs structure
     outputs = {}
     if hasattr(component_class, "outputs") and component_class.outputs:
         for output_name, output_obj in component_class.outputs.items():
-            outputs[output_name] = {
-                "description": output_obj.description or f"{output_name} output"
-            }
+            outputs[output_name] = {"description": output_obj.description or f"{output_name} output"}
 
     # Build the node structure
     node_data = {
@@ -171,15 +167,15 @@ def gen_json(directory_path: str):
     # Build groups
     groups = []
     if custom_nodes:
-        groups.append({"title": "Custom Runtime Nodes", "nodeIds": custom_nodes})
+        groups.append({"title": "Your PyFlyde Nodes", "nodeIds": custom_nodes})
     if stdlib_nodes:
-        groups.append({"title": "Overridden Stdlib", "nodeIds": stdlib_nodes})
+        groups.append({"title": "PyFlyde Standard Nodes", "nodeIds": stdlib_nodes})
 
     # Build final JSON structure
     json_data = {"nodes": nodes, "groups": groups}
 
     # Write to file
-    output_file = os.path.join(directory_path, ".flyde-nodes.json")
+    output_file = os.path.join(directory_path, "flyde-nodes.json")
     with open(output_file, "w") as f:
         json.dump(json_data, f, indent=2)
 
@@ -194,7 +190,7 @@ def main():
 
 Examples:
     flyde.py path/to/MyFlow.flyde # Runs a flow
-    flyde.py gen path/to/directory/ # Generates .flyde-nodes.json for directory
+    flyde.py gen path/to/directory/ # Generates flyde-nodes.json for directory
 """,
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )
@@ -209,7 +205,7 @@ Examples:
     parser.add_argument(
         "path",
         type=str,
-        help='Path to a ".flyde" flow file to run, or a directory to generate .flyde-nodes.json for',
+        help='Path to a ".flyde" flow file to run, or a directory to generate flyde-nodes.json for',
     )
 
     args = parser.parse_args()
@@ -234,8 +230,6 @@ Examples:
         if os.path.isdir(args.path):
             gen_json(args.path)
         else:
-            raise ValueError(
-                f"Path {args.path} is not a directory. Only directory generation is supported."
-            )
+            raise ValueError(f"Path {args.path} is not a directory. Only directory generation is supported.")
     else:
         raise ValueError(f"Unknown command: {args.command}")
