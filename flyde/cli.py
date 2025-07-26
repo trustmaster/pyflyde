@@ -9,6 +9,7 @@ import os
 import pprint
 import re
 import sys
+from typing import Union
 
 import yaml
 
@@ -169,7 +170,7 @@ def generate_flyde_node_json(node_name: str, flyde_info: dict) -> dict:
     return node_data
 
 
-def generate_node_json(node_name: str, component_class, file_path: str = "") -> dict[str, object] | str:
+def generate_node_json(node_name: str, component_class, file_path: str = "") -> Union[dict, str]:
     """Generate JSON structure for a single component."""
     # Get node metadata
     description = (component_class.__doc__ or "").strip()
